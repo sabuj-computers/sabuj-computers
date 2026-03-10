@@ -439,6 +439,30 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
   transition:width .8s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;min-width:18px}
 .bar-fill span{font-size:10px;color:#fff;font-weight:700}
 
+
+/* ── STUDENT FILTER BAR ── */
+.stud-filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  margin-bottom:16px;padding:14px 16px;background:#f7faf8;border-radius:12px;border:1px solid #e4ece7}
+.stud-filter-bar input{flex:1;min-width:160px;padding:9px 14px;border:2px solid #dde8e0;
+  border-radius:10px;font-family:'Hind Siliguri',sans-serif;font-size:13px;outline:none}
+.stud-filter-bar input:focus{border-color:var(--g2)}
+.stud-filter-bar select{padding:9px 12px;border:2px solid #dde8e0;border-radius:10px;
+  font-family:'Hind Siliguri',sans-serif;font-size:13px;outline:none;background:#fff;cursor:pointer}
+.stud-filter-bar select:focus{border-color:var(--g2)}
+.filter-count{font-size:12px;color:var(--muted);white-space:nowrap;margin-left:auto}
+.filter-count strong{color:var(--g1)}
+/* pending badge */
+.badge-pending{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;
+  padding:2px 10px;border-radius:8px;font-size:12px;font-weight:700}
+/* quick result cell */
+.quick-result-wrap{display:flex;align-items:center;gap:6px}
+.quick-result-select{padding:3px 6px;border:1.5px solid #dde8e0;border-radius:8px;
+  font-family:'Hind Siliguri',sans-serif;font-size:12px;background:#fff;cursor:pointer;outline:none}
+.quick-result-select:focus{border-color:var(--g2)}
+.btn-quick-save{background:var(--g2);color:#fff;border:none;border-radius:7px;
+  padding:3px 9px;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-quick-save:hover{background:var(--g1)}
+
 </style>
 </head>
 <body>
@@ -565,8 +589,12 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
           <div class="fr3">
             <div class="fg"><label>ফলাফল</label>
               <select id="s-result">
-                <option>A+</option><option>A</option><option>A-</option><option>B</option>
-                <option>B-</option><option>C</option><option>D</option><option>F</option>
+                <option value="">— ফলাফল নেই —</option>
+                <option value="A+">A+</option><option value="A">A</option>
+                <option value="A-">A-</option><option value="B+">B+</option>
+                <option value="B">B</option><option value="B-">B-</option>
+                <option value="C">C</option><option value="D">D</option>
+                <option value="F">F</option>
               </select>
             </div>
             <div class="fg"><label>কোর্স</label>
@@ -578,6 +606,29 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
           </div>
           <button class="btn-save" onclick="saveStudent()">💾 সংরক্ষণ</button>
           <button class="btn-secondary" style="width:auto;padding:11px 22px;margin-left:10px" onclick="clearStudentForm()">বাতিল</button>
+        </div>
+        <!-- FILTER BAR -->
+        <div class="stud-filter-bar">
+          <input type="text" id="studFilterText" placeholder="🔍 নাম / রেজি. নং দিয়ে খুঁজুন..."
+            oninput="renderAdminStudents()">
+          <select id="studFilterResult" onchange="renderAdminStudents()">
+            <option value="">সব ফলাফল</option>
+            <option value="PENDING">⏳ ফলাফল বাকি</option>
+            <option value="A+">A+</option><option value="A">A</option>
+            <option value="A-">A-</option><option value="B+">B+</option>
+            <option value="B">B</option><option value="B-">B-</option>
+            <option value="C">C</option><option value="D">D</option>
+            <option value="F">F (ফেল)</option>
+          </select>
+          <select id="studFilterCourse" onchange="renderAdminStudents()">
+            <option value="">সব কোর্স</option>
+            <option value="BTEB">BTEB</option>
+            <option value="PROTISTHAN">প্রাতিষ্ঠানিক</option>
+          </select>
+          <select id="studFilterYear" onchange="renderAdminStudents()">
+            <option value="">সব বছর</option>
+          </select>
+          <span class="filter-count" id="studFilterCount"></span>
         </div>
         <div style="overflow-x:auto">
           <table class="admin-student-table">
@@ -1115,6 +1166,7 @@ function checkVerifyUrl(reg){
       ['Course', courseLabel],
       ['Registration No.', s.reg],
       ['Study Session', (s.session||'')+(s.year?', '+s.year:'')],
+      (s.result&&s.result.trim())?['Grade / Result', s.result]:null,
     ].filter(Boolean);
 
     result.style.display='block';
@@ -1129,8 +1181,9 @@ function checkVerifyUrl(reg){
             <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">রেজিস্ট্রেশন: ${s.reg}</div>
           </div>
           <div style="text-align:center">
-            <div style="background:rgba(255,255,255,.15);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,.3)">${s.result||'—'}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">গ্রেড</div>
+            ${s.result&&s.result.trim()?`
+            <div style="background:rgba(255,255,255,.15);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;border:2px solid rgba(255,255,255,.3)">${s.result}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">গ্রেড</div>`:''}
           </div>
         </div>
         <!-- Verified badge -->
@@ -1254,10 +1307,15 @@ function doSearch(){
   const pw=document.getElementById('resPhotoWrap');
   if(s.photo){pw.innerHTML=`<img src="${s.photo}" class="res-photo" alt="${s.name}">`;}
   else{pw.innerHTML=`<div class="res-photo-placeholder">${s.name[0]||'?'}</div>`;}
-  // grade circle
+  // grade circle — hide if no result
   const gc=document.getElementById('resGrade');
-  const gc_style=gradeStyle(s.result);
-  gc.style.background=gc_style.bg;gc.style.color=gc_style.fg;gc.textContent=s.result;
+  if(s.result&&s.result.trim()!==''){
+    const gc_style=gradeStyle(s.result);
+    gc.style.background=gc_style.bg;gc.style.color=gc_style.fg;
+    gc.textContent=s.result;gc.style.display='flex';
+  } else {
+    gc.style.display='none';
+  }
   document.getElementById('resCourse').innerHTML=`<span class="course-pill course-${s.course}">${s.course==='BTEB'?'BTEB':'প্রতিষ্ঠান ভিত্তিক'}</span>`;
   document.getElementById('resSession').textContent=s.session;
   document.getElementById('resYear').textContent=s.year;
@@ -1267,9 +1325,10 @@ function doSearch(){
 }
 
 function gradeStyle(g){
+  if(!g||g.trim()==='')return{bg:'#f3f4f6',fg:'#6b7280'};
   const m={'A+':['#d1fae5','#065f46'],'A':['#dcfce7','#166534'],'A-':['#ecfdf5','#047857'],
-    'B':['#dbeafe','#1e40af'],'B-':['#eff6ff','#1d4ed8'],'C':['#fef9c3','#854d0e'],
-    'D':['#ffedd5','#9a3412'],'F':['#fee2e2','#991b1b']};
+    'B+':['#dbeafe','#1e3a8a'],'B':['#dbeafe','#1e40af'],'B-':['#eff6ff','#1d4ed8'],
+    'C':['#fef9c3','#854d0e'],'D':['#ffedd5','#9a3412'],'F':['#fee2e2','#991b1b']};
   const c=m[g]||['#f3f4f6','#374151'];return{bg:c[0],fg:c[1]};
 }
 
@@ -1791,19 +1850,84 @@ function saveTestimonials(){saveDB('testimonials', DB.testimonials);renderTestim
 
 // Students
 function renderAdminStudents(){
-  document.getElementById('adminStudTbody').innerHTML=DB.students.map((s,i)=>`
-    <tr>
-      <td>${i+1}</td>
+  // Populate year filter
+  const yearSel=document.getElementById('studFilterYear');
+  if(yearSel){
+    const years=[...new Set((DB.students||[]).map(s=>s.year).filter(Boolean))].sort((a,b)=>b-a);
+    const curYear=yearSel.value;
+    yearSel.innerHTML='<option value="">সব বছর</option>'+years.map(y=>`<option value="${y}"${y===curYear?' selected':''}>${y}</option>`).join('');
+  }
+  // Get filter values
+  const ftxt=(document.getElementById('studFilterText')||{}).value||'';
+  const fres=(document.getElementById('studFilterResult')||{}).value||'';
+  const fcrs=(document.getElementById('studFilterCourse')||{}).value||'';
+  const fyr=(document.getElementById('studFilterYear')||{}).value||'';
+
+  // Filter students (keep real index for edit/delete)
+  const filtered=(DB.students||[]).map((s,i)=>({s,i})).filter(({s})=>{
+    if(ftxt){
+      const q=ftxt.toLowerCase();
+      if(!s.name.toLowerCase().includes(q)&&!s.reg.includes(ftxt))return false;
+    }
+    if(fres==='PENDING'){if(s.result&&s.result.trim()!=='')return false;}
+    else if(fres){if(s.result!==fres)return false;}
+    if(fcrs&&s.course!==fcrs)return false;
+    if(fyr&&s.year!==fyr)return false;
+    return true;
+  });
+
+  // Update count badge
+  const fc=document.getElementById('studFilterCount');
+  if(fc){
+    const total=DB.students.length;
+    const pending=(DB.students||[]).filter(s=>!s.result||s.result.trim()==='').length;
+    fc.innerHTML=`<strong>${filtered.length}</strong> / ${total} জন &nbsp;|&nbsp; ⏳ <strong>${pending}</strong> ফলাফল বাকি`;
+  }
+
+  if(!filtered.length){
+    document.getElementById('adminStudTbody').innerHTML=`<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:24px">কোনো শিক্ষার্থী পাওয়া যায়নি</td></tr>`;
+    return;
+  }
+
+  document.getElementById('adminStudTbody').innerHTML=filtered.map(({s,i},rowNum)=>`
+    <tr id="strow-${i}">
+      <td>${rowNum+1}</td>
       <td>${s.photo?`<img src="${s.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${s.name}</td>
-      <td>${s.reg}</td>
-      <td>${s.session}<br><small style="color:#9ca3af">${s.year}</small></td>
-      <td><span style="background:${gradeStyle(s.result).bg};color:${gradeStyle(s.result).fg};padding:2px 10px;border-radius:8px;font-size:12px;font-weight:700">${s.result}</span></td>
+      <td style="font-size:12px">${s.reg}</td>
+      <td>${s.session||''}<br><small style="color:#9ca3af">${s.year||''}</small></td>
+      <td>
+        <div class="quick-result-wrap">
+          ${s.result&&s.result.trim()
+            ?`<span style="background:${gradeStyle(s.result).bg};color:${gradeStyle(s.result).fg};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">${s.result}</span>`
+            :`<span class="badge-pending">⏳ বাকি</span>`}
+          <select class="quick-result-select" id="qr-${i}" onchange="">
+            <option value="">—</option>
+            <option value="A+">A+</option><option value="A">A</option>
+            <option value="A-">A-</option><option value="B+">B+</option>
+            <option value="B">B</option><option value="B-">B-</option>
+            <option value="C">C</option><option value="D">D</option>
+            <option value="F">F</option>
+          </select>
+          <button class="btn-quick-save" onclick="quickSaveResult(${i})">✓</button>
+        </div>
+      </td>
       <td><span style="font-size:12px">${s.course==='BTEB'?'BTEB':'প্রতিষ্ঠান'}</span></td>
       <td>
-        <button class="badge-edit" onclick="editStudent(${i})">✏️ সম্পাদনা</button>
+        <button class="badge-edit" onclick="editStudent(${i})">✏️</button>
         <button class="badge-del" onclick="deleteStudent(${i})">🗑️</button>
       </td>
     </tr>`).join('');
+}
+
+function quickSaveResult(i){
+  const sel=document.getElementById('qr-'+i);
+  if(!sel)return;
+  const val=sel.value;
+  if(!val){showNotif('❌ একটি গ্রেড বাছুন');return;}
+  DB.students[i].result=val;
+  saveDB('students',DB.students);
+  renderAdminStudents();
+  showNotif('✅ '+DB.students[i].name+' → গ্রেড '+val+' সংরক্ষিত');
 }
 
 function saveStudent(){
@@ -1849,7 +1973,7 @@ function editStudent(i){
   document.getElementById('s-session').value=s.session||'';
   document.getElementById('s-year').value=s.year||'';
   document.getElementById('s-addr').value=s.address||'';
-  document.getElementById('s-result').value=s.result||'A';
+  document.getElementById('s-result').value=s.result||'';
   document.getElementById('s-course').value=s.course||'BTEB';
   document.querySelector('.student-add-form').scrollIntoView({behavior:'smooth'});
 }
@@ -1864,7 +1988,7 @@ function clearStudentForm(){
   ['s-name','s-reg','s-phone','s-father','s-mother','s-session','s-year','s-addr']
     .forEach(id=>document.getElementById(id).value='');
   document.getElementById('s-gender').value='';
-  document.getElementById('s-result').value='A';
+  document.getElementById('s-result').value='';
   document.getElementById('s-course').value='BTEB';
   document.getElementById('s-photo').value='';
 }
@@ -2143,8 +2267,10 @@ function renderDashboard(){
   const total=sts.length;
   const bteb=sts.filter(s=>s.course==='BTEB').length;
   const proto=total-bteb;
-  const passed=sts.filter(s=>s.result&&s.result!=='F').length;
-  const passRate=total?Math.round(passed/total*100):0;
+  const withResult=sts.filter(s=>s.result&&s.result.trim()!=='').length;
+  const pending=total-withResult;
+  const passed=sts.filter(s=>s.result&&s.result.trim()!==''&&s.result!=='F').length;
+  const passRate=withResult?Math.round(passed/withResult*100):0;
   const fbs=DB.feedbacks?Object.values(DB.feedbacks):[];
   const avgRating=fbs.length?(Math.round(fbs.reduce((a,f)=>a+(+f.rating||5),0)/fbs.length*10)/10).toFixed(1):0;
 
@@ -2153,11 +2279,12 @@ function renderDashboard(){
     <div class="dash-card"><div class="dash-n">${bteb}</div><div class="dash-l">BTEB কোর্স</div></div>
     <div class="dash-card"><div class="dash-n">${proto}</div><div class="dash-l">প্রাতিষ্ঠানিক</div></div>
     <div class="dash-card"><div class="dash-n">${passRate}%</div><div class="dash-l">পাসের হার</div></div>
+    <div class="dash-card"><div class="dash-n">${pending}</div><div class="dash-l">ফলাফল বাকি ⏳</div></div>
     <div class="dash-card"><div class="dash-n">${fbs.length}</div><div class="dash-l">মোট মতামত</div></div>
     <div class="dash-card"><div class="dash-n">${avgRating||'—'}</div><div class="dash-l">গড় রেটিং ⭐</div></div>`;
 
   const grades=['A+','A','A-','B+','B','B-','C','D','F'];
-  const gc=grades.map(g=>sts.filter(s=>s.result===g).length);
+  const gc=grades.map(g=>sts.filter(s=>s.result&&s.result===g).length);
   const gmax=Math.max(...gc,1);
   document.getElementById('dashGradeChart').innerHTML=grades.map((g,i)=>`
     <div class="bar-row"><span class="bar-label">${g}</span>
