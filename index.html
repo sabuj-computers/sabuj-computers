@@ -2,7 +2,6 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>সবুজ কম্পিউটার্স - বাগাতিপাড়া, নাটোর</title>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
@@ -2669,9 +2668,8 @@ function sendChat(){
       saveAdmissionToFirebase(data.admissionData);
     }
   })
-  .catch((err)=>{
+  .catch(()=>{
     showChatTyping(false);
-    console.error('Chat error:',err);
     addChatMsg('❗ সংযোগ সমস্যা। সরাসরি ফোন করুন: 📞 '+(DB.general.phone||'০১৭২৪ ০৮৪৩৫০'),'bot');
   });
 }
@@ -2694,13 +2692,7 @@ function addChatMsg(text,type){
   const msgs=document.getElementById('chatMsgs');
   const d=document.createElement('div');
   d.className='chat-msg '+type;
-  // Support line breaks and bold (*text*)
-  const html=text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*([^*]+)\*/g,'<strong>$1</strong>')
-    .replace(/
-/g,'<br>');
-  d.innerHTML=html;
+  d.textContent=text;
   msgs.appendChild(d);
   msgs.scrollTop=msgs.scrollHeight;
 }
