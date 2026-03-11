@@ -27,9 +27,12 @@ body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--tex
 ::-webkit-scrollbar-thumb{background:var(--g2);border-radius:3px}
 
 /* ===== NOTIFICATION ===== */
-.notif{position:fixed;bottom:24px;right:24px;z-index:99999;background:var(--g1);color:#fff;
-  padding:14px 22px;border-radius:14px;font-size:14px;box-shadow:0 8px 28px rgba(0,0,0,.35);
-  opacity:0;transform:translateY(16px) scale(.97);transition:all .3s;pointer-events:none;border-left:4px solid var(--gold)}
+.notif{position:fixed;bottom:28px;right:28px;z-index:2147483647;
+  background:linear-gradient(135deg,#021a08,#0d3d1f);color:#fff;
+  padding:14px 22px;border-radius:14px;font-size:14px;font-family:'Hind Siliguri',sans-serif;
+  box-shadow:0 12px 36px rgba(0,0,0,.4),0 0 0 1px rgba(200,168,71,.3);
+  opacity:0;transform:translateY(20px) scale(.95);transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;border-left:4px solid var(--gold);max-width:320px}
 .notif.show{opacity:1;transform:none}
 
 /* ===== SECRET ADMIN TRIGGER ===== */
@@ -58,44 +61,64 @@ body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--tex
 .btn-secondary:hover{background:#e2eee5}
 
 /* ===== ADMIN PANEL ===== */
-.admin-overlay{position:fixed;inset:0;background:rgba(5,20,10,.8);z-index:99980;backdrop-filter:blur(4px);
-  display:none;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto}
-.admin-overlay.show{display:flex}
-.admin-panel{background:#fff;border-radius:24px;width:100%;max-width:1000px;overflow:hidden;
-  box-shadow:0 32px 100px rgba(0,0,0,.45);margin:auto}
-.admin-header{background:linear-gradient(135deg,var(--g1),var(--g2));padding:24px 32px;
-  display:flex;justify-content:space-between;align-items:center}
-.admin-header h2{color:#fff;font-family:'Noto Serif Bengali';font-size:20px}
-.btn-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:10px;
-  padding:8px 18px;cursor:pointer;font-family:'Hind Siliguri';font-size:14px;transition:background .2s}
-.btn-close:hover{background:rgba(255,255,255,.25)}
-.admin-tabs{display:flex;gap:0;background:#f7faf8;border-bottom:1px solid #e4ece6;overflow-x:auto}
-.admin-tab{padding:14px 22px;border:none;background:none;cursor:pointer;font-family:'Hind Siliguri';
-  font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;
-  transition:all .2s;white-space:nowrap}
-.admin-tab.active{color:var(--g2);border-bottom-color:var(--g2);background:#fff}
-.admin-body{padding:32px;max-height:75vh;overflow-y:auto}
+.admin-overlay{position:fixed;inset:0;background:rgba(3,14,7,.82);z-index:99980;backdrop-filter:blur(6px);
+  display:none;justify-content:center;align-items:flex-start;padding:16px 20px;overflow-y:auto}
+.admin-overlay.show{display:flex;animation:fadeInBg .2s ease}
+@keyframes fadeInBg{from{opacity:0}to{opacity:1}}
+.admin-panel{background:#fff;border-radius:20px;width:100%;max-width:1060px;overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,.55);margin:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:.7}to{transform:translateY(0);opacity:1}}
+.admin-header{background:linear-gradient(135deg,#021a08 0%,#0d3d1f 45%,#1a6b35 100%);padding:20px 28px;
+  display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--gold)}
+.admin-header h2{color:#fff;font-family:'Noto Serif Bengali';font-size:19px;display:flex;align-items:center;gap:10px}
+.admin-header h2::before{content:'';display:inline-block;width:6px;height:24px;background:var(--gold);border-radius:3px}
+.btn-close{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;
+  padding:7px 18px;cursor:pointer;font-family:'Hind Siliguri';font-size:14px;transition:all .2s}
+.btn-close:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.4)}
+.admin-tabs{display:flex;gap:0;background:#f4f8f5;border-bottom:2px solid #e2ece6;overflow-x:auto;
+  scrollbar-width:none;padding:0 4px}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{padding:12px 18px;border:none;background:none;cursor:pointer;font-family:'Hind Siliguri';
+  font-size:13px;font-weight:600;color:#6b7280;border-bottom:3px solid transparent;
+  transition:all .18s;white-space:nowrap;border-radius:8px 8px 0 0;margin-top:4px}
+.admin-tab:hover{color:var(--g2);background:rgba(46,158,82,.08)}
+.admin-tab.active{color:var(--g1);border-bottom-color:var(--g2);background:#fff;
+  box-shadow:0 -2px 8px rgba(13,61,31,.08)}
+.admin-body{padding:28px 32px;max-height:78vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--g3) #f0f0f0}
+.admin-body::-webkit-scrollbar{width:6px}
+.admin-body::-webkit-scrollbar-thumb{background:var(--g3);border-radius:3px}
 .admin-section{display:none}
-.admin-section.active{display:block}
-.fg{margin-bottom:18px}
-.fg label{display:block;font-weight:600;font-size:13px;color:var(--g1);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
-.fg input,.fg textarea,.fg select{width:100%;padding:11px 15px;border:2px solid #dde8e0;border-radius:11px;
-  font-family:'Hind Siliguri';font-size:14px;color:var(--text);transition:border .2s;background:#fafcfb}
-.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--g2);background:#fff}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.admin-section.active{display:block;animation:fadeSection .2s ease}
+@keyframes fadeSection{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-weight:700;font-size:12px;color:#0d3d1f;margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.fg input,.fg textarea,.fg select{width:100%;padding:10px 14px;border:1.5px solid #dde8e0;border-radius:10px;
+  font-family:'Hind Siliguri';font-size:14px;color:var(--text);transition:all .18s;background:#fafcfb}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--g2);
+  background:#fff;box-shadow:0 0 0 3px rgba(46,158,82,.12)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 @media(max-width:600px){.fr2,.fr3{grid-template-columns:1fr}}
-.btn-save{background:var(--g1);color:#fff;padding:12px 28px;border:none;border-radius:11px;
-  font-family:'Hind Siliguri';font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
-.btn-save:hover{background:var(--g2)}
-.btn-add{background:var(--gold);color:#3d2800;padding:10px 22px;border:none;border-radius:11px;
-  font-family:'Hind Siliguri';font-size:14px;font-weight:700;cursor:pointer;margin-bottom:16px}
-.service-edit-item{background:#f7faf8;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #e4ece6;position:relative}
-.btn-del{background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:5px 12px;
-  cursor:pointer;font-size:13px;font-weight:600}
-.student-add-form{background:linear-gradient(135deg,#f0f8f3,#e8f5ec);border-radius:16px;
-  padding:24px;margin-bottom:24px;border:1px solid #c8e6d0}
-.admin-student-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.btn-save{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:11px 26px;border:none;
+  border-radius:10px;font-family:'Hind Siliguri';font-size:15px;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:0 3px 10px rgba(13,61,31,.3)}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(13,61,31,.4)}
+.btn-save:active{transform:translateY(0)}
+.btn-add{background:linear-gradient(135deg,#b8942a,var(--gold));color:#3d2800;padding:9px 20px;border:none;
+  border-radius:10px;font-family:'Hind Siliguri';font-size:14px;font-weight:700;cursor:pointer;
+  margin-bottom:14px;box-shadow:0 2px 8px rgba(200,168,71,.35);transition:all .2s}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(200,168,71,.45)}
+.service-edit-item{background:#f7faf8;border-radius:14px;padding:16px;margin-bottom:10px;
+  border:1.5px solid #e4ece6;position:relative;transition:border-color .2s}
+.service-edit-item:hover{border-color:#a7f3d0}
+.btn-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;
+  cursor:pointer;font-size:13px;font-weight:700;transition:all .2s}
+.btn-del:hover{background:#dc2626;color:#fff}
+.student-add-form{background:linear-gradient(135deg,#edfaf3,#e2f5ea);border-radius:16px;
+  padding:22px 24px;margin-bottom:22px;border:1.5px solid #bbddc8;
+  box-shadow:0 2px 12px rgba(13,61,31,.07)}
+.admin-student-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;border-radius:12px;overflow:hidden}
 .admin-student-table th{background:var(--g1);color:#fff;padding:11px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.3px}
 .admin-student-table td{padding:10px 14px;border-bottom:1px solid #f0f4f1}
 .admin-student-table tr:hover td{background:#f7fbf8}
@@ -387,8 +410,12 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
 
 /* ===== ADMIN DASHBOARD ===== */
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-.dash-card{background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:14px;
-  padding:18px 14px;text-align:center;color:#fff}
+.dash-card{background:linear-gradient(135deg,#021a08,var(--g2));border-radius:14px;
+  padding:18px 14px;text-align:center;color:#fff;box-shadow:0 4px 16px rgba(13,61,31,.22);
+  transition:transform .2s;position:relative;overflow:hidden}
+.dash-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;
+  background:rgba(255,255,255,.05);border-radius:50%}
+.dash-card:hover{transform:translateY(-2px)}
 .dash-card .dash-n{font-family:'Playfair Display';font-size:34px;font-weight:800;line-height:1;color:var(--gold2)}
 .dash-card .dash-l{font-size:11px;color:rgba(255,255,255,.75);margin-top:5px}
 .dash-chart{background:#f7faf8;border-radius:12px;padding:14px 16px;margin-bottom:12px}
@@ -488,7 +515,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
           <div class="fg"><label>ট্যাগলাইন</label><input id="a-tagline" type="text"></div>
         </div>
         <div class="fr2" style="margin-top:8px">
-          <div class="fg"><label>ফাউন্ডেশন কোর্সের নাম <small style="color:#9ca3af">(রসিদ ও রেজি.কার্ডে দেখাবে)</small></label><input id="a-foundation-name" type="text" placeholder="Computer Office Application (Foundation)"></div>
+          <div class="fg"><label>ফাউন্ডেশন কোর্সের নাম <small style="color:#9ca3af">(রসিদ ও ফলাফল কার্ডে দেখাবে)</small></label><input id="a-foundation-name" type="text" placeholder="Computer Office Application (Foundation)"></div>
           <div class="fg"><label>BTEB কোর্সের নাম <small style="color:#9ca3af">(রসিদ ও ফলাফল কার্ডে দেখাবে)</small></label><input id="a-bteb-name" type="text" placeholder="Computer Office Application (BTEB)"></div>
         </div>
         <div class="fg"><label>হিরো শিরোনাম (মূল বার্তা)</label><input id="a-hero-title" type="text"></div>
@@ -573,7 +600,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
               </select>
             </div>
             <div class="fg"><label>কোর্স</label>
-              <select id="s-course-select" onchange="handleCourseSelect()" style="width:100%;padding:11px 15px;border:2px solid #dde8e0;border-radius:11px;font-family:'Hind Siliguri';font-size:14px;color:var(--text);background:#fafcfb">
+              <select id="s-course-select" onchange="handleCourseSelect()" style="width:100%;padding:11px 15px;border:2px solid #dde8e0;border-radius:11px;font-family:'Hind Siliguri';font-size:14px;background:#fafcfb">
                 <option value="">— কোর্স বাছুন —</option>
                 <option value="FOUNDATION">ফাউন্ডেশন ভিত্তিক</option>
                 <option value="BTEB">BTEB</option>
@@ -687,8 +714,6 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
   </div>
 </div>
 
-<!-- NOTIFICATION -->
-<div class="notif" id="notif"></div>
 
 <!-- ==================== HEADER ==================== -->
 <header>
@@ -788,7 +813,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
 <section class="search-section" id="search">
   <div class="sec-eyebrow">ফলাফল অনুসন্ধান</div>
   <div class="sec-title">আপনার <span>ফলাফল দেখুন</span></div>
-  <div class="sec-desc">রেজিস্ট্রেশন নম্বর বা ফোন নম্বর দিয়ে তথ্য দেখুন। ফাউন্ডেশন শিক্ষার্থীরা রেজিস্ট্রেশন কার্ড ডাউনলোড করতে পারবেন। BTEB রেজিস্ট্রেশন কার্ড কারিগরি বোর্ড থেকে প্রদান করা হয়।</div>
+  <div class="sec-desc">রেজিস্ট্রেশন বা ফোন নম্বর দিয়ে তথ্য দেখুন। ফাউন্ডেশন শিক্ষার্থীরা রেজিস্ট্রেশন কার্ড ডাউনলোড করতে পারবেন।</div>
   <div class="search-card">
     <div class="search-row">
       <input type="text" class="search-inp" id="searchInp" placeholder="রেজিস্ট্রেশন নং বা ফোন নম্বর..." onkeydown="if(event.key==='Enter')doSearch()">
@@ -816,9 +841,9 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
     <div id="resFeeBox" style="display:none"></div>
     <div id="resActionBtns" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
       <div id="btebBoardNote" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:12px 16px;font-size:13px;color:#1e3a8a;font-family:'Hind Siliguri',sans-serif">
-        &#8505;&#65039; <strong>BTEB শিক্ষার্থীদের রেজিস্ট্রেশন কার্ড</strong> কারিগরি শিক্ষা বোর্ড (BTEB) থেকে সংগ্রহ করতে হবে।
+        <strong>&#8505; BTEB শিক্ষার্থীদের রেজিস্ট্রেশন কার্ড</strong> কারিগরি শিক্ষা বোর্ড (BTEB) থেকে সংগ্রহ করতে হবে।
       </div>
-      <button id="btnRegCard" onclick="downloadCertificate()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;border:none;border-radius:14px;font-family:'Hind Siliguri',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(13,61,31,.35)">&#128219; রেজিস্ট্রেশন কার্ড ডাউনলোড <span style="font-size:12px;opacity:.8">(ফাউন্ডেশন)</span></button>
+      <button id="btnRegCard" onclick="downloadCertificate()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;border:none;border-radius:14px;font-family:'Hind Siliguri',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(13,61,31,.35)">&#128219; রেজিস্ট্রেশন কার্ড ডাউনলোড <span style="font-size:12px;opacity:.75">(ফাউন্ডেশন)</span></button>
       <button id="btnFeeReceipt" onclick="downloadFeeReceipt()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;border:none;border-radius:14px;font-family:'Hind Siliguri',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(30,64,175,.35)">&#129534; কোর্স ফি রসিদ ডাউনলোড</button>
       <button id="btnResultCard" onclick="downloadResultCard()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;border-radius:14px;font-family:'Hind Siliguri',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(109,40,217,.35)">&#128203; ফলাফল কার্ড ডাউনলোড</button>
     </div>
@@ -1231,7 +1256,7 @@ function checkVerifyUrl(reg){
     loading.style.display='none';
     if(!s){notFound.style.display='block';return;}
     const gs=gradeStyle(s.result||'A');
-    const courseLabel=s.course==='BTEB'?(DB.general.btebCourseName||'Computer Office Application (BTEB)'):(s.course==='FOUNDATION'?(DB.general.foundationCourseName||'Computer Office Application (Foundation)'):(s.course||'Computer Office Application'));
+    const courseLabel=s.course==='BTEB'?(DB.general.btebCourseName||'Computer Office Application (BTEB)'):(s.course==='FOUNDATION'?(DB.general.foundationCourseName||'Computer Office Application (Foundation)'):(s.course||''));
     const rows=[
       ['Student Name', s.name],
       s.fatherName?["Father's Name", s.fatherName]:null,
@@ -1432,8 +1457,8 @@ function doSearch(){
   if(_bR)_bR.style.display=(s.course==='FOUNDATION')?'block':'none';
   if(_bF)_bF.style.display='block';
   if(_bRes)_bRes.style.display=(s.result&&s.result.trim())?'block':'none';
-  const _btebNote=document.getElementById('btebBoardNote');
-  if(_btebNote)_btebNote.style.display=(s.course==='BTEB')?'block':'none';
+  const _bN=document.getElementById('btebBoardNote');
+  if(_bN)_bN.style.display=(s.course==='BTEB')?'block':'none';
 }
 
 function gradeStyle(g){
@@ -1458,256 +1483,204 @@ function downloadFeeReceipt(){
 }
 
 function buildFeeReceipt(s){
-  const W=900,H=1300,M=50;
-  const cv=document.createElement('canvas');
-  cv.width=W; cv.height=H;
-  const c=cv.getContext('2d');
+  const W=900, M=52;
   const g=DB.general||{};
   const fn_=g.foundationCourseName||'Computer Office Application (Foundation)';
   const bn_=g.btebCourseName||'Computer Office Application (BTEB)';
-  const courseName=s.course==='BTEB'?bn_:s.course==='FOUNDATION'?fn_:(s.course||'---');
-  const tot=Number(s.feeTotal)||0;
-  const paid=Number(s.feePaid)||0;
-  const due=Math.max(0,tot-paid);
+  const courseName=s.course==='BTEB'?bn_:s.course==='FOUNDATION'?fn_:(s.course||'N/A');
+  const tot=Number(s.feeTotal)||0, paid=Number(s.feePaid)||0, due=Math.max(0,tot-paid);
   const sts=s.feeStatus||(due<=0&&tot>0?'Paid':paid>0?'Partial':'Due');
   const rNo='RCP-'+new Date().getFullYear()+'-'+String(s.reg||'0').padStart(6,'0');
   const rDate=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
 
-  // === BACKGROUND ===
-  c.fillStyle='#ffffff'; c.fillRect(0,0,W,H);
+  // --- Dynamic height ---
+  const HDR=192, STATBAR=56, TABLE_TOP=268, ROW_H=48, NROWS=6;
+  const FEE_H=290, DIVPAD=28, NOTE_H=86, SIG_H=72, FTR=44;
+  const contentH=Math.max(NROWS*ROW_H, FEE_H);
+  const H=TABLE_TOP+contentH+DIVPAD+NOTE_H+SIG_H+FTR;
 
-  // Subtle grid pattern
-  c.strokeStyle='rgba(13,61,31,0.04)'; c.lineWidth=1;
-  for(let x=0;x<W;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke();}
-  for(let y=0;y<H;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke();}
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const c=cv.getContext('2d');
 
-  // === HEADER BAND ===
+  // Background
+  c.fillStyle='#f7fbf9'; c.fillRect(0,0,W,H);
+  c.fillStyle='rgba(13,61,31,0.03)';
+  for(let gx=20;gx<W;gx+=20) for(let gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
+
+  // === HEADER ===
   const hg=c.createLinearGradient(0,0,W,0);
-  hg.addColorStop(0,'#052e12');
-  hg.addColorStop(0.5,'#1a6b35');
-  hg.addColorStop(1,'#052e12');
-  c.fillStyle=hg; c.fillRect(0,0,W,190);
-
-  // Gold accent line top
+  hg.addColorStop(0,'#031e09'); hg.addColorStop(0.45,'#155e2b'); hg.addColorStop(1,'#031e09');
+  c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+  // Gold lines
   c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
-  // Gold accent line bottom of header
-  c.fillStyle='rgba(200,168,71,0.6)'; c.fillRect(0,185,W,3);
+  c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
 
-  // Header left: Logo area
+  // Logo
   const logoEl=document.getElementById('hdrLogo');
   const lImg=logoEl?logoEl.querySelector('img'):null;
-  const lX=M, lY=20, lSz=150;
-  c.save();
-  c.beginPath();
-  roundClip(c,lX,lY,lSz,lSz,14);
-  c.clip();
-  if(lImg&&lImg.complete&&lImg.naturalWidth>0){
-    try{c.drawImage(lImg,lX,lY,lSz,lSz);}catch(e){
-      c.fillStyle='#2e9e52';c.fillRect(lX,lY,lSz,lSz);
-    }
-  } else {
-    c.fillStyle='#2e9e52';c.fillRect(lX,lY,lSz,lSz);
-    c.fillStyle='#fff';c.font='bold 72px Arial';
-    c.textAlign='center';c.textBaseline='middle';
-    c.fillText((g.name||'S')[0].toUpperCase(),lX+lSz/2,lY+lSz/2);
-    c.textBaseline='alphabetic';
-  }
+  const lSz=152, lX=M, lY=19;
+  c.save(); c.beginPath(); roundClip(c,lX,lY,lSz,lSz,16); c.clip();
+  if(lImg&&lImg.complete&&lImg.naturalWidth>0){try{c.drawImage(lImg,lX,lY,lSz,lSz);}catch(e){_fbLogo(c,lX,lY,lSz,'#166534',g.name);}}
+  else _fbLogo(c,lX,lY,lSz,'#166534',g.name);
   c.restore();
-  // Logo border
-  c.strokeStyle='rgba(200,168,71,0.7)';c.lineWidth=2.5;
-  c.save();c.beginPath();roundClip(c,lX,lY,lSz,lSz,14);c.stroke();c.restore();
+  c.strokeStyle='rgba(200,168,71,0.7)'; c.lineWidth=2.5;
+  c.save(); c.beginPath(); roundClip(c,lX,lY,lSz,lSz,16); c.stroke(); c.restore();
 
-  // Header center: Institute info
-  const iX=lX+lSz+22;
+  // Institute name + info
+  const iX=lX+lSz+18;
   c.textAlign='left';
-  c.fillStyle='#ffffff';
-  c.font='bold 34px "Hind Siliguri",sans-serif';
-  c.fillText(g.name||'সবুজ কম্পিউটার্স', iX, 55);
+  c.fillStyle='#ffffff'; c.font='bold 36px "Hind Siliguri",sans-serif';
+  c.fillText(g.name||'সবুজ কম্পিউটার্স', iX, 60);
+  c.font='15px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+  c.fillText(g.address||'তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 86);
+  c.font='13px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+  c.fillText('Ph: '+(g.phone||'')+' | '+(g.email||''), iX, 108);
+  // Divider in header
+  c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(iX,118); c.lineTo(W-M,118); c.stroke();
+  // Document title — two lines, NO overlap
+  c.fillStyle='#f0d060'; c.font='bold 21px Arial';
+  c.fillText('COURSE FEE RECEIPT', iX, 142);
+  c.fillStyle='rgba(255,255,255,0.62)'; c.font='14px "Hind Siliguri",sans-serif';
+  c.fillText('কোর্স ফি রসিদ', iX, 166);
 
-  c.font='16px "Hind Siliguri",sans-serif';
-  c.fillStyle='rgba(255,255,255,0.8)';
-  c.fillText(g.address||'তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 84);
-  c.fillText('Phone: '+(g.phone||'')+'   Email: '+(g.email||''), iX, 108);
-
-  // Gold divider in header
-  c.strokeStyle='rgba(200,168,71,0.4)';c.lineWidth=1;
-  c.beginPath();c.moveTo(iX,118);c.lineTo(W-M,118);c.stroke();
-
-  // Document title
-  c.fillStyle='#f0d060';
-  c.font='bold 22px Arial';
-  c.fillText('COURSE FEE RECEIPT', iX, 145);
-  c.font='16px "Hind Siliguri",sans-serif';
-  c.fillStyle='rgba(255,255,255,0.7)';
-  c.fillText('কোর্স ফি রসিদ', iX+185, 145);
-
-  // Header right: Receipt number & date
+  // Receipt no + date — top right
   c.textAlign='right';
-  c.fillStyle='rgba(255,255,255,0.6)';
-  c.font='12px Arial';
-  c.fillText('Receipt No.', W-M, 50);
-  c.fillStyle='#f0d060';
-  c.font='bold 18px Arial';
-  c.fillText(rNo, W-M, 73);
-  c.fillStyle='rgba(255,255,255,0.6)';
-  c.font='12px Arial';
-  c.fillText('Date', W-M, 98);
-  c.fillStyle='#ffffff';
-  c.font='14px Arial';
-  c.fillText(rDate, W-M, 117);
+  c.fillStyle='rgba(255,255,255,0.5)'; c.font='10px Arial';
+  c.fillText('RECEIPT NO.', W-M, 44);
+  c.fillStyle='#f0d060'; c.font='bold 16px Arial';
+  c.fillText(rNo, W-M, 63);
+  c.fillStyle='rgba(255,255,255,0.5)'; c.font='10px Arial';
+  c.fillText('DATE', W-M, 90);
+  c.fillStyle='#ffffff'; c.font='14px Arial';
+  c.fillText(rDate, W-M, 109);
   c.textAlign='left';
 
   // === STATUS BANNER ===
-  const statusConf = {
-    Paid: {bg:'#d1fae5',border:'#34d399',text:'#065f46',label:'FULLY PAID  /  সম্পূর্ণ পরিশোধিত',icon:'PAID'},
-    Partial: {bg:'#fef9c3',border:'#fbbf24',text:'#92400e',label:'PARTIALLY PAID  /  আংশিক পরিশোধিত',icon:'PARTIAL'},
-    Due: {bg:'#fee2e2',border:'#f87171',text:'#991b1b',label:'PAYMENT DUE  /  বকেয়া আছে',icon:'DUE'},
-  }[sts]||{bg:'#f3f4f6',border:'#9ca3af',text:'#374151',label:'FEE RECEIPT',icon:'INFO'};
-
-  c.fillStyle=statusConf.bg;
-  roundRect(c,M,202,W-M*2,44,8);c.fill();
-  c.strokeStyle=statusConf.border;c.lineWidth=2;
-  roundRect(c,M,202,W-M*2,44,8);c.stroke();
-  c.fillStyle=statusConf.text;
-  c.font='bold 18px "Hind Siliguri",Arial';
-  c.textAlign='center';
-  c.fillText(statusConf.label, W/2, 229);
-  c.textAlign='left';
+  const stsCfg={
+    Paid:   {bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'FULLY PAID  /  সম্পূর্ণ পরিশোধিত'},
+    Partial:{bg:'#fef9c3',brd:'#fbbf24',fg:'#92400e',tx:'PARTIALLY PAID  /  আংশিক পরিশোধিত'},
+    Due:    {bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'PAYMENT DUE  /  বকেয়া আছে'},
+  }[sts]||{bg:'#f3f4f6',brd:'#9ca3af',fg:'#374151',tx:'FEE RECEIPT'};
+  const banY=HDR+12;
+  c.fillStyle=stsCfg.bg; roundRect(c,M,banY,W-M*2,44,8); c.fill();
+  c.strokeStyle=stsCfg.brd; c.lineWidth=2; roundRect(c,M,banY,W-M*2,44,8); c.stroke();
+  c.fillStyle=stsCfg.fg; c.font='bold 17px "Hind Siliguri",Arial'; c.textAlign='center';
+  c.fillText(stsCfg.tx, W/2, banY+28); c.textAlign='left';
 
   // === TWO COLUMN LAYOUT ===
-  let y=268;
-  const col1W=(W-M*2-20)*0.55;
-  const col2X=M+col1W+20;
-  const col2W=(W-M*2-20)*0.45;
+  const col1W=Math.floor((W-M*2-22)*0.55);
+  const col2X=M+col1W+22, col2W=W-M-col2X;
 
-  // -- LEFT: Student Info --
-  // Section header
-  c.fillStyle='#0d3d1f';
-  c.fillRect(M,y,col1W,3);
-  c.font='bold 14px Arial';
-  c.fillStyle='#0d3d1f';
-  c.fillText('STUDENT INFORMATION', M, y-8);
-  y+=14;
+  // LEFT: Student info header
+  c.fillStyle='#0d3d1f'; c.fillRect(M,TABLE_TOP,col1W,2.5);
+  c.font='bold 11px Arial'; c.fillStyle='#0d3d1f';
+  c.fillText('STUDENT INFORMATION', M, TABLE_TOP-7);
 
-  const rows=[
-    ['Name / নাম', s.name||'---', true],
-    ['Registration No.', s.reg||'---', true],
-    ['Course / কোর্স', courseName, false],
-    ['Session / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
-    ['Father\'s Name', s.fatherName||'---', false],
-    ['Mobile', s.phone||'---', false],
+  const infoRows=[
+    ['NAME / নাম', s.name||'N/A', true, '#0d3d1f'],
+    ['REGISTRATION NO.', s.reg||'N/A', true, '#1d4ed8'],
+    ['COURSE / কোর্স', courseName, false, '#1f2937'],
+    ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
+    ["FATHER'S NAME", s.fatherName||'N/A', false, '#374151'],
+    ['MOBILE', s.phone||'N/A', false, '#374151'],
   ];
-
-  rows.forEach(([lbl,val,bold],i)=>{
-    const rY=y+i*46;
-    c.fillStyle=i%2===0?'#f7fbf8':'#ffffff';
-    c.fillRect(M,rY,col1W,46);
-    c.strokeStyle='#e4ece7';c.lineWidth=0.5;
-    c.strokeRect(M,rY,col1W,46);
-    // label
-    c.fillStyle='#6b7280';
-    c.font='11px Arial';
-    c.fillText(lbl.toUpperCase(), M+10, rY+17);
-    // value
-    c.fillStyle=bold?'#0d3d1f':'#1f2937';
-    c.font=(bold?'bold ':'')+' 15px "Hind Siliguri",Arial';
-    let v=String(val||'---');
-    while(c.measureText(v).width>col1W-20&&v.length>4) v=v.slice(0,-1)+'...';
-    c.fillText(v, M+10, rY+38);
+  infoRows.forEach(([lbl,val,bold,vc],i)=>{
+    const rY=TABLE_TOP+i*ROW_H;
+    c.fillStyle=i%2===0?'#f0faf4':'#ffffff'; c.fillRect(M,rY,col1W,ROW_H);
+    c.strokeStyle='#d1fae5'; c.lineWidth=0.5; c.strokeRect(M,rY,col1W,ROW_H);
+    c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(lbl, M+10, rY+14);
+    c.fillStyle=vc||'#1f2937'; c.font=(bold?'bold ':'')+'14px "Hind Siliguri",Arial';
+    let v=String(val||'N/A'); while(c.measureText(v).width>col1W-22&&v.length>4) v=v.slice(0,-1)+'..';
+    c.fillText(v, M+10, rY+37);
   });
-  y+=rows.length*46+16;
+  const tableEnd=TABLE_TOP+infoRows.length*ROW_H;
+  c.strokeStyle='#86efac'; c.lineWidth=1.5;
+  c.beginPath(); c.moveTo(M,tableEnd); c.lineTo(M+col1W,tableEnd); c.stroke();
 
-  // -- RIGHT: Fee Summary boxes --
-  let ry=268;
-  c.fillStyle='#1e40af';
-  c.fillRect(col2X,ry,col2W,3);
-  c.font='bold 14px Arial';
-  c.fillStyle='#1e40af';
-  c.fillText('FEE SUMMARY', col2X, ry-8);
-  ry+=14;
+  // RIGHT: Fee summary header
+  c.fillStyle='#1e40af'; c.fillRect(col2X,TABLE_TOP,col2W,2.5);
+  c.font='bold 11px Arial'; c.fillStyle='#1e40af';
+  c.fillText('FEE SUMMARY', col2X, TABLE_TOP-7);
+  let fy=TABLE_TOP;
 
   // Total fee box
-  c.fillStyle='#eff6ff';
-  roundRect(c,col2X,ry,col2W,86,10);c.fill();
-  c.strokeStyle='#bfdbfe';c.lineWidth=1.5;
-  roundRect(c,col2X,ry,col2W,86,10);c.stroke();
-  c.font='12px Arial';c.fillStyle='#6b7280';c.textAlign='center';
-  c.fillText('TOTAL FEE / মোট ফি', col2X+col2W/2, ry+22);
-  c.font='bold 36px Arial';c.fillStyle='#1e3a8a';
-  c.fillText(tot>0?('BDT '+tot.toLocaleString('en-IN')):'---', col2X+col2W/2, ry+64);
-  ry+=100;
+  c.fillStyle='#eff6ff'; roundRect(c,col2X,fy,col2W,86,10); c.fill();
+  c.strokeStyle='#bfdbfe'; c.lineWidth=1.5; roundRect(c,col2X,fy,col2W,86,10); c.stroke();
+  c.textAlign='center'; c.font='10px Arial'; c.fillStyle='#6b7280';
+  c.fillText('TOTAL FEE', col2X+col2W/2, fy+18);
+  c.font='11px "Hind Siliguri",Arial'; c.fillText('মোট ফি', col2X+col2W/2, fy+33);
+  c.font='bold 30px Arial'; c.fillStyle='#1e3a8a';
+  c.fillText(tot>0?'BDT '+tot.toLocaleString('en-IN'):'—', col2X+col2W/2, fy+68);
+  fy+=98;
 
   // Paid box
-  c.fillStyle='#f0fdf4';
-  roundRect(c,col2X,ry,col2W,74,10);c.fill();
-  c.strokeStyle='#86efac';c.lineWidth=1.5;
-  roundRect(c,col2X,ry,col2W,74,10);c.stroke();
-  c.font='12px Arial';c.fillStyle='#6b7280';
-  c.fillText('PAID / পরিশোধিত', col2X+col2W/2, ry+20);
-  c.font='bold 30px Arial';c.fillStyle='#166534';
-  c.fillText('BDT '+paid.toLocaleString('en-IN'), col2X+col2W/2, ry+56);
-  ry+=88;
+  c.fillStyle='#f0fdf4'; roundRect(c,col2X,fy,col2W,72,10); c.fill();
+  c.strokeStyle='#86efac'; c.lineWidth=1.5; roundRect(c,col2X,fy,col2W,72,10); c.stroke();
+  c.font='10px Arial'; c.fillStyle='#6b7280';
+  c.fillText('PAID / পরিশোধিত', col2X+col2W/2, fy+20);
+  c.font='bold 28px Arial'; c.fillStyle='#166534';
+  c.fillText('BDT '+paid.toLocaleString('en-IN'), col2X+col2W/2, fy+55);
+  fy+=84;
 
   // Due box
-  const dueColor=due>0?{bg:'#fef2f2',brd:'#fca5a5',fg:'#991b1b'}:{bg:'#f0fdf4',brd:'#86efac',fg:'#166534'};
-  c.fillStyle=dueColor.bg;
-  roundRect(c,col2X,ry,col2W,74,10);c.fill();
-  c.strokeStyle=dueColor.brd;c.lineWidth=1.5;
-  roundRect(c,col2X,ry,col2W,74,10);c.stroke();
-  c.font='12px Arial';c.fillStyle='#6b7280';
-  c.fillText('DUE / বকেয়া', col2X+col2W/2, ry+20);
-  c.font='bold 30px Arial';c.fillStyle=dueColor.fg;
-  c.fillText('BDT '+due.toLocaleString('en-IN'), col2X+col2W/2, ry+56);
-  ry+=88;
+  const dC=due>0?{bg:'#fef2f2',brd:'#fca5a5',fg:'#991b1b'}:{bg:'#f0fdf4',brd:'#86efac',fg:'#166534'};
+  c.fillStyle=dC.bg; roundRect(c,col2X,fy,col2W,72,10); c.fill();
+  c.strokeStyle=dC.brd; c.lineWidth=1.5; roundRect(c,col2X,fy,col2W,72,10); c.stroke();
+  c.font='10px Arial'; c.fillStyle='#6b7280';
+  c.fillText('DUE / বকেয়া', col2X+col2W/2, fy+20);
+  c.font='bold 28px Arial'; c.fillStyle=dC.fg;
+  c.fillText('BDT '+due.toLocaleString('en-IN'), col2X+col2W/2, fy+55);
+  fy+=84;
   c.textAlign='left';
 
-  // === SEPARATOR LINE ===
-  const sepY=Math.max(y,ry)+10;
-  c.strokeStyle='#e4ece7';c.lineWidth=1;
-  c.beginPath();c.moveTo(M,sepY);c.lineTo(W-M,sepY);c.stroke();
+  // === SEPARATOR ===
+  const sepY=Math.max(tableEnd, fy)+20;
+  c.strokeStyle='#d1fae5'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(M,sepY); c.lineTo(W-M,sepY); c.stroke();
 
   // === NOTE BOX ===
-  const noteY=sepY+16;
-  c.fillStyle='#fafcfb';
-  roundRect(c,M,noteY,W-M*2,70,8);c.fill();
-  c.strokeStyle='#d1fae5';c.lineWidth=1;
-  roundRect(c,M,noteY,W-M*2,70,8);c.stroke();
-  c.fillStyle='#374151';c.font='13px "Hind Siliguri",Arial';
-  c.fillText('Note: This receipt is auto-generated by '+( g.name||'Sabuj Computers')+'. Please retain for future reference.', M+14, noteY+22);
-  c.fillText('Contact: '+(g.phone||'01724084350')+' | '+(g.email||'sssabuj007@gmail.com'), M+14, noteY+44);
-  c.fillStyle='#9ca3af';c.font='12px Arial';
-  c.fillText('Printed: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+14, noteY+64);
+  const noteY=sepY+14;
+  c.fillStyle='#f9fbfa'; roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.fill();
+  c.strokeStyle='#d1fae5'; c.lineWidth=1; roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.stroke();
+  c.fillStyle='#374151'; c.font='13px "Hind Siliguri",Arial';
+  c.fillText('Note: This receipt is auto-generated by '+(g.name||'Sabuj Computers')+'. Please retain for records.', M+12, noteY+22);
+  c.fillText('Contact: '+(g.phone||'')+' | '+(g.email||''), M+12, noteY+44);
+  c.fillStyle='#9ca3af'; c.font='11px Arial';
+  c.fillText('Printed: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+12, noteY+64);
 
   // === SIGNATURES ===
-  const sigY=noteY+90;
-  const sigW=180;
-  const sigPositions=[M+30, W/2-sigW/2, W-M-sigW-30];
-  const sigLabels=['Signature of Student','Accounts','Proprietor'];
-  const sigNames=['','',g.owner||'Md. Sabuj Ali'];
-  sigPositions.forEach((x,i)=>{
-    c.strokeStyle='#374151';c.lineWidth=1.2;
-    c.beginPath();c.moveTo(x,sigY);c.lineTo(x+sigW,sigY);c.stroke();
-    c.fillStyle='#374151';c.font='13px Arial';c.textAlign='center';
-    c.fillText(sigLabels[i], x+sigW/2, sigY+20);
-    if(sigNames[i]){
-      c.font='12px "Hind Siliguri",Arial';c.fillStyle='#6b7280';
-      c.fillText(sigNames[i], x+sigW/2, sigY+38);
-    }
+  const sigY=noteY+NOTE_H+10;
+  const sigW=168;
+  [[M+20,sigY],[W/2-sigW/2,sigY],[W-M-sigW-20,sigY]].forEach(([x,sy],i)=>{
+    c.strokeStyle='#9ca3af'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(x,sy); c.lineTo(x+sigW,sy); c.stroke();
+    c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+    c.fillText(['Signature of Student','Accounts Officer','Proprietor'][i], x+sigW/2, sy+17);
+    if(i===2){c.font='12px "Hind Siliguri",Arial'; c.fillStyle='#6b7280'; c.fillText(g.owner||'Md. Sabuj Ali', x+sigW/2, sy+33);}
   });
   c.textAlign='left';
 
-  // === FOOTER BAR ===
-  const ftH=H-44;
-  c.fillStyle='#052e12';c.fillRect(0,ftH,W,44);
-  c.fillStyle='#c8a847';c.fillRect(0,ftH,W,3);
-  c.fillStyle='#ffffff';c.font='13px Arial';c.textAlign='center';
-  c.fillText(rNo+'  |  Institute Code: 5424  |  Reg: '+(s.reg||'---')+'  |  Status: '+sts.toUpperCase(), W/2, ftH+27);
+  // === FOOTER ===
+  const ftY=sigY+SIG_H;
+  c.fillStyle='#031e09'; c.fillRect(0,ftY,W,FTR);
+  c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+  c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+  c.fillText(rNo+' | Code: 5424 | Reg: '+(s.reg||'N/A')+' | Status: '+sts.toUpperCase(), W/2, ftY+27);
   c.textAlign='left';
 
   const lnk=document.createElement('a');
   lnk.download='FeeReceipt_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
-  lnk.href=cv.toDataURL('image/png',1.0);lnk.click();
-  showNotif('Fee receipt downloaded!');
+  lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
+  showNotif('✅ ফি রসিদ ডাউনলোড হয়েছে!');
+}
+
+function _fbLogo(c,x,y,sz,col,name){
+  c.fillStyle=col||'#166534'; c.fillRect(x,y,sz,sz);
+  c.fillStyle='#fff'; c.font='bold '+(sz*0.48)+'px Arial';
+  c.textAlign='center'; c.textBaseline='middle';
+  c.fillText((name||'S')[0].toUpperCase(), x+sz/2, y+sz/2);
+  c.textBaseline='alphabetic'; c.textAlign='left';
 }
 
 
@@ -1722,239 +1695,199 @@ function downloadResultCard(){
   setTimeout(()=>buildResultCard(s),200);
 }
 
+
 function buildResultCard(s){
-  const W=900,H=1320,M=50;
-  const cv=document.createElement('canvas');
-  cv.width=W; cv.height=H;
-  const c=cv.getContext('2d');
+  const W=900, M=52;
   const g=DB.general||{};
   const gs=gradeStyle(s.result);
   const fn_=g.foundationCourseName||'Computer Office Application (Foundation)';
   const bn_=g.btebCourseName||'Computer Office Application (BTEB)';
-  const courseName=s.course==='BTEB'?bn_:s.course==='FOUNDATION'?fn_:(s.course||'---');
+  const courseName=s.course==='BTEB'?bn_:s.course==='FOUNDATION'?fn_:(s.course||'N/A');
   const GPA_MAP={'A+':5.00,'A':4.00,'A-':3.50,'B+':3.00,'B':2.50,'B-':2.00,'C':1.50,'D':1.00,'F':0.00};
-  const gpaVal=GPA_MAP[s.result]!==undefined?GPA_MAP[s.result].toFixed(2):'---';
+  const gpaVal=GPA_MAP[s.result]!==undefined?GPA_MAP[s.result].toFixed(2):'N/A';
   const passed=s.result!=='F';
 
-  // === BACKGROUND ===
-  c.fillStyle='#faf5ff';c.fillRect(0,0,W,H);
+  // Dynamic rows
+  const allRows=[
+    ['NAME / নাম', s.name||'N/A', true],
+    ['REGISTRATION NO.', s.reg||'N/A', true],
+    ['COURSE / কোর্স', courseName, false],
+    ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
+    ["FATHER'S NAME", s.fatherName, false],
+    ["MOTHER'S NAME", s.motherName, false],
+    ['MOBILE', s.phone, false],
+    ['GRADE / GPA', s.result+(gpaVal!=='N/A'?' (GPA '+gpaVal+')':''), true],
+  ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='N/A');
 
-  // Subtle grid
-  c.strokeStyle='rgba(76,29,149,0.03)';c.lineWidth=1;
-  for(let x=0;x<W;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke();}
-  for(let y=0;y<H;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke();}
+  // Dynamic height
+  const HDR=192, GRADE_H=308, BAN_H=52, TABLE_Y=HDR+GRADE_H+BAN_H+12;
+  const ROW_H=46, NOTE_H=86, SIG_H=72, FTR=44;
+  const phW=132, phH=168;
+  const tableRows=allRows.length;
+  const H=TABLE_Y+Math.max(tableRows*ROW_H, phH+130)+NOTE_H+SIG_H+FTR+20;
+
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const c=cv.getContext('2d');
+
+  // Background
+  c.fillStyle='#faf8ff'; c.fillRect(0,0,W,H);
+  c.fillStyle='rgba(76,29,149,0.02)';
+  for(let gx=20;gx<W;gx+=20) for(let gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
 
   // === HEADER ===
   const hg=c.createLinearGradient(0,0,W,0);
-  hg.addColorStop(0,'#1e0a4a');
-  hg.addColorStop(0.5,'#5b21b6');
-  hg.addColorStop(1,'#1e0a4a');
-  c.fillStyle=hg;c.fillRect(0,0,W,190);
-
-  // Gold top line
-  c.fillStyle='#c8a847';c.fillRect(0,0,W,5);
-  c.fillStyle='rgba(200,168,71,0.5)';c.fillRect(0,185,W,3);
+  hg.addColorStop(0,'#1a0840'); hg.addColorStop(0.45,'#5521b5'); hg.addColorStop(1,'#1a0840');
+  c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+  c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
+  c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
 
   // Logo
   const logoEl=document.getElementById('hdrLogo');
   const lImg=logoEl?logoEl.querySelector('img'):null;
-  c.save();
-  c.beginPath();roundClip(c,M,20,150,150,14);c.clip();
-  if(lImg&&lImg.complete&&lImg.naturalWidth>0){
-    try{c.drawImage(lImg,M,20,150,150);}catch(e){
-      c.fillStyle='#7c3aed';c.fillRect(M,20,150,150);
-    }
-  } else {
-    c.fillStyle='#7c3aed';c.fillRect(M,20,150,150);
-    c.fillStyle='#fff';c.font='bold 72px Arial';
-    c.textAlign='center';c.textBaseline='middle';
-    c.fillText((g.name||'S')[0].toUpperCase(),M+75,95);
-    c.textBaseline='alphabetic';
-  }
+  const lSz=152, lX=M, lY=19;
+  c.save(); c.beginPath(); roundClip(c,lX,lY,lSz,lSz,16); c.clip();
+  if(lImg&&lImg.complete&&lImg.naturalWidth>0){try{c.drawImage(lImg,lX,lY,lSz,lSz);}catch(e){_fbLogo(c,lX,lY,lSz,'#5521b5',g.name);}}
+  else _fbLogo(c,lX,lY,lSz,'#5521b5',g.name);
   c.restore();
-  c.strokeStyle='rgba(200,168,71,0.7)';c.lineWidth=2.5;
-  c.save();c.beginPath();roundClip(c,M,20,150,150,14);c.stroke();c.restore();
+  c.strokeStyle='rgba(200,168,71,0.7)'; c.lineWidth=2.5;
+  c.save(); c.beginPath(); roundClip(c,lX,lY,lSz,lSz,16); c.stroke(); c.restore();
 
-  // Institute text
-  const iX=M+172;
+  // Institute info
+  const iX=lX+lSz+18;
   c.textAlign='left';
-  c.fillStyle='#ffffff';
-  c.font='bold 34px "Hind Siliguri",sans-serif';
-  c.fillText(g.name||'সবুজ কম্পিউটার্স', iX, 55);
-  c.font='16px "Hind Siliguri",sans-serif';
-  c.fillStyle='rgba(255,255,255,0.75)';
-  c.fillText(g.address||'তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 83);
-  c.fillText('Phone: '+(g.phone||'')+'   Email: '+(g.email||''), iX, 107);
-  c.strokeStyle='rgba(200,168,71,0.35)';c.lineWidth=1;
-  c.beginPath();c.moveTo(iX,116);c.lineTo(W-M,116);c.stroke();
-  c.fillStyle='#e9d5ff';
-  c.font='bold 22px Arial';
-  c.fillText('RESULT CARD', iX, 143);
-  c.font='16px "Hind Siliguri",sans-serif';
-  c.fillStyle='rgba(255,255,255,0.65)';
-  c.fillText('ফলাফল কার্ড', iX+145, 143);
-  c.fillStyle='rgba(255,255,255,0.55)';c.font='14px Arial';
-  c.fillText((s.session||'')+(s.year?' | '+s.year:''), iX, 167);
+  c.fillStyle='#ffffff'; c.font='bold 36px "Hind Siliguri",sans-serif';
+  c.fillText(g.name||'সবুজ কম্পিউটার্স', iX, 60);
+  c.font='15px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+  c.fillText(g.address||'তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 86);
+  c.font='13px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+  c.fillText('Ph: '+(g.phone||'')+' | '+(g.email||''), iX, 108);
+  c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(iX,118); c.lineTo(W-M,118); c.stroke();
+  // Title — two lines, NOT overlapping
+  c.fillStyle='#e9d5ff'; c.font='bold 21px Arial';
+  c.fillText('RESULT CARD', iX, 142);
+  c.fillStyle='rgba(255,255,255,0.62)'; c.font='14px "Hind Siliguri",sans-serif';
+  c.fillText('ফলাফল কার্ড', iX, 166);
+  // Session top-right
+  c.textAlign='right'; c.fillStyle='rgba(255,255,255,0.5)'; c.font='12px Arial';
+  c.fillText((s.session||'')+(s.year?' | '+s.year:''), W-M, 88);
+  c.textAlign='left';
 
-  // === GRADE CIRCLE + PASS/FAIL ===
-  const circleY=295;
-
-  // Glow rings
-  c.save();c.globalAlpha=0.07;c.fillStyle=gs.fg;
-  c.beginPath();c.arc(W/2,circleY,120,0,Math.PI*2);c.fill();c.restore();
-  c.save();c.globalAlpha=0.13;c.fillStyle=gs.fg;
-  c.beginPath();c.arc(W/2,circleY,100,0,Math.PI*2);c.fill();c.restore();
-
+  // === GRADE CIRCLE ===
+  const cX=W/2, cY=HDR+145, cR=90;
+  // Glow halos
+  c.save(); c.globalAlpha=0.05; c.fillStyle=gs.fg; c.beginPath(); c.arc(cX,cY,cR+40,0,Math.PI*2); c.fill(); c.restore();
+  c.save(); c.globalAlpha=0.10; c.fillStyle=gs.fg; c.beginPath(); c.arc(cX,cY,cR+22,0,Math.PI*2); c.fill(); c.restore();
   // Main circle
-  c.fillStyle=gs.bg;
-  c.beginPath();c.arc(W/2,circleY,82,0,Math.PI*2);c.fill();
-  c.strokeStyle=gs.fg;c.lineWidth=7;
-  c.beginPath();c.arc(W/2,circleY,82,0,Math.PI*2);c.stroke();
-
-  // Grade text
-  c.fillStyle=gs.fg;
-  c.font='bold 70px Arial';
-  c.textAlign='center';c.textBaseline='middle';
-  c.fillText(s.result,W/2,circleY);
+  c.fillStyle=gs.bg; c.beginPath(); c.arc(cX,cY,cR,0,Math.PI*2); c.fill();
+  c.strokeStyle=gs.fg; c.lineWidth=8; c.beginPath(); c.arc(cX,cY,cR,0,Math.PI*2); c.stroke();
+  c.fillStyle=gs.fg; c.font='bold 78px Arial';
+  c.textAlign='center'; c.textBaseline='middle'; c.fillText(s.result,cX,cY);
   c.textBaseline='alphabetic';
 
   // GPA pill
-  const gpX=W/2-80, gpY=circleY+96;
-  c.fillStyle=gs.bg;
-  roundRect(c,gpX,gpY,160,42,10);c.fill();
-  c.strokeStyle=gs.fg;c.lineWidth=2;
-  roundRect(c,gpX,gpY,160,42,10);c.stroke();
-  c.fillStyle=gs.fg;c.font='bold 20px Arial';c.textAlign='center';
-  c.fillText('GPA : '+gpaVal, W/2, gpY+28);
+  const gpY=cY+cR+14;
+  c.fillStyle=gs.bg; roundRect(c,cX-84,gpY,168,40,10); c.fill();
+  c.strokeStyle=gs.fg; c.lineWidth=2; roundRect(c,cX-84,gpY,168,40,10); c.stroke();
+  c.fillStyle=gs.fg; c.font='bold 19px Arial'; c.textAlign='center';
+  c.fillText('GPA : '+gpaVal, cX, gpY+27);
 
   // Pass/Fail banner
-  const banY=gpY+58;
-  const banConf=passed?
-    {bg:'#d1fae5',brd:'#34d399',fg:'#065f46',tx:'PASSED  /  উত্তীর্ণ'}:
-    {bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'FAILED  /  অনুত্তীর্ণ'};
-  c.fillStyle=banConf.bg;
-  roundRect(c,M,banY,W-M*2,52,12);c.fill();
-  c.strokeStyle=banConf.brd;c.lineWidth=3;
-  roundRect(c,M,banY,W-M*2,52,12);c.stroke();
-  c.fillStyle=banConf.fg;c.font='bold 24px "Hind Siliguri",Arial';c.textAlign='center';
-  c.fillText(banConf.tx, W/2, banY+34);
-  c.textAlign='left';
+  const banY=gpY+52;
+  const bC=passed
+    ?{bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'PASSED  /  উত্তীর্ণ'}
+    :{bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'FAILED  /  অনুত্তীর্ণ'};
+  c.fillStyle=bC.bg; roundRect(c,M,banY,W-M*2,50,12); c.fill();
+  c.strokeStyle=bC.brd; c.lineWidth=3; roundRect(c,M,banY,W-M*2,50,12); c.stroke();
+  c.fillStyle=bC.fg; c.font='bold 22px "Hind Siliguri",Arial'; c.textAlign='center';
+  c.fillText(bC.tx, W/2, banY+33); c.textAlign='left';
 
-  // === STUDENT INFO TABLE ===
-  const tableY=banY+72;
-  c.fillStyle='#4c1d95';c.fillRect(M,tableY,W-M*2,3);
-  c.font='bold 14px Arial';c.fillStyle='#4c1d95';
-  c.fillText('STUDENT DETAILS', M, tableY-8);
+  // === STUDENT TABLE ===
+  const phX=W-M-phW;
+  const tW=phX-M-14;
+  c.fillStyle='#4c1d95'; c.fillRect(M,TABLE_Y,tW,2.5);
+  c.font='bold 11px Arial'; c.fillStyle='#4c1d95'; c.fillText('STUDENT DETAILS', M, TABLE_Y-7);
 
-  const infoRows=[
-    ['Name / নাম', s.name||'---', true, '#4c1d95'],
-    ['Registration No.', s.reg||'---', true, '#1e40af'],
-    ['Course / কোর্স', courseName, false, '#1f2937'],
-    ['Session / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
-    ['Father\'s Name', s.fatherName||'---', false, '#1f2937'],
-    ['Mother\'s Name', s.motherName||'---', false, '#1f2937'],
-    ['Mobile', s.phone||'---', false, '#1f2937'],
-    ['Grade / GPA', s.result+(gpaVal!=='---'?' (GPA '+gpaVal+')':''), true, gs.fg],
-  ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='---');
-
-  // Photo area on right
-  const phW=130,phH=165,phX=W-M-phW,phY_=tableY+3;
-  const tableW=phX-M-16;
-
-  infoRows.forEach(([lbl,val,bold,vc],i)=>{
-    const rY=tableY+3+i*46;
-    c.fillStyle=i%2===0?'#f5f3ff':'#faf5ff';
-    c.fillRect(M,rY,tableW,46);
-    c.strokeStyle='#ede9fe';c.lineWidth=0.5;
-    c.strokeRect(M,rY,tableW,46);
-    c.fillStyle='#9ca3af';c.font='11px Arial';
-    c.fillText(lbl.toUpperCase(), M+10, rY+17);
-    c.fillStyle=vc||'#1f2937';
-    c.font=(bold?'bold ':'')+' 15px "Hind Siliguri",Arial';
-    let v=String(val||'---');
-    while(c.measureText(v).width>tableW-20&&v.length>4) v=v.slice(0,-1)+'...';
-    c.fillText(v, M+10, rY+38);
+  allRows.forEach(([lbl,val,bold],i)=>{
+    const rY=TABLE_Y+i*ROW_H;
+    c.fillStyle=i%2===0?'#f5f3ff':'#faf8ff'; c.fillRect(M,rY,tW,ROW_H);
+    c.strokeStyle='#ede9fe'; c.lineWidth=0.5; c.strokeRect(M,rY,tW,ROW_H);
+    c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(lbl, M+10, rY+14);
+    const isGrade=lbl.startsWith('GRADE');
+    c.fillStyle=isGrade?gs.fg:'#1f2937';
+    c.font=(bold?'bold ':'')+'14px "Hind Siliguri",Arial';
+    let v=String(val||'N/A'); while(c.measureText(v).width>tW-22&&v.length>4) v=v.slice(0,-1)+'..';
+    c.fillText(v, M+10, rY+36);
   });
+  const tEnd=TABLE_Y+allRows.length*ROW_H;
+  c.strokeStyle='#ede9fe'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(M,tEnd); c.lineTo(M+tW,tEnd); c.stroke();
 
-  const tableEnd=tableY+3+infoRows.length*46;
-  c.strokeStyle='#ede9fe';c.lineWidth=1;
-  c.beginPath();c.moveTo(M,tableEnd);c.lineTo(M+tableW,tableEnd);c.stroke();
+  // Photo box
+  const phY=TABLE_Y;
+  c.fillStyle='#f0ebff'; c.fillRect(phX,phY,phW,phH);
+  c.strokeStyle='#7c3aed'; c.lineWidth=1.5; c.strokeRect(phX,phY,phW,phH);
+  c.fillStyle='#c4b5fd'; c.font='bold 44px Arial';
+  c.textAlign='center'; c.textBaseline='middle';
+  c.fillText((s.name||'?')[0].toUpperCase(), phX+phW/2, phY+phH/2-8);
+  c.font='11px Arial'; c.fillStyle='#a78bfa'; c.fillText('PHOTO', phX+phW/2, phY+phH-13);
+  c.textBaseline='alphabetic'; c.textAlign='left';
 
-  // === NOTE BOX ===
-  const noteY=Math.max(tableEnd,phY_+phH+20)+20;
-  c.fillStyle='#fafafa';
-  roundRect(c,M,noteY,W-M*2,72,8);c.fill();
-  c.strokeStyle='#e5e7eb';c.lineWidth=1;
-  roundRect(c,M,noteY,W-M*2,72,8);c.stroke();
-  c.fillStyle='#374151';c.font='13px "Hind Siliguri",Arial';
-  c.fillText('This result card is auto-generated by '+(g.name||'Sabuj Computers')+'.', M+14, noteY+22);
-  c.fillText('Date: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), M+14, noteY+44);
-  c.fillStyle='#9ca3af';c.font='12px Arial';
-  c.fillText('Contact: '+(g.phone||'')+(g.email?' | '+g.email:''), M+14, noteY+64);
+  // QR
+  const qrSz=114, qrX=phX+(phW-qrSz)/2, qrY=phY+phH+12;
+  const verifyUrl=window.location.origin+window.location.pathname+'?verify='+encodeURIComponent(s.reg);
+  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=114x114&data='+encodeURIComponent(verifyUrl);
+
+  // === NOTE ===
+  const noteY=Math.max(tEnd, qrY+qrSz+24)+18;
+  c.fillStyle='#f9f8ff'; roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.fill();
+  c.strokeStyle='#e4e0f7'; c.lineWidth=1; roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.stroke();
+  c.fillStyle='#374151'; c.font='13px "Hind Siliguri",Arial';
+  c.fillText('This result card is auto-generated by '+(g.name||'Sabuj Computers')+'.', M+12, noteY+22);
+  c.fillText('Date: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), M+12, noteY+44);
+  c.fillStyle='#9ca3af'; c.font='11px Arial';
+  c.fillText('Contact: '+(g.phone||'')+' | '+(g.email||''), M+12, noteY+64);
 
   // === SIGNATURES ===
-  const sigY_=noteY+90;
-  const sigW=180;
-  [M+30, W/2-sigW/2, W-M-sigW-30].forEach((x,i)=>{
-    c.strokeStyle='#374151';c.lineWidth=1.2;
-    c.beginPath();c.moveTo(x,sigY_);c.lineTo(x+sigW,sigY_);c.stroke();
-    c.fillStyle='#374151';c.font='13px Arial';c.textAlign='center';
-    c.fillText(['Signature of Student','Examiner','Proprietor'][i], x+sigW/2, sigY_+20);
-    if(i===2){
-      c.font='12px "Hind Siliguri",Arial';c.fillStyle='#6b7280';
-      c.fillText(g.owner||'Md. Sabuj Ali', x+sigW/2, sigY_+38);
-    }
+  const sigY=noteY+NOTE_H+8;
+  const sigW=168;
+  [[M+20,sigY],[W/2-sigW/2,sigY],[W-M-sigW-20,sigY]].forEach(([x,sy],i)=>{
+    c.strokeStyle='#9ca3af'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(x,sy); c.lineTo(x+sigW,sy); c.stroke();
+    c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+    c.fillText(['Signature of Student','Examiner','Proprietor'][i], x+sigW/2, sy+17);
+    if(i===2){c.font='12px "Hind Siliguri",Arial'; c.fillStyle='#6b7280'; c.fillText(g.owner||'Md. Sabuj Ali', x+sigW/2, sy+33);}
   });
   c.textAlign='left';
 
   // === FOOTER ===
-  const ftH=H-44;
-  c.fillStyle='#1e0a4a';c.fillRect(0,ftH,W,44);
-  c.fillStyle='#c8a847';c.fillRect(0,ftH,W,3);
-  c.fillStyle='#ffffff';c.font='13px Arial';c.textAlign='center';
-  c.fillText('Institute Code: 5424  |  Reg: '+(s.reg||'---')+'  |  Result: '+s.result+' (GPA '+gpaVal+')  |  '+new Date().getFullYear(), W/2, ftH+27);
+  const ftY=sigY+SIG_H;
+  c.fillStyle='#1a0840'; c.fillRect(0,ftY,W,FTR);
+  c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+  c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+  c.fillText('Code: 5424 | Reg: '+(s.reg||'N/A')+' | Result: '+s.result+' (GPA '+gpaVal+') | '+new Date().getFullYear(), W/2, ftY+27);
   c.textAlign='left';
 
-  // === PHOTO (async) ===
-  // Photo placeholder box
-  c.fillStyle='#ede9fe';c.fillRect(phX,phY_,phW,phH);
-  c.strokeStyle='#7c3aed';c.lineWidth=1.5;c.strokeRect(phX,phY_,phW,phH);
-  c.fillStyle='#7c3aed';c.font='bold 48px Arial';
-  c.textAlign='center';c.textBaseline='middle';
-  c.fillText((s.name||'?')[0].toUpperCase(), phX+phW/2, phY_+phH/2-15);
-  c.font='12px Arial';c.fillStyle='#9ca3af';
-  c.fillText('PHOTO', phX+phW/2, phY_+phH-16);
-  c.textBaseline='alphabetic';c.textAlign='left';
-
-  // QR code
-  const qrSz=120, qrX=phX+(phW-qrSz)/2, qrY=phY_+phH+16;
-  const verifyUrl=window.location.origin+window.location.pathname+'?verify='+encodeURIComponent(s.reg);
-  const qrApiUrl='https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encodeURIComponent(verifyUrl);
-  const qrImg=new Image();
-  qrImg.crossOrigin='anonymous';
-
-  const doFinish=()=>{
+  // Async: QR then Photo
+  const finish=()=>{
     const lnk=document.createElement('a');
     lnk.download='ResultCard_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
-    lnk.href=cv.toDataURL('image/png',1.0);lnk.click();
-    showNotif('Result card downloaded!');
+    lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
+    showNotif('✅ ফলাফল কার্ড ডাউনলোড হয়েছে!');
   };
-
-  const drawAndFinish=()=>{
-    c.fillStyle='#9ca3af';c.font='11px Arial';c.textAlign='center';
-    c.fillText('Scan to Verify', qrX+qrSz/2, qrY+qrSz+16);
-    c.textAlign='left';
-    if(s.photo){
-      const pImg=new Image();
-      pImg.onload=()=>{c.drawImage(pImg,phX+2,phY_+2,phW-4,phH-4);doFinish();};
-      pImg.onerror=doFinish;
-      pImg.src=s.photo;
-    } else doFinish();
+  const afterQR=()=>{
+    if(s.photo){const pi=new Image();pi.onload=()=>{c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);finish();};pi.onerror=finish;pi.src=s.photo;}
+    else finish();
   };
-
-  qrImg.onload=()=>{c.drawImage(qrImg,qrX,qrY,qrSz,qrSz);drawAndFinish();};
-  qrImg.onerror=()=>{drawQR(c,qrX,qrY,qrSz);drawAndFinish();};
-  qrImg.src=qrApiUrl;
+  const qi=new Image(); qi.crossOrigin='anonymous';
+  qi.onload=()=>{
+    c.drawImage(qi,qrX,qrY,qrSz,qrSz);
+    c.fillStyle='#9ca3af'; c.font='10px Arial'; c.textAlign='center';
+    c.fillText('Scan to Verify', qrX+qrSz/2, qrY+qrSz+13);
+    c.textAlign='left'; afterQR();
+  };
+  qi.onerror=()=>{drawQR(c,qrX,qrY,qrSz); afterQR();};
+  qi.src=qrUrl;
 }
 
 
@@ -2484,18 +2417,12 @@ function addTesti(){DB.testimonials.push({avatar:'?',name:'নতুন রি�
 function saveTestimonials(){saveDB('testimonials', DB.testimonials);renderTestimonials();showNotif('✅ রিভিউ সংরক্ষিত');}
 
 function handleCourseSelect(){
-  const sel=document.getElementById('s-course-select');
-  const hidden=document.getElementById('s-course');
-  const other=document.getElementById('s-course-other');
-  if(!sel)return;
-  if(sel.value==='OTHER'){
-    if(other)other.style.display='block';
-    if(hidden)hidden.value=other?other.value:'';
-    if(other)other.focus();
-  } else {
-    if(other)other.style.display='none';
-    if(hidden)hidden.value=sel.value;
-  }
+  const s=document.getElementById('s-course-select');
+  const h=document.getElementById('s-course');
+  const o=document.getElementById('s-course-other');
+  if(!s)return;
+  if(s.value==='OTHER'){if(o){o.style.display='block';o.focus();}if(h)h.value=(o&&o.value)||'';}
+  else{if(o)o.style.display='none';if(h)h.value=s.value;}
 }
 
 // Students
@@ -2631,21 +2558,13 @@ function editStudent(i){
   document.getElementById('s-year').value=s.year||'';
   document.getElementById('s-addr').value=s.address||'';
   document.getElementById('s-result').value=s.result||'';
-  // Set course select
-  const _ecsel=document.getElementById('s-course-select');
-  const _ecother=document.getElementById('s-course-other');
-  const _echidden=document.getElementById('s-course');
-  if(s.course==='FOUNDATION'||s.course==='BTEB'){
-    if(_ecsel)_ecsel.value=s.course;
-    if(_ecother)_ecother.style.display='none';
-  } else if(s.course){
-    if(_ecsel)_ecsel.value='OTHER';
-    if(_ecother){_ecother.style.display='block';_ecother.value=s.course;}
-  } else {
-    if(_ecsel)_ecsel.value='';
-    if(_ecother)_ecother.style.display='none';
-  }
-  if(_echidden)_echidden.value=s.course||'';
+  const _ecs=document.getElementById('s-course-select');
+  const _eco=document.getElementById('s-course-other');
+  const _ech=document.getElementById('s-course');
+  if(s.course==='FOUNDATION'||s.course==='BTEB'){if(_ecs)_ecs.value=s.course;if(_eco)_eco.style.display='none';}
+  else if(s.course){if(_ecs)_ecs.value='OTHER';if(_eco){_eco.style.display='block';_eco.value=s.course;}}
+  else{if(_ecs)_ecs.value='';if(_eco)_eco.style.display='none';}
+  if(_ech)_ech.value=s.course||'';
   document.getElementById('s-fee-total').value=s.feeTotal||'';
   document.getElementById('s-fee-paid').value=s.feePaid||'';
   const fss2=document.getElementById('s-fee-status');if(fss2)fss2.value=s.feeStatus||'';
@@ -2664,13 +2583,10 @@ function clearStudentForm(){
     .forEach(id=>document.getElementById(id).value='');
   document.getElementById('s-gender').value='';
   document.getElementById('s-result').value='';
-  // Reset course
-  const _csel=document.getElementById('s-course-select');
-  const _cother=document.getElementById('s-course-other');
-  const _chidden=document.getElementById('s-course');
-  if(_csel)_csel.value='';
-  if(_cother){_cother.style.display='none';_cother.value='';}
-  if(_chidden)_chidden.value='';
+  const _cs=document.getElementById('s-course-select');
+  const _co=document.getElementById('s-course-other');
+  const _ch=document.getElementById('s-course');
+  if(_cs)_cs.value=''; if(_co){_co.style.display='none';_co.value='';} if(_ch)_ch.value='';
   document.getElementById('s-photo').value='';
   ['s-fee-total','s-fee-paid'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   const fss=document.getElementById('s-fee-status');if(fss)fss.value='';
@@ -3137,5 +3053,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
 </body>
 </html>
