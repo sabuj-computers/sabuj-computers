@@ -1133,7 +1133,6 @@ function loadDB(callback) {
       if (DB.notices && !Array.isArray(DB.notices)) DB.notices = Object.values(DB.notices);
       if (DB.testimonials && !Array.isArray(DB.testimonials)) DB.testimonials = Object.values(DB.testimonials);
       if (DB.training && !Array.isArray(DB.training)) DB.training = Object.values(DB.training);
-      if (DB.testimonials && !Array.isArray(DB.testimonials)) DB.testimonials = Object.values(DB.testimonials);
       // Fill only truly missing fields (never overwrite existing ones)
       const def = defaultDB();
       if (!DB.general) DB.general = def.general;
@@ -1147,7 +1146,21 @@ function loadDB(callback) {
       if (!DB.training || !DB.training.length) DB.training = def.training;
       if (!DB.testimonials || !DB.testimonials.length) DB.testimonials = def.testimonials;
       if (!DB.students) DB.students = [];
+      if (!DB.notices) DB.notices = [];
       if (!DB.password) DB.password = def.password;
+
+      // Restore photos from separate photos node (keyed by reg number)
+      if (val.photos) {
+        const photosObj = val.photos;
+        DB.students.forEach((s) => {
+          if (s.hasPhoto && s.reg) {
+            const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+            if (photosObj[safeKey]) {
+              s.photo = photosObj[safeKey];
+            }
+          }
+        });
+      }
     } else {
       // Truly first time — no data in Firebase at all
       DB = defaultDB();
@@ -1168,10 +1181,35 @@ function loadDB(callback) {
 
 function saveDB(path, value) {
   // path: e.g. 'general', 'services', 'students', null=whole DB
-  if (path) {
-    db.ref('sabuj/' + path).set(value).catch(e => console.error('Save error:', e));
+  if (path === 'students') {
+    // Save photos separately under student reg number to avoid Firebase 10MB limit
+    // and to prevent index-mismatch on delete
+    const studentsNoPhoto = (value||[]).map(s => {
+      const {photo, ...rest} = s;
+      if (photo && photo.startsWith('data:')) {
+        // Save photo under reg number key
+        const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+        if(safeKey) {
+          db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e));
+        }
+        return {...rest, hasPhoto: !!safeKey};
+      }
+      return {...rest, hasPhoto: false};
+    });
+    db.ref('sabuj/students').set(studentsNoPhoto).catch(e => {
+      console.error('Save error:', e);
+      showNotif('❌ সংরক্ষণে সমস্যা হয়েছে! ইন্টারনেট সংযোগ যাচাই করুন।');
+    });
+  } else if (path) {
+    db.ref('sabuj/' + path).set(value).catch(e => {
+      console.error('Save error:', e);
+      showNotif('❌ সংরক্ষণে সমস্যা হয়েছে!');
+    });
   } else {
-    db.ref('sabuj').set(DB).catch(e => console.error('Save error:', e));
+    db.ref('sabuj').set(DB).catch(e => {
+      console.error('Save error:', e);
+      showNotif('❌ সংরক্ষণে সমস্যা হয়েছে!');
+    });
   }
 }
 
@@ -1233,8 +1271,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 function renderAll(){
   renderGeneral();renderServices();renderTraining();renderTestimonials();renderContact();renderNotices();
   loadPublicFeedbacks();
-  document.getElementById('achTotal').textContent=DB.students.length+'+';
-  document.getElementById('statStudents').textContent=DB.students.length+'+';
+  const _total=DB.students.length;
+  const _achEl=document.getElementById('achTotal');
+  const _statEl=document.getElementById('statStudents');
+  if(_achEl)_achEl.textContent=_total+'+';
+  if(_statEl)_statEl.textContent=_total+'+';
 }
 
 // ── VERIFY via URL ──
@@ -2254,14 +2295,15 @@ function loadPublicFeedbacks(){
     if(!box)return;
     if(!val){box.innerHTML='';return;}
     const items=Object.values(val).reverse();
+    const _ef=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     box.innerHTML=items.map(f=>`
       <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 12px rgba(13,61,31,0.08);border:1px solid #e4ece7">
         <div style="font-size:16px;margin-bottom:10px">${'⭐'.repeat(f.rating||5)}</div>
-        <p style="font-size:14px;color:#4a6040;line-height:1.75;font-style:italic;margin-bottom:14px">"${f.msg}"</p>
+        <p style="font-size:14px;color:#4a6040;line-height:1.75;font-style:italic;margin-bottom:14px">"${_ef(f.msg)}"</p>
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#1a6b35,#2e9e52);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0">${f.name[0]||'?'}</div>
-          <div><div style="font-weight:700;font-size:14px;color:#0d3d1f">${f.name}</div>
-          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${f.address?f.address+' • ':''} ${f.time||''}</div></div>
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#1a6b35,#2e9e52);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:700;flex-shrink:0">${(f.name||'?')[0]}</div>
+          <div><div style="font-weight:700;font-size:14px;color:#0d3d1f">${_ef(f.name)}</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px">${f.address?_ef(f.address)+' • ':''} ${_ef(f.time)}</div></div>
         </div>
       </div>`).join('');
   });
@@ -2270,6 +2312,10 @@ function loadPublicFeedbacks(){
 // ===================================================
 // ADMIN FORMS
 // ===================================================
+
+// Safe HTML attribute escaping — prevents input value breaking on quotes
+function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 function switchTab(name){
   const names=['dashboard','general','services','training','testimonials','students','gallery','notices','password'];
   document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
@@ -2373,11 +2419,11 @@ function renderSvcEditor(){
   document.getElementById('svcEditor').innerHTML=DB.services.map((s,i)=>`
     <div class="service-edit-item">
       <div style="display:flex;gap:10px;margin-bottom:8px">
-        <input type="text" value="${s.icon}" style="width:55px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center;font-size:18px" onchange="DB.services[${i}].icon=this.value">
-        <input type="text" value="${s.title}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" onchange="DB.services[${i}].title=this.value">
+        <input type="text" value="${esc(s.icon)}" style="width:55px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center;font-size:18px" onchange="DB.services[${i}].icon=this.value">
+        <input type="text" value="${esc(s.title)}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" onchange="DB.services[${i}].title=this.value">
         <button class="btn-del" onclick="DB.services.splice(${i},1);renderSvcEditor()">✕ মুছুন</button>
       </div>
-      <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.services[${i}].desc=this.value">${s.desc}</textarea>
+      <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.services[${i}].desc=this.value">${esc(s.desc)}</textarea>
     </div>`).join('');
 }
 function addService(){DB.services.push({icon:'🌟',title:'নতুন সেবা',desc:'বিবরণ লিখুন'});renderSvcEditor();}
@@ -2388,11 +2434,11 @@ function renderTrnEditor(){
   document.getElementById('trnEditor').innerHTML=DB.training.map((t,i)=>`
     <div class="service-edit-item">
       <div style="display:flex;gap:10px;margin-bottom:8px">
-        <input type="text" value="${t.badge||''}" style="width:160px;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px" placeholder="Badge" onchange="DB.training[${i}].badge=this.value">
-        <input type="text" value="${t.title}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" onchange="DB.training[${i}].title=this.value">
+        <input type="text" value="${esc(t.badge||'')}" style="width:160px;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px" placeholder="Badge" onchange="DB.training[${i}].badge=this.value">
+        <input type="text" value="${esc(t.title)}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" onchange="DB.training[${i}].title=this.value">
         <button class="btn-del" onclick="DB.training.splice(${i},1);renderTrnEditor()">✕ মুছুন</button>
       </div>
-      <textarea rows="5" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.training[${i}].items=this.value.split('\\n').filter(Boolean)">${t.items.join('\n')}</textarea>
+      <textarea rows="5" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.training[${i}].items=this.value.split('\\n').filter(Boolean)">${esc(t.items.join('\n'))}</textarea>
       <p style="font-size:11px;color:#9ca3af;margin-top:4px">প্রতিটি আইটেম নতুন লাইনে</p>
     </div>`).join('');
 }
@@ -2404,13 +2450,13 @@ function renderTestiEditor(){
   document.getElementById('testiEditor').innerHTML=DB.testimonials.map((t,i)=>`
     <div class="service-edit-item">
       <div style="display:flex;gap:10px;margin-bottom:8px">
-        <input type="text" value="${t.avatar||''}" style="width:55px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center" placeholder="আ" onchange="DB.testimonials[${i}].avatar=this.value">
-        <input type="text" value="${t.name}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" placeholder="নাম" onchange="DB.testimonials[${i}].name=this.value">
+        <input type="text" value="${esc(t.avatar||'')}" style="width:55px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center" placeholder="আ" onchange="DB.testimonials[${i}].avatar=this.value">
+        <input type="text" value="${esc(t.name)}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" placeholder="নাম" onchange="DB.testimonials[${i}].name=this.value">
         <input type="number" value="${t.stars||5}" min="1" max="5" style="width:60px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center" onchange="DB.testimonials[${i}].stars=+this.value">
         <button class="btn-del" onclick="DB.testimonials.splice(${i},1);renderTestiEditor()">✕</button>
       </div>
-      <input type="text" value="${t.sub||''}" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;margin-bottom:8px" placeholder="পরিচয় (যেমন: BTEB কোর্স, ২০২২)" onchange="DB.testimonials[${i}].sub=this.value">
-      <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.testimonials[${i}].text=this.value">${t.text}</textarea>
+      <input type="text" value="${esc(t.sub||'')}" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;margin-bottom:8px" placeholder="পরিচয় (যেমন: BTEB কোর্স, ২০২২)" onchange="DB.testimonials[${i}].sub=this.value">
+      <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.testimonials[${i}].text=this.value">${esc(t.text)}</textarea>
     </div>`).join('');
 }
 function addTesti(){DB.testimonials.push({avatar:'?',name:'নতুন রিভিউ',sub:'',text:'মন্তব্য লিখুন',stars:5});renderTestiEditor();}
@@ -2420,9 +2466,14 @@ function handleCourseSelect(){
   const s=document.getElementById('s-course-select');
   const h=document.getElementById('s-course');
   const o=document.getElementById('s-course-other');
-  if(!s)return;
-  if(s.value==='OTHER'){if(o){o.style.display='block';o.focus();}if(h)h.value=(o&&o.value)||'';}
-  else{if(o)o.style.display='none';if(h)h.value=s.value;}
+  if(!s||!h)return;
+  if(s.value==='OTHER'){
+    if(o){o.style.display='block';o.focus();}
+    h.value=(o&&o.value.trim())||'';
+  } else {
+    if(o){o.style.display='none';}
+    h.value=s.value; // Sets 'FOUNDATION', 'BTEB', or ''
+  }
 }
 
 // Students
@@ -2444,7 +2495,7 @@ function renderAdminStudents(){
   const filtered=(DB.students||[]).map((s,i)=>({s,i})).filter(({s})=>{
     if(ftxt){
       const q=ftxt.toLowerCase();
-      if(!s.name.toLowerCase().includes(q)&&!s.reg.includes(ftxt))return false;
+      if(!(s.name||'').toLowerCase().includes(q)&&!(s.reg||'').includes(ftxt))return false;
     }
     if(fres==='PENDING'){if(s.result&&s.result.trim()!=='')return false;}
     else if(fres){if(s.result!==fres)return false;}
@@ -2462,14 +2513,14 @@ function renderAdminStudents(){
   }
 
   if(!filtered.length){
-    document.getElementById('adminStudTbody').innerHTML=`<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:24px">কোনো শিক্ষার্থী পাওয়া যায়নি</td></tr>`;
+    document.getElementById('adminStudTbody').innerHTML=`<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:24px">কোনো শিক্ষার্থী পাওয়া যায়নি</td></tr>`;
     return;
   }
 
   document.getElementById('adminStudTbody').innerHTML=filtered.map(({s,i},rowNum)=>`
     <tr id="strow-${i}">
       <td>${rowNum+1}</td>
-      <td>${s.photo?`<img src="${s.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${s.name}</td>
+      <td>${s.photo?`<img src="${s.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${s.name||'—'}</td>
       <td style="font-size:12px">${s.reg}</td>
       <td>${s.session||''}<br><small style="color:#9ca3af">${s.year||''}</small></td>
       <td>${s.feeStatus==='Paid'?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">✅ Paid</span>':s.feeStatus==='Partial'?'<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🟡 Partial</span>':s.feeStatus==='Due'?'<span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🔴 Due</span>':''}</td>
@@ -2509,6 +2560,8 @@ function quickSaveResult(i){
 }
 
 function saveStudent(){
+  // Ensure hidden course value is synced before reading
+  handleCourseSelect();
   const idx=document.getElementById('s-edit-idx').value;
   const pf=document.getElementById('s-photo').files[0];
   const doSave=photo=>{
@@ -2532,14 +2585,15 @@ function saveStudent(){
       photo:photo||(existing?existing.photo:null)
     };
     if(!obj.name||!obj.reg){showNotif('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
+    if(!obj.course){showNotif('❌ কোর্স বাছুন (FOUNDATION বা BTEB)');return;}
     const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&(idx===''||_i!==+idx));
     if(_dup>=0){showNotif('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
     if(idx!=='')DB.students[+idx]=obj;
     else DB.students.push(obj);
     saveDB('students',DB.students);renderAdminStudents();
-    document.getElementById('achTotal').textContent=DB.students.length+'+';
-    document.getElementById('statStudents').textContent=DB.students.length+'+';
-    clearStudentForm();showNotif('✅ শিক্ষার্থী সংরক্ষিত');
+    if(document.getElementById('achTotal'))document.getElementById('achTotal').textContent=DB.students.length+'+';
+    if(document.getElementById('statStudents'))document.getElementById('statStudents').textContent=DB.students.length+'+';
+    clearStudentForm();showNotif(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
   };
   if(pf){const r=new FileReader();r.onload=e=>doSave(e.target.result);r.readAsDataURL(pf);}
   else doSave(null);
@@ -2574,7 +2628,16 @@ function editStudent(i){
 
 function deleteStudent(i){
   if(!confirm('এই শিক্ষার্থীকে মুছে ফেলবেন?'))return;
-  DB.students.splice(i,1);saveDB('students',DB.students);renderAdminStudents();showNotif('🗑️ মুছে ফেলা হয়েছে');
+  const s=DB.students[i];
+  // Remove photo from Firebase photos node
+  if(s&&s.reg){
+    const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+    db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
+  }
+  DB.students.splice(i,1);saveDB('students',DB.students);renderAdminStudents();
+  if(document.getElementById('achTotal'))document.getElementById('achTotal').textContent=DB.students.length+'+';
+  if(document.getElementById('statStudents'))document.getElementById('statStudents').textContent=DB.students.length+'+';
+  showNotif('🗑️ শিক্ষার্থী মুছে ফেলা হয়েছে');
 }
 
 function clearStudentForm(){
