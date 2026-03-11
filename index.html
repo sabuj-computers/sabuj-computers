@@ -424,6 +424,15 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
   padding:3px 9px;font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
 .btn-quick-save:hover{background:var(--g1)}
 
+
+@media(max-width:768px){
+  #hamBtn{display:block!important}
+  #mainNav{display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(13,61,31,.97);z-index:9998;align-items:center;justify-content:center;gap:20px;padding:40px}
+  #mainNav.nav-open{display:flex!important}
+  #mainNav a{font-size:18px;color:#fff;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.15);width:100%;text-align:center;letter-spacing:.5px}
+  #hamBtn{display:flex!important;flex-direction:column;justify-content:center}
+}
+
 </style>
 </head>
 <body>
@@ -566,19 +575,28 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
               <input type="file" id="s-photo" accept="image/*">
             </div>
           </div>
-          <div class="fr3" style="margin-top:4px">
-            <div class="fg">
-              <label>মোট কোর্স ফি <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
-              <input id="s-fee-total" type="number" placeholder="0" min="0" oninput="calcFeeDue()">
+          <div style="background:#f0f8f4;border:1.5px dashed #2e9e52;border-radius:12px;padding:16px;margin-top:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:12px">💳 কোর্স ফি তথ্য <span style="color:#9ca3af;font-weight:400">(সব ঐচ্ছিক)</span></div>
+            <div class="fr3">
+              <div class="fg">
+                <label>মোট ফি <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+                <input id="s-fee-total" type="number" placeholder="যেমন: 3000" min="0" oninput="calcFeeDue()">
+              </div>
+              <div class="fg">
+                <label>পরিশোধিত <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+                <input id="s-fee-paid" type="number" placeholder="যেমন: 1500" min="0" oninput="calcFeeDue()">
+              </div>
+              <div class="fg">
+                <label>স্ট্যাটাস</label>
+                <select id="s-fee-status">
+                  <option value="">— বাছুন —</option>
+                  <option value="Paid">✅ Paid (সম্পূর্ণ)</option>
+                  <option value="Partial">🟡 Partial (আংশিক)</option>
+                  <option value="Due">🔴 Due (বকেয়া)</option>
+                </select>
+              </div>
             </div>
-            <div class="fg">
-              <label>পরিশোধিত <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
-              <input id="s-fee-paid" type="number" placeholder="0" min="0" oninput="calcFeeDue()">
-            </div>
-            <div class="fg">
-              <label>বকেয়া <span style="color:#9ca3af;font-weight:400">(auto)</span></label>
-              <input id="s-fee-due" type="number" placeholder="0" min="0" readonly style="background:#f7faf8;cursor:default">
-            </div>
+            <div id="feeDuePreview" style="display:none;margin-top:8px;font-size:12px;color:#9a3412;font-weight:600;background:#fff7ed;padding:8px 12px;border-radius:8px">⚠️ বকেয়া: ৳<span id="feeDueAmt">0</span></div>
           </div>
           <button class="btn-save" onclick="saveStudent()">💾 সংরক্ষণ</button>
           <button class="btn-secondary" style="width:auto;padding:11px 22px;margin-left:10px" onclick="clearStudentForm()">বাতিল</button>
@@ -608,7 +626,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
         </div>
         <div style="overflow-x:auto">
           <table class="admin-student-table">
-            <thead><tr><th>#</th><th>নাম</th><th>রেজিস্ট্রেশন</th><th>সেশন/বছর</th><th>ফলাফল</th><th>কোর্স</th><th>অ্যাকশন</th></tr></thead>
+            <thead><tr><th>#</th><th>নাম</th><th>রেজিস্ট্রেশন</th><th>সেশন/বছর</th><th>ফি</th><th>ফলাফল</th><th>কোর্স</th><th>অ্যাকশন</th></tr></thead>
             <tbody id="adminStudTbody"></tbody>
           </table>
         </div>
@@ -675,7 +693,8 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       📞 <a id="hdrPhone" href="tel:01724084350">০১৭২৪ ০৮৪৩৫০</a>
     </div>
   </div>
-  <nav id="mainNav">
+  <button id="hamBtn" onclick="toggleNav()" aria-label="মেনু" style="display:none;background:none;border:none;cursor:pointer;padding:8px;position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:9999"><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span></button>
+<nav id="mainNav">
     <a href="#home" class="active">হোম</a>
     <a href="#why">কেন আমরা</a>
     <a href="#services">সেবা</a>
@@ -895,18 +914,19 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
             <div style="color:#fff;font-weight:700;font-size:14px">আমাদের অবস্থান</div>
             <div style="color:rgba(255,255,255,.7);font-size:11px">তমালতলা বাজার, বাগাতিপাড়া, নাটোর</div>
           </div>
-          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8" target="_blank" rel="noopener"
+          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener"
              style="background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">🗺️ বড় করে দেখুন</a>
         </div>
         <iframe
-          src="https://maps.google.com/maps?q=24.3982,88.9408&z=16&output=embed"
-          width="100%" height="260" style="border:0;display:block" allowfullscreen="" loading="lazy">
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3631.8!2d88.9408!3d24.3982!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsDIzJzUzLjUiTiA4OMKwNTYnMjYuOSJF!5e0!3m2!1sbn!2sbd!4v1"
+          width="100%" height="260" style="border:0;display:block" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
         </iframe>
         <div style="padding:12px 16px;background:#f7faf8;display:flex;gap:10px">
-          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8" target="_blank" rel="noopener"
+          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener"
              style="flex:1;text-align:center;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:10px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
              📍 Google Maps-এ দেখুন</a>
-          <a href="https://www.google.com/maps/dir/?api=1&destination=24.3982,88.9408" target="_blank" rel="noopener"
+          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener"
              style="flex:1;text-align:center;background:#fff;color:#0d3d1f;padding:10px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;border:2px solid #0d3d1f">
              🧭 রাস্তা দেখুন</a>
         </div>
@@ -1065,6 +1085,8 @@ function loadDB(callback) {
       // Convert Firebase objects back to arrays (Firebase stores arrays as objects)
       if (DB.students && !Array.isArray(DB.students)) DB.students = Object.values(DB.students);
       if (DB.services && !Array.isArray(DB.services)) DB.services = Object.values(DB.services);
+      if (DB.notices && !Array.isArray(DB.notices)) DB.notices = Object.values(DB.notices);
+      if (DB.testimonials && !Array.isArray(DB.testimonials)) DB.testimonials = Object.values(DB.testimonials);
       if (DB.training && !Array.isArray(DB.training)) DB.training = Object.values(DB.training);
       if (DB.testimonials && !Array.isArray(DB.testimonials)) DB.testimonials = Object.values(DB.testimonials);
       // Fill only truly missing fields (never overwrite existing ones)
@@ -1259,10 +1281,7 @@ function renderGeneral(){
 }
 
   // Set WhatsApp button link
-  const _waRaw='8801724084350';
-  const _waNum=_waRaw;
-  const _waEl=document.getElementById('waBtn');
-  if(_waEl)_waEl.href='https://wa.me/'+_waNum+'?text='+encodeURIComponent('আসসালামু আলাইকুম, আমি সবুজ কম্পিউটার্স সম্পর্কে জানতে চাই।');
+  // WhatsApp — hardcoded in HTML href directly
 
 function renderServices(){
   document.getElementById('svcGrid').innerHTML=DB.services.map(s=>`
@@ -1356,16 +1375,26 @@ function doSearch(){
   // Fee display
   const feeBox=document.getElementById('resFeeBox');
   if(feeBox){
-    if(s.feeTotal||s.feePaid){
-      const due=(s.feeDue!=null&&s.feeDue!==undefined)?s.feeDue:Math.max(0,(s.feeTotal||0)-(s.feePaid||0));
-      const paid=due<=0;
+    if(s.feeTotal||s.feePaid||s.feeStatus){
+      const due=s.feeDue!=null?s.feeDue:Math.max(0,(s.feeTotal||0)-(s.feePaid||0));
+      const status=s.feeStatus||(due<=0?'Paid':(s.feePaid>0?'Partial':'Due'));
+      const statusStyle={
+        'Paid':  {bg:'#dcfce7',border:'#86efac',color:'#166534',icon:'✅',label:'সম্পূর্ণ পরিশোধিত'},
+        'Partial':{bg:'#fef9c3',border:'#fde047',color:'#854d0e',icon:'🟡',label:'আংশিক পরিশোধিত'},
+        'Due':   {bg:'#fee2e2',border:'#fca5a5',color:'#991b1b',icon:'🔴',label:'বকেয়া আছে'},
+      }[status]||{bg:'#f3f4f6',border:'#e5e7eb',color:'#374151',icon:'💳',label:'ফি তথ্য'};
       feeBox.style.display='block';
-      feeBox.innerHTML='<div style="margin-top:16px;background:'+(paid?'#dcfce7':'#fff7ed')+';border:2px solid '+(paid?'#86efac':'#fed7aa')+';border-radius:14px;padding:16px 20px">'
-        +'<div style="font-weight:700;font-size:14px;color:'+(paid?'#166534':'#9a3412')+';margin-bottom:12px">'+(paid?'✅ কোর্স ফি সম্পূর্ণ পরিশোধিত':'⚠️ কোর্স ফি তথ্য')+'</div>'
+      feeBox.innerHTML=
+        '<div style="margin-top:16px;background:'+statusStyle.bg+';border:2px solid '+statusStyle.border+';border-radius:16px;padding:18px 20px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+        +'<span style="font-size:22px">'+statusStyle.icon+'</span>'
+        +'<div><div style="font-weight:800;font-size:15px;color:'+statusStyle.color+'">💳 কোর্স ফি তথ্য</div>'
+        +'<div style="font-size:12px;color:'+statusStyle.color+';opacity:.8">'+statusStyle.label+'</div></div>'
+        +'</div>'
         +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">'
-        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">মোট ফি</div><div style="font-weight:800;font-size:18px;color:#0d3d1f">৳'+(s.feeTotal||0)+'</div></div>'
-        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">পরিশোধিত</div><div style="font-weight:800;font-size:18px;color:#166534">৳'+(s.feePaid||0)+'</div></div>'
-        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">বকেয়া</div><div style="font-weight:800;font-size:18px;color:'+(due>0?'#dc2626':'#166534')+'">৳'+(due>0?due:0)+'</div></div>'
+        +(s.feeTotal?'<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:10px"><div style="font-size:10px;color:#6b7280;margin-bottom:3px;font-weight:600">মোট ফি</div><div style="font-weight:800;font-size:18px;color:#0d3d1f">৳'+(s.feeTotal)+'</div></div>':'')
+        +(s.feePaid?'<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:10px"><div style="font-size:10px;color:#6b7280;margin-bottom:3px;font-weight:600">পরিশোধিত</div><div style="font-weight:800;font-size:18px;color:#166534">৳'+(s.feePaid)+'</div></div>':'')
+        +(due>0?'<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:10px"><div style="font-size:10px;color:#6b7280;margin-bottom:3px;font-weight:600">বকেয়া</div><div style="font-weight:800;font-size:18px;color:#dc2626">৳'+due+'</div></div>':'')
         +'</div></div>';
     } else { feeBox.style.display='none'; }
   }
@@ -1788,7 +1817,7 @@ function populateAdminForms(){
     if(op){op.src=g.ownerPhoto;op.style.display='block';}
     if(rb)rb.style.display='inline-block';
   }
-  renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();
+  renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();renderGalleryAdmin();
 }
 
 function previewOwnerPhoto(inp){
@@ -1945,6 +1974,7 @@ function renderAdminStudents(){
       <td>${s.photo?`<img src="${s.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${s.name}</td>
       <td style="font-size:12px">${s.reg}</td>
       <td>${s.session||''}<br><small style="color:#9ca3af">${s.year||''}</small></td>
+      <td>${s.feeStatus==='Paid'?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">✅ Paid</span>':s.feeStatus==='Partial'?'<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🟡 Partial</span>':s.feeStatus==='Due'?'<span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🔴 Due</span>':''}</td>
       <td>
         <div class="quick-result-wrap">
           ${s.result&&s.result.trim()
@@ -1999,7 +2029,8 @@ function saveStudent(){
       course:document.getElementById('s-course').value,
       feeTotal:parseInt(document.getElementById('s-fee-total').value)||0,
       feePaid:parseInt(document.getElementById('s-fee-paid').value)||0,
-      feeDue:parseInt(document.getElementById('s-fee-due').value)||0,
+      feeDue:Math.max(0,(parseInt(document.getElementById('s-fee-total').value)||0)-(parseInt(document.getElementById('s-fee-paid').value)||0)),
+      feeStatus:document.getElementById('s-fee-status').value||'',
       photo:photo||(existing?existing.photo:null)
     };
     if(!obj.name||!obj.reg){showNotif('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
@@ -2030,7 +2061,8 @@ function editStudent(i){
   document.getElementById('s-course').value=s.course||'BTEB';
   document.getElementById('s-fee-total').value=s.feeTotal||'';
   document.getElementById('s-fee-paid').value=s.feePaid||'';
-  document.getElementById('s-fee-due').value=s.feeDue||'';
+  const fss2=document.getElementById('s-fee-status');if(fss2)fss2.value=s.feeStatus||'';
+  calcFeeDue();
   document.querySelector('.student-add-form').scrollIntoView({behavior:'smooth'});
 }
 
@@ -2047,7 +2079,9 @@ function clearStudentForm(){
   document.getElementById('s-result').value='';
   document.getElementById('s-course').value='BTEB';
   document.getElementById('s-photo').value='';
-  ['s-fee-total','s-fee-paid','s-fee-due'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['s-fee-total','s-fee-paid'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const fss=document.getElementById('s-fee-status');if(fss)fss.value='';
+  const fdp=document.getElementById('feeDuePreview');if(fdp)fdp.style.display='none';
 }
 
 function renderGalleryAdmin(){
@@ -2379,8 +2413,17 @@ function renderDashboard(){
 function calcFeeDue(){
   const total=parseInt(document.getElementById('s-fee-total').value)||0;
   const paid=parseInt(document.getElementById('s-fee-paid').value)||0;
-  const e=document.getElementById('s-fee-due');
-  if(e)e.value=Math.max(0,total-paid)||'';
+  const due=Math.max(0,total-paid);
+  const preview=document.getElementById('feeDuePreview');
+  const dueAmt=document.getElementById('feeDueAmt');
+  if(preview){preview.style.display=(due>0&&total>0)?'block':'none';}
+  if(dueAmt){dueAmt.textContent=due;}
+  const sel=document.getElementById('s-fee-status');
+  if(sel&&total>0){
+    if(due<=0)sel.value='Paid';
+    else if(paid>0)sel.value='Partial';
+    else sel.value='Due';
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2473,10 +2516,25 @@ function toggleNoticeNew(i){
   renderNoticeAdmin();
 }
 
+
+function toggleNav(){
+  const nav=document.getElementById('mainNav');
+  const open=nav.classList.toggle('nav-open');
+  document.body.style.overflow=open?'hidden':'';
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('#mainNav a').forEach(function(a){
+    a.addEventListener('click',function(){
+      document.getElementById('mainNav').classList.remove('nav-open');
+      document.body.style.overflow='';
+    });
+  });
+});
 </script>
 
 <!-- WhatsApp Float -->
-<a id="waBtn" class="wa-btn" href="#" target="_blank" rel="noopener" title="WhatsApp-এ যোগাযোগ করুন">
+<a id="waBtn" class="wa-btn" href="https://wa.me/8801724084350?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81+%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE%2C+%E0%A6%B8%E0%A6%AC%E0%A7%81%E0%A6%9C+%E0%A6%95%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%BF%E0%A6%89%E0%A6%9F%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B8+%E0%A6%B8%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%B0%E0%A7%8D%E0%A6%95%E0%A7%87+%E0%A6%9C%E0%A6%BE%E0%A6%A8%E0%A6%A4%E0%A7%87+%E0%A6%9A%E0%A6%BE%E0%A6%87" target="_blank" rel="noopener" title="WhatsApp-এ যোগাযোগ করুন">
   <div class="wa-pulse"></div>
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
