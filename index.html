@@ -542,6 +542,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       <button class="admin-tab" onclick="switchTab('training')">🎓 কোর্স</button>
       <button class="admin-tab" onclick="switchTab('testimonials')">⭐ রিভিউ</button>
       <button class="admin-tab" onclick="switchTab('students')">👩‍🎓 শিক্ষার্থী</button>
+      <button class="admin-tab" onclick="switchTab('admissions')">📋 ভর্তি আবেদন</button>
       <button class="admin-tab" onclick="switchTab('notices')">📢 নোটিশ</button>
       <button class="admin-tab" onclick="switchTab('gallery')">🖼️ গ্যালারি</button>
       <button class="admin-tab" onclick="switchTab('password')">🔑 পাসওয়ার্ড</button>
@@ -701,6 +702,18 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
         </div>
       </div>
 
+
+
+      <!-- ADMISSIONS -->
+      <div class="admin-section" id="tab-admissions">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h4 style="color:var(--g1);font-size:16px">📋 AI Chatbot থেকে ভর্তি আবেদন</h4>
+          <button class="btn-save" onclick="loadAdmissions()" style="padding:10px 20px">🔄 রিফ্রেশ</button>
+        </div>
+        <div id="admissionsList">
+          <p style="color:var(--muted);font-size:14px;text-align:center;padding:30px">লোড হচ্ছে...</p>
+        </div>
+      </div>
 
       <!-- NOTICES ADMIN -->
       <div class="admin-section" id="tab-notices">
@@ -1854,6 +1867,7 @@ function switchTab(name){
   if(name==='gallery')renderGalleryAdmin();
   if(name==='dashboard')renderDashboard();
   if(name==='notices')renderNoticeAdmin();
+  if(name==='admissions')loadAdmissions();
 }
 
 function populateAdminForms(){
@@ -2384,6 +2398,62 @@ function getDefaultStudents(){return[
 ];}
 
 
+
+// ═══════════════════════════════════════════════════
+// ADMISSIONS (from AI Chatbot)
+// ═══════════════════════════════════════════════════
+function loadAdmissions(){
+  const list=document.getElementById('admissionsList');
+  if(!list)return;
+  list.innerHTML='<p style="color:var(--muted);text-align:center;padding:30px">লোড হচ্ছে...</p>';
+  db.ref('sabuj/admissions').orderByChild('submittedAt').limitToLast(50).once('value').then(snap=>{
+    const val=snap.val();
+    if(!val){
+      list.innerHTML='<p style="color:var(--muted);text-align:center;padding:30px">কোনো আবেদন নেই</p>';
+      return;
+    }
+    const items=Object.entries(val).reverse();
+    list.innerHTML=`<div style="overflow-x:auto"><table class="admin-student-table">
+      <thead><tr>
+        <th>#</th><th>নাম</th><th>ফোন</th><th>কোর্স</th><th>ঠিকানা</th><th>সময়</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th>
+      </tr></thead>
+      <tbody>${items.map(([key,a],i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td style="font-weight:700">${a.name||'—'}</td>
+          <td>${a.phone||'—'}</td>
+          <td><span class="course-pill course-${a.course==='BTEB'?'BTEB':'PROTISTHAN'}">${a.course||'—'}</span></td>
+          <td style="font-size:12px">${a.address||'—'}</td>
+          <td style="font-size:11px;color:#9ca3af">${a.submittedAt?new Date(a.submittedAt).toLocaleString('bn-BD'):'—'}</td>
+          <td><span style="background:${a.status==='done'?'#d1fae5':'#fef9c3'};color:${a.status==='done'?'#065f46':'#854d0e'};padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700">${a.status==='done'?'✅ সম্পন্ন':'⏳ অপেক্ষমান'}</span></td>
+          <td style="display:flex;gap:6px">
+            <button class="badge-edit" onclick="markAdmissionDone('${key}')">✅ সম্পন্ন</button>
+            <button class="badge-del" onclick="deleteAdmission('${key}')">🗑️</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:right">মোট ${items.length}টি আবেদন</p>`;
+  }).catch(()=>{
+    list.innerHTML='<p style="color:#dc2626;text-align:center;padding:30px">লোড করতে সমস্যা হয়েছে</p>';
+  });
+}
+
+function markAdmissionDone(key){
+  db.ref('sabuj/admissions/'+key).update({status:'done'}).then(()=>{
+    showNotif('✅ আবেদন সম্পন্ন হিসেবে চিহ্নিত');
+    loadAdmissions();
+  });
+}
+
+function deleteAdmission(key){
+  if(!confirm('এই আবেদন মুছে ফেলবেন?'))return;
+  db.ref('sabuj/admissions/'+key).remove().then(()=>{
+    showNotif('🗑️ আবেদন মুছে ফেলা হয়েছে');
+    loadAdmissions();
+  });
+}
+
 // ═══════════════════════════════════════════════════
 // NOTICE BOARD
 // ═══════════════════════════════════════════════════
@@ -2559,42 +2629,63 @@ function sendChat(){
   inp.value='';
   addChatMsg(msg,'user');
   chatHistory.push({role:'user',content:msg});
+  // Hide quick buttons after first message
+  const qel=document.getElementById('chatQuick');
+  if(qel)qel.style.display='none';
   showChatTyping(true);
 
-  const ctx=`তুমি সবুজ কম্পিউটার্সের (Sabuj Computer Training Center) AI সহায়তা। সংক্ষিপ্ত, বন্ধুত্বপূর্ণ বাংলায় উত্তর দাও (২-৪ বাক্য)। ইমোজি ব্যবহার করো।
-প্রতিষ্ঠানের তথ্য:
-• নাম: ${DB.general.name||'সবুজ কম্পিউটার্স'} | Institute Code: 5424
-• ঠিকানা: তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর
-• মোবাইল: ${DB.general.phone||'০১৭২৪ ০৮৪৩৫০'} | ইমেইল: ${DB.general.email||'sssabuj007@gmail.com'}
-• প্রোপ্রাইটর: ${DB.general.owner||'মোঃ সবুজ আলী'}
-• কোর্স: BTEB অনুমোদিত Computer Office Application (৬ মাস), প্রাতিষ্ঠানিক Computer Office Application
-• সেবা: বই ও স্টেশনারি, কম্পিউটার সার্ভিস ও অনলাইন সেবা, ছবি ও প্রিন্টিং, লাইব্রেরি
-• মোট শিক্ষার্থী: ${(DB.students||[]).length}+ জন
-• শপ সময়: সপ্তাহে ৭ দিন সকাল ৯:০০ - দুপুর ১:৩০ এবং বিকেল ৪:০০ - রাত ৮:৩০
-• লাইব্রেরি: শুক্রবার বন্ধ`;
+  // Send DB context to Worker so AI can do lookups
+  const payload={
+    messages: chatHistory.slice(-10),
+    students: (DB.students||[]).map(s=>({
+      name:s.name, reg:s.reg, phone:s.phone,
+      result:s.result, course:s.course,
+      session:s.session, year:s.year,
+      feeTotal:s.feeTotal, feePaid:s.feePaid, feeStatus:s.feeStatus
+    })),
+    general: {
+      name:DB.general.name, phone:DB.general.phone,
+      email:DB.general.email, owner:DB.general.owner,
+      address:DB.general.address
+    }
+  };
 
   fetch('https://sabuj-ai.demotik770.workers.dev',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:250,
-      system:ctx,
-      messages:chatHistory.slice(-8)
-    })
+    body:JSON.stringify(payload)
   })
   .then(r=>r.json())
   .then(data=>{
     showChatTyping(false);
-    const reply=(data.content&&data.content[0]&&data.content[0].text)||
+    const reply = data.reply ||
       '❗ উত্তর পেতে সমস্যা হচ্ছে। সরাসরি ফোন করুন: 📞 '+(DB.general.phone||'০১৭২৪ ০৮৪৩৫০');
     chatHistory.push({role:'assistant',content:reply});
     addChatMsg(reply,'bot');
+
+    // If admission data collected — save to Firebase
+    if(data.action==='admit' && data.admissionData){
+      saveAdmissionToFirebase(data.admissionData);
+    }
   })
   .catch(()=>{
     showChatTyping(false);
     addChatMsg('❗ সংযোগ সমস্যা। সরাসরি ফোন করুন: 📞 '+(DB.general.phone||'০১৭২৪ ০৮৪৩৫০'),'bot');
   });
+}
+
+function saveAdmissionToFirebase(data){
+  const admission={
+    name:data.name||'',
+    phone:data.phone||'',
+    course:data.course||'',
+    address:data.address||'',
+    status:'pending',
+    submittedAt: new Date().toISOString()
+  };
+  db.ref('sabuj/admissions').push(admission).then(()=>{
+    console.log('Admission saved to Firebase');
+  }).catch(e=>console.error('Admission save error:',e));
 }
 
 function addChatMsg(text,type){
