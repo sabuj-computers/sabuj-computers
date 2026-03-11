@@ -384,46 +384,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
 .wa-pulse{position:absolute;width:100%;height:100%;border-radius:50%;
   background:#25D366;animation:waPulse 2s ease-out infinite}
 @keyframes waPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.9);opacity:0}}
-/* ===== AI CHATBOT ===== */
-.chat-btn{position:fixed;bottom:84px;right:76px;z-index:9980;width:48px;height:48px;
-  border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;
-  box-shadow:0 4px 20px rgba(99,102,241,.5);transition:all .3s;color:#fff}
-.chat-btn:hover{transform:scale(1.1)}
-.chat-window{position:fixed;bottom:148px;right:16px;z-index:9985;width:355px;max-width:calc(100vw - 20px);
-  background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);
-  display:none;flex-direction:column;overflow:hidden;max-height:500px;border:1px solid #e4ece7}
-.chat-window.open{display:flex}
-.chat-hdr{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:13px 16px;
-  display:flex;align-items:center;gap:10px;flex-shrink:0}
-.chat-hdr-av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);
-  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.chat-hdr-info h4{color:#fff;font-size:13px;font-weight:700;margin:0}
-.chat-hdr-info p{color:rgba(255,255,255,.7);font-size:11px;margin:0}
-.chat-hdr-close{margin-left:auto;background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px;line-height:1}
-.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:180px}
-.chat-msg{max-width:84%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;word-break:break-word}
-.chat-msg.bot{background:#f0f4f1;color:#1e3028;border-bottom-left-radius:4px;align-self:flex-start}
-.chat-msg.user{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
-  border-bottom-right-radius:4px;align-self:flex-end}
-.chat-typing{display:none;align-self:flex-start;background:#f0f4f1;border-radius:16px;
-  padding:9px 14px;border-bottom-left-radius:4px;flex-shrink:0}
-.chat-typing span{display:inline-block;width:7px;height:7px;border-radius:50%;
-  background:#9ca3af;margin:0 2px;animation:typeDot 1.2s infinite}
-.chat-typing span:nth-child(2){animation-delay:.2s}
-.chat-typing span:nth-child(3){animation-delay:.4s}
-@keyframes typeDot{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.chat-inp-row{display:flex;gap:7px;padding:10px;border-top:1px solid #e4ece7;background:#fafcfb;flex-shrink:0}
-.chat-inp{flex:1;padding:9px 13px;border:2px solid #dde8e0;border-radius:12px;
-  font-family:'Hind Siliguri',sans-serif;font-size:13px;background:#fff;outline:none}
-.chat-inp:focus{border-color:#6366f1}
-.chat-send{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;
-  border-radius:11px;padding:9px 13px;cursor:pointer;font-size:15px;flex-shrink:0}
-.chat-quick{display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 10px;flex-shrink:0}
-.chat-quick button{background:#f0f4f1;border:1px solid #dde8e0;border-radius:20px;
-  padding:4px 11px;font-size:11px;cursor:pointer;font-family:'Hind Siliguri',sans-serif;
-  color:var(--text);transition:all .2s}
-.chat-quick button:hover{background:var(--g2);color:#fff;border-color:var(--g2)}
+
 /* ===== ADMIN DASHBOARD ===== */
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
 .dash-card{background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:14px;
@@ -498,6 +459,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       <button class="admin-tab" onclick="switchTab('testimonials')">⭐ রিভিউ</button>
       <button class="admin-tab" onclick="switchTab('students')">👩‍🎓 শিক্ষার্থী</button>
       <button class="admin-tab" onclick="switchTab('gallery')">🖼️ গ্যালারি</button>
+      <button class="admin-tab" onclick="switchTab('notices')">📢 নোটিশ</button>
       <button class="admin-tab" onclick="switchTab('password')">🔑 পাসওয়ার্ড</button>
     </div>
     <div class="admin-body">
@@ -604,6 +566,20 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
               <input type="file" id="s-photo" accept="image/*">
             </div>
           </div>
+          <div class="fr3" style="margin-top:4px">
+            <div class="fg">
+              <label>মোট কোর্স ফি <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+              <input id="s-fee-total" type="number" placeholder="0" min="0" oninput="calcFeeDue()">
+            </div>
+            <div class="fg">
+              <label>পরিশোধিত <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+              <input id="s-fee-paid" type="number" placeholder="0" min="0" oninput="calcFeeDue()">
+            </div>
+            <div class="fg">
+              <label>বকেয়া <span style="color:#9ca3af;font-weight:400">(auto)</span></label>
+              <input id="s-fee-due" type="number" placeholder="0" min="0" readonly style="background:#f7faf8;cursor:default">
+            </div>
+          </div>
           <button class="btn-save" onclick="saveStudent()">💾 সংরক্ষণ</button>
           <button class="btn-secondary" style="width:auto;padding:11px 22px;margin-left:10px" onclick="clearStudentForm()">বাতিল</button>
         </div>
@@ -644,6 +620,30 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
         <div id="galleryAdminPreview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px"></div>
       </div>
 
+      <!-- NOTICES ADMIN -->
+      <div class="admin-section" id="tab-notices">
+        <div style="background:linear-gradient(135deg,#f0f8f4,#e8f4ee);border:2px dashed #2e9e52;border-radius:14px;padding:22px;margin-bottom:20px">
+          <h4 style="color:var(--g1);margin-bottom:16px;font-size:15px">📢 নতুন নোটিশ যোগ করুন</h4>
+          <div class="fr2">
+            <div class="fg"><label>শিরোনাম *</label>
+              <input id="n-title" type="text" placeholder="যেমন: ভর্তি বিজ্ঞপ্তি ২০২৫"></div>
+            <div class="fg"><label>তারিখ</label>
+              <input id="n-date" type="date"></div>
+          </div>
+          <div class="fg"><label>বিবরণ <span style="color:#9ca3af;font-weight:400">(ঐচ্ছিক)</span></label>
+            <textarea id="n-desc" rows="2" placeholder="সংক্ষিপ্ত বিবরণ..." style="resize:vertical"></textarea></div>
+          <div class="fg">
+            <label>PDF আপলোড <span style="color:#9ca3af;font-weight:400">(ঐচ্ছিক — সর্বোচ্চ ৫MB)</span></label>
+            <input type="file" id="n-pdf" accept=".pdf,application/pdf"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <input type="checkbox" id="n-new" checked style="width:16px;height:16px;cursor:pointer">
+            <label for="n-new" style="font-size:13px;cursor:pointer;margin:0">🟢 "নতুন" badge দেখাবে</label>
+          </div>
+          <button class="btn-save" style="margin-top:14px" onclick="saveNotice()">📢 নোটিশ প্রকাশ করুন</button>
+        </div>
+        <div id="noticeAdminList"></div>
+      </div>
+
       <!-- PASSWORD -->
       <div class="admin-section" id="tab-password">
         <div style="max-width:400px">
@@ -681,6 +681,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
     <a href="#services">সেবা</a>
     <a href="#training">প্রশিক্ষণ</a>
     <a href="#achievements">সাফল্য</a>
+    <a href="#notice">নোটিশ</a>
     <a href="#search">ফলাফল</a>
     <a href="#contact">যোগাযোগ</a>
   </nav>
@@ -782,9 +783,21 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       <div class="res-item"><label>বছর</label><span id="resYear"></span></div>
       <div class="res-item"><label>ঠিকানা</label><span id="resAddr"></span></div>
     </div>
+    <div id="resFeeBox" style="display:none"></div>
     <button onclick="downloadCertificate()" style="display:block;width:100%;padding:18px 20px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#ffffff;border:none;border-radius:14px;font-family:'Hind Siliguri',sans-serif;font-size:17px;font-weight:700;cursor:pointer;text-align:center;margin-top:4px;position:relative;z-index:999;box-shadow:0 4px 18px rgba(13,61,31,0.4)">🪪 রেজিস্ট্রেশন কার্ড ডাউনলোড করুন</button>
   </div>
   <div class="not-found-box" id="notFoundBox">❌ কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি। রেজিস্ট্রেশন নম্বর বা ফোন নম্বর যাচাই করুন।</div>
+</section>
+
+<!-- ═══════════════ NOTICE BOARD ═══════════════ -->
+<section class="sec sec-white" id="notice" style="padding:70px 6%">
+  <div class="sec-eyebrow">গুরুত্বপূর্ণ তথ্য</div>
+  <div class="sec-title">নোটিশ <span>বোর্ড</span></div>
+  <div class="sec-desc">সবুজ কম্পিউটার্সের সকল গুরুত্বপূর্ণ নোটিশ ও বিজ্ঞপ্তি এখানে পাওয়া যাবে।</div>
+  <div id="noticeBoard" style="margin-top:36px;display:grid;gap:16px;max-width:860px;margin-left:auto;margin-right:auto"></div>
+  <div id="noNotice" style="text-align:center;padding:40px;color:var(--muted);font-size:15px;display:none">
+    📋 এই মুহূর্তে কোনো নোটিশ নেই।
+  </div>
 </section>
 
 <!-- ==================== CTA ==================== -->
@@ -874,10 +887,29 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
 
     <!-- Map + Feedback Form -->
     <div style="display:flex;flex-direction:column;gap:20px">
-      <!-- Map placeholder -->
-      <div class="map-placeholder">
-        <div class="map-icon">📍</div>
-        <p>তমালতলা বাজার (কলেজ রোড)<br>বাগাতিপাড়া, নাটোর</p>
+      <!-- Google Map -->
+      <div style="border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(13,61,31,.15);border:1px solid #e4ece7">
+        <div style="background:linear-gradient(135deg,#0d3d1f,#1a6b35);padding:14px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">📍</span>
+          <div style="flex:1">
+            <div style="color:#fff;font-weight:700;font-size:14px">আমাদের অবস্থান</div>
+            <div style="color:rgba(255,255,255,.7);font-size:11px">তমালতলা বাজার, বাগাতিপাড়া, নাটোর</div>
+          </div>
+          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8" target="_blank" rel="noopener"
+             style="background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">🗺️ বড় করে দেখুন</a>
+        </div>
+        <iframe
+          src="https://maps.google.com/maps?q=24.3982,88.9408&z=16&output=embed"
+          width="100%" height="260" style="border:0;display:block" allowfullscreen="" loading="lazy">
+        </iframe>
+        <div style="padding:12px 16px;background:#f7faf8;display:flex;gap:10px">
+          <a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8" target="_blank" rel="noopener"
+             style="flex:1;text-align:center;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:10px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
+             📍 Google Maps-এ দেখুন</a>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=24.3982,88.9408" target="_blank" rel="noopener"
+             style="flex:1;text-align:center;background:#fff;color:#0d3d1f;padding:10px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;border:2px solid #0d3d1f">
+             🧭 রাস্তা দেখুন</a>
+        </div>
       </div>
 
       <!-- Feedback / Contact Form -->
@@ -1014,6 +1046,7 @@ function defaultDB() {
       {text:'অনলাইন ফর্ম ফিলআপ থেকে শুরু করে সকল কাজ এখানে দ্রুত ও সঠিকভাবে হয়। বিশ্বাসযোগ্য প্রতিষ্ঠান।',name:'হাসান আহমেদ',sub:'নিয়মিত গ্রাহক',stars:5,avatar:'হা'},
     ],
     password:'sabuj2024',
+    notices:[],
     students:[]
   };
 }
@@ -1131,7 +1164,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function renderAll(){
-  renderGeneral();renderServices();renderTraining();renderTestimonials();renderContact();
+  renderGeneral();renderServices();renderTraining();renderTestimonials();renderContact();renderNotices();
   loadPublicFeedbacks();
   document.getElementById('achTotal').textContent=DB.students.length+'+';
   document.getElementById('statStudents').textContent=DB.students.length+'+';
@@ -1226,8 +1259,8 @@ function renderGeneral(){
 }
 
   // Set WhatsApp button link
-  const _waRaw=(DB.general.phone||'01724084350').replace(/[^0-9]/g,'');
-  const _waNum=_waRaw.startsWith('0')?'88'+_waRaw:_waRaw;
+  const _waRaw='8801724084350';
+  const _waNum=_waRaw;
   const _waEl=document.getElementById('waBtn');
   if(_waEl)_waEl.href='https://wa.me/'+_waNum+'?text='+encodeURIComponent('আসসালামু আলাইকুম, আমি সবুজ কম্পিউটার্স সম্পর্কে জানতে চাই।');
 
@@ -1320,6 +1353,22 @@ function doSearch(){
   document.getElementById('resSession').textContent=s.session;
   document.getElementById('resYear').textContent=s.year;
   document.getElementById('resAddr').textContent=s.address||'—';
+  // Fee display
+  const feeBox=document.getElementById('resFeeBox');
+  if(feeBox){
+    if(s.feeTotal||s.feePaid){
+      const due=(s.feeDue!=null&&s.feeDue!==undefined)?s.feeDue:Math.max(0,(s.feeTotal||0)-(s.feePaid||0));
+      const paid=due<=0;
+      feeBox.style.display='block';
+      feeBox.innerHTML='<div style="margin-top:16px;background:'+(paid?'#dcfce7':'#fff7ed')+';border:2px solid '+(paid?'#86efac':'#fed7aa')+';border-radius:14px;padding:16px 20px">'
+        +'<div style="font-weight:700;font-size:14px;color:'+(paid?'#166534':'#9a3412')+';margin-bottom:12px">'+(paid?'✅ কোর্স ফি সম্পূর্ণ পরিশোধিত':'⚠️ কোর্স ফি তথ্য')+'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center">'
+        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">মোট ফি</div><div style="font-weight:800;font-size:18px;color:#0d3d1f">৳'+(s.feeTotal||0)+'</div></div>'
+        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">পরিশোধিত</div><div style="font-weight:800;font-size:18px;color:#166534">৳'+(s.feePaid||0)+'</div></div>'
+        +'<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:11px;color:#6b7280;margin-bottom:3px">বকেয়া</div><div style="font-weight:800;font-size:18px;color:'+(due>0?'#dc2626':'#166534')+'">৳'+(due>0?due:0)+'</div></div>'
+        +'</div></div>';
+    } else { feeBox.style.display='none'; }
+  }
   rb.classList.add('show');
   rb.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -1710,13 +1759,14 @@ function loadPublicFeedbacks(){
 // ADMIN FORMS
 // ===================================================
 function switchTab(name){
-  const names=['dashboard','general','services','training','testimonials','students','gallery','password'];
+  const names=['dashboard','general','services','training','testimonials','students','gallery','notices','password'];
   document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='students')renderAdminStudents();
   if(name==='gallery')renderGalleryAdmin();
   if(name==='dashboard')renderDashboard();
+  if(name==='notices')renderNoticeAdmin();
 }
 
 function populateAdminForms(){
@@ -1947,6 +1997,9 @@ function saveStudent(){
       address:document.getElementById('s-addr').value.trim(),
       result:document.getElementById('s-result').value,
       course:document.getElementById('s-course').value,
+      feeTotal:parseInt(document.getElementById('s-fee-total').value)||0,
+      feePaid:parseInt(document.getElementById('s-fee-paid').value)||0,
+      feeDue:parseInt(document.getElementById('s-fee-due').value)||0,
       photo:photo||(existing?existing.photo:null)
     };
     if(!obj.name||!obj.reg){showNotif('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
@@ -1975,6 +2028,9 @@ function editStudent(i){
   document.getElementById('s-addr').value=s.address||'';
   document.getElementById('s-result').value=s.result||'';
   document.getElementById('s-course').value=s.course||'BTEB';
+  document.getElementById('s-fee-total').value=s.feeTotal||'';
+  document.getElementById('s-fee-paid').value=s.feePaid||'';
+  document.getElementById('s-fee-due').value=s.feeDue||'';
   document.querySelector('.student-add-form').scrollIntoView({behavior:'smooth'});
 }
 
@@ -1991,6 +2047,7 @@ function clearStudentForm(){
   document.getElementById('s-result').value='';
   document.getElementById('s-course').value='BTEB';
   document.getElementById('s-photo').value='';
+  ['s-fee-total','s-fee-paid','s-fee-due'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
 }
 
 function renderGalleryAdmin(){
@@ -2309,83 +2366,111 @@ function renderDashboard(){
 // ═══════════════════════════════════════════════════
 // AI CHATBOT
 // ═══════════════════════════════════════════════════
-let chatOpen=false;
-let chatHistory=[];
 
-function toggleChat(){
-  chatOpen=!chatOpen;
-  document.getElementById('chatWindow').classList.toggle('open',chatOpen);
-  if(chatOpen)document.getElementById('chatInput').focus();
+
+
+
+
+
+
+// ═══════════════════════════════════════════════════════
+// FEE CALC
+// ═══════════════════════════════════════════════════════
+function calcFeeDue(){
+  const total=parseInt(document.getElementById('s-fee-total').value)||0;
+  const paid=parseInt(document.getElementById('s-fee-paid').value)||0;
+  const e=document.getElementById('s-fee-due');
+  if(e)e.value=Math.max(0,total-paid)||'';
 }
 
-function sendQuick(txt){
-  document.getElementById('chatInput').value=txt;
-  const qel=document.getElementById('chatQuick');
-  if(qel)qel.style.display='none';
-  sendChat();
+// ═══════════════════════════════════════════════════════
+// NOTICE BOARD
+// ═══════════════════════════════════════════════════════
+function renderNotices(){
+  const notices=(DB.notices||[]).slice().reverse();
+  const board=document.getElementById('noticeBoard');
+  const noEl=document.getElementById('noNotice');
+  if(!board)return;
+  if(!notices.length){board.innerHTML='';if(noEl)noEl.style.display='block';return;}
+  if(noEl)noEl.style.display='none';
+  board.innerHTML=notices.map(n=>
+    '<div style="background:#fff;border-radius:16px;padding:22px 24px;border:1px solid #e4ece7;box-shadow:0 2px 12px rgba(13,61,31,.07);display:flex;align-items:flex-start;gap:16px">'
+    +'<div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#0d3d1f,#1a6b35);display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-weight:700;font-size:16px;color:#0d3d1f">'+n.title+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px">নতুন</span>':'')+'</div>'
+    +'<div style="font-size:11px;color:#6b8c76;margin:4px 0 8px">📅 '+(n.date||'')+'</div>'
+    +(n.desc?'<div style="font-size:13px;color:#4a6040;margin-bottom:10px;line-height:1.6">'+n.desc+'</div>':'')
+    +(n.pdf?'<a href="'+n.pdf+'" download="notice.pdf" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">📄 PDF ডাউনলোড করুন</a>':'')
+    +'</div></div>'
+  ).join('');
 }
 
-function sendChat(){
-  const inp=document.getElementById('chatInput');
-  const msg=(inp.value||'').trim();
-  if(!msg)return;
-  inp.value='';
-  addChatMsg(msg,'user');
-  chatHistory.push({role:'user',content:msg});
-  showChatTyping(true);
-
-  const ctx=`তুমি সবুজ কম্পিউটার্সের (Sabuj Computer Training Center) AI সহায়তা। সংক্ষিপ্ত, বন্ধুত্বপূর্ণ বাংলায় উত্তর দাও (২-৪ বাক্য)। ইমোজি ব্যবহার করো।
-প্রতিষ্ঠানের তথ্য:
-• নাম: ${DB.general.name||'সবুজ কম্পিউটার্স'} | Institute Code: 5424
-• ঠিকানা: তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর
-• মোবাইল: ${DB.general.phone||'০১৭২৪ ০৮৪৩৫০'} | ইমেইল: ${DB.general.email||'sssabuj007@gmail.com'}
-• প্রোপ্রাইটর: ${DB.general.owner||'মোঃ সবুজ আলী'}
-• কোর্স: BTEB অনুমোদিত Computer Office Application (৬ মাস), প্রাতিষ্ঠানিক Computer Office Application
-• সেবা: বই ও স্টেশনারি, কম্পিউটার সার্ভিস ও অনলাইন সেবা, ছবি ও প্রিন্টিং, লাইব্রেরি
-• মোট শিক্ষার্থী: ${(DB.students||[]).length}+ জন
-• শপ সময়: সপ্তাহে ৭ দিন সকাল ৯:০০ - দুপুর ১:৩০ এবং বিকেল ৪:০০ - রাত ৮:৩০
-• লাইব্রেরি: শুক্রবার বন্ধ`;
-
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:250,
-      system:ctx,
-      messages:chatHistory.slice(-8)
-    })
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    showChatTyping(false);
-    const reply=(data.content&&data.content[0]&&data.content[0].text)||
-      '❗ উত্তর পেতে সমস্যা হচ্ছে। সরাসরি ফোন করুন: 📞 '+(DB.general.phone||'০১৭২৪ ০৮৪৩৫০');
-    chatHistory.push({role:'assistant',content:reply});
-    addChatMsg(reply,'bot');
-  })
-  .catch(()=>{
-    showChatTyping(false);
-    addChatMsg('❗ সংযোগ সমস্যা। সরাসরি ফোন করুন: 📞 '+(DB.general.phone||'০১৭২৪ ০৮৪৩৫০'),'bot');
-  });
+function renderNoticeAdmin(){
+  const notices=DB.notices||[];
+  const el=document.getElementById('noticeAdminList');
+  if(!el)return;
+  const nd=document.getElementById('n-date');
+  if(nd&&!nd.value)nd.value=new Date().toISOString().split('T')[0];
+  if(!notices.length){el.innerHTML='<p style="color:var(--muted);font-size:14px;text-align:center;padding:20px">কোনো নোটিশ নেই।</p>';return;}
+  el.innerHTML='<h4 style="color:var(--g1);margin-bottom:12px;font-size:14px">প্রকাশিত নোটিশ ('+notices.length+'টি)</h4>'
+  +notices.map((n,i)=>
+    '<div style="background:#f7faf8;border:1px solid #e4ece7;border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px">'
+    +'<div style="flex:1"><div style="font-weight:700;color:var(--g1);font-size:14px">'+n.title+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">নতুন</span>':'')+'</div>'
+    +'<div style="font-size:12px;color:var(--muted);margin-top:3px">📅 '+(n.date||'তারিখ নেই')+(n.pdf?' | 📄 PDF':' | 📝 টেক্সট')+'</div>'
+    +(n.desc?'<div style="font-size:12px;color:#4a6040;margin-top:4px">'+n.desc+'</div>':'')
+    +'</div><div style="display:flex;gap:6px;flex-shrink:0">'
+    +'<button onclick="toggleNoticeNew('+i+')" style="background:'+(n.isNew?'#fef9c3':'#dcfce7')+';color:'+(n.isNew?'#854d0e':'#166534')+';border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer">'+(n.isNew?'🟡 সরান':'🟢 নতুন')+'</button>'
+    +'<button onclick="deleteNotice('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer">🗑️</button>'
+    +'</div></div>'
+  ).join('');
 }
 
-function addChatMsg(text,type){
-  const msgs=document.getElementById('chatMsgs');
-  const d=document.createElement('div');
-  d.className='chat-msg '+type;
-  d.textContent=text;
-  msgs.appendChild(d);
-  msgs.scrollTop=msgs.scrollHeight;
+function saveNotice(){
+  const title=document.getElementById('n-title').value.trim();
+  if(!title){showNotif('❌ শিরোনাম দিন');return;}
+  const pf=document.getElementById('n-pdf').files[0];
+  const doSave=function(pdfData){
+    var notice={
+      title:title,
+      date:document.getElementById('n-date').value||new Date().toLocaleDateString('bn-BD'),
+      desc:document.getElementById('n-desc').value.trim(),
+      isNew:document.getElementById('n-new').checked,
+      pdf:pdfData||null,
+      ts:Date.now()
+    };
+    if(!DB.notices)DB.notices=[];
+    DB.notices.push(notice);
+    saveDB('notices',DB.notices);
+    renderNotices();
+    renderNoticeAdmin();
+    document.getElementById('n-title').value='';
+    document.getElementById('n-desc').value='';
+    document.getElementById('n-pdf').value='';
+    document.getElementById('n-new').checked=true;
+    showNotif('✅ নোটিশ প্রকাশিত হয়েছে!');
+  };
+  if(pf){
+    if(pf.size>5*1024*1024){showNotif('❌ PDF ৫MB এর বেশি হবে না');return;}
+    var r=new FileReader();
+    r.onload=function(e){doSave(e.target.result);};
+    r.readAsDataURL(pf);
+  } else {doSave(null);}
 }
 
-function showChatTyping(show){
-  const t=document.getElementById('chatTyping');
-  if(t){t.style.display=show?'flex':'none';}
-  if(show){
-    const m=document.getElementById('chatMsgs');
-    if(m)m.scrollTop=m.scrollHeight;
-  }
+function deleteNotice(i){
+  if(!confirm('এই নোটিশ মুছে ফেলবেন?'))return;
+  DB.notices.splice(i,1);
+  saveDB('notices',DB.notices);
+  renderNotices();
+  renderNoticeAdmin();
+  showNotif('🗑️ নোটিশ মুছে ফেলা হয়েছে');
+}
+
+function toggleNoticeNew(i){
+  DB.notices[i].isNew=!DB.notices[i].isNew;
+  saveDB('notices',DB.notices);
+  renderNotices();
+  renderNoticeAdmin();
 }
 
 </script>
@@ -2397,32 +2482,9 @@ function showChatTyping(show){
 </a>
 <!-- Dark Mode Toggle -->
 <button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="Dark/Light Mode">🌙</button>
-<!-- AI Chat Button -->
-<button class="chat-btn" id="chatBtn" onclick="toggleChat()" title="AI সহায়তা">🤖</button>
-<!-- AI Chat Window -->
-<div class="chat-window" id="chatWindow">
-  <div class="chat-hdr">
-    <div class="chat-hdr-av">🤖</div>
-    <div class="chat-hdr-info"><h4>Sabuj AI সহায়তা</h4><p>প্রশ্ন করুন, সাথে সাথে উত্তর পান</p></div>
-    <button class="chat-hdr-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-msgs" id="chatMsgs">
-    <div class="chat-msg bot">নমস্কার! 👋 আমি সবুজ কম্পিউটার্সের AI সহায়তা। কোর্স, ভর্তি, সময়সূচি বা যেকোনো বিষয়ে জিজ্ঞেস করুন!</div>
-  </div>
-  <div class="chat-typing" id="chatTyping"><span></span><span></span><span></span></div>
-  <div class="chat-quick" id="chatQuick">
-    <button onclick="sendQuick('কোন কোর্স আছে?')">📚 কোর্স</button>
-    <button onclick="sendQuick('ভর্তির নিয়ম কী?')">✍️ ভর্তি</button>
-    <button onclick="sendQuick('কোর্স ফি কত?')">💰 ফি</button>
-    <button onclick="sendQuick('যোগাযোগের নম্বর কী?')">📞 যোগাযোগ</button>
-    <button onclick="sendQuick('কোথায় অবস্থিত?')">📍 ঠিকানা</button>
-    <button onclick="sendQuick('সময়সূচি কী?')">🕐 সময়</button>
-  </div>
-  <div class="chat-inp-row">
-    <input class="chat-inp" id="chatInput" placeholder="প্রশ্ন লিখুন..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="chat-send" onclick="sendChat()">➤</button>
-  </div>
-</div>
+
+
+
 
 </body>
 </html>
