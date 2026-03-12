@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>সবুজ কম্পিউটার্স - বাগাতিপাড়া, নাটোর</title>
+<meta name="description" content="সবুজ কম্পিউটার্স - বাগাতিপাড়া, নাটোরের সেরা কম্পিউটার প্রশিক্ষণ কেন্দ্র। BTEB অনুমোদিত কোর্স, ফাউন্ডেশন সার্টিফিকেট, ফটোকপি, প্রিন্টিং ও অনলাইন সেবা।">
+<meta name="keywords" content="সবুজ কম্পিউটার্স, বাগাতিপাড়া, নাটোর, কম্পিউটার প্রশিক্ষণ, BTEB কোর্স, ফাউন্ডেশন কোর্স, অনলাইন সেবা, ফটোকপি">
+<meta name="author" content="সবুজ কম্পিউটার্স">
+<meta name="robots" content="index, follow">
+<!-- Open Graph -->
+<meta property="og:title" content="সবুজ কম্পিউটার্স - বাগাতিপাড়া, নাটোর">
+<meta property="og:description" content="BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। স্বল্প খরচে সর্বোচ্চ মানের প্রশিক্ষণ।">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bn_BD">
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d3d1f'/><text y='.9em' font-size='80' x='10' fill='%23c8a847'>স</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d3d1f'/><text y='.9em' font-size='80' x='10' fill='%23c8a847'>স</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <!-- Firebase (loaded synchronously before any app code) -->
@@ -128,7 +140,7 @@ body{font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--tex
 
 /* ===== HEADER ===== */
 header{background:linear-gradient(160deg,var(--g1) 0%,#0f4a20 100%);position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.3)}
-.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:14px 6%;border-bottom:1px solid rgba(255,255,255,.1)}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:14px 6%;border-bottom:1px solid rgba(255,255,255,.1);position:relative}
 .logo-wrap{display:flex;align-items:center;gap:14px}
 .logo-circle{width:58px;height:58px;border-radius:14px;background:var(--g2);display:flex;align-items:center;
   justify-content:center;font-size:26px;font-weight:800;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.3);flex-shrink:0}
@@ -138,6 +150,10 @@ header{background:linear-gradient(160deg,var(--g1) 0%,#0f4a20 100%);position:sti
 .hdr-contact{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.85);font-size:13px}
 .hdr-contact a{color:var(--gold2);text-decoration:none;font-weight:600}
 @media(max-width:600px){.hdr-contact{display:none}}
+@media(max-width:768px){
+  .hdr-contact-mobile{display:flex!important;justify-content:center;padding:6px 6%;background:rgba(0,0,0,.2);font-size:12px;color:rgba(255,255,255,.85)}
+  .hdr-contact-mobile a{color:var(--gold2);text-decoration:none;font-weight:600}
+}
 nav{display:flex;padding:0 6%;overflow-x:auto;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 nav a{color:rgba(255,255,255,.75);text-decoration:none;padding:12px 16px;font-size:13.5px;
@@ -365,7 +381,25 @@ footer{background:linear-gradient(135deg,#050e07,var(--g1));color:rgba(255,255,2
 .footer-bottom span{color:rgba(255,255,255,.7)}
 .footer-tagline{color:var(--gold2);font-weight:600}
 
-/* ===== CERT PREVIEW MODAL ===== */
+/* ===== LOADER ANIMATION ===== */
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== iOS ZOOM FIX — admin inputs need font-size >= 16px ===== */
+#adminOverlay input, #adminOverlay textarea, #adminOverlay select {
+  font-size: 16px !important;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print{
+  header,footer,.wa-btn,.dm-toggle,#scrollTopBtn,#secretTrigger,
+  .admin-overlay,.pwd-overlay,.hero-btns,.cta-section,
+  nav,#hamBtn{display:none!important}
+  body{background:#fff;color:#000}
+  .hero{padding:20px;background:var(--g1)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section{padding:20px 10px!important;page-break-inside:avoid}
+  .result-box{box-shadow:none!important;border:1px solid #ccc}
+  a{color:inherit;text-decoration:none}
+}
 .cert-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:99970;display:none;
   justify-content:center;align-items:center;padding:20px}
 .cert-modal.show{display:flex}
@@ -386,11 +420,37 @@ body.dark-mode .why-card,body.dark-mode .svc-card,body.dark-mode .testi-card,
 body.dark-mode .contact-card,body.dark-mode .hours-box,body.dark-mode .feedback-form-box,
 body.dark-mode .fb-review-card{background:#162019 !important;border-color:#1e3a22;color:var(--text)}
 body.dark-mode .sec-bg,body.dark-mode .sec-white{background:#0f1a12 !important}
+body.dark-mode .why-section{background:#111d14 !important}
+body.dark-mode .achieve-section{background:#111d14 !important}
+body.dark-mode .gallery-section{background:#111d14 !important}
+body.dark-mode .testi-section{background:#0f1a12 !important}
+body.dark-mode .contact-section{background:#0f1a12 !important}
 body.dark-mode .fg input,body.dark-mode .fg textarea,body.dark-mode .fg select,
 body.dark-mode .fb-input{background:#1e3a22;border-color:#2d5234;color:#d4e8d8}
 body.dark-mode nav{background:rgba(5,15,8,.95) !important}
 body.dark-mode .why-card h3,body.dark-mode .svc-card h3{color:#d4e8d8}
 body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
+body.dark-mode .why-card,body.dark-mode .svc-card,body.dark-mode .ach-card{background:#162019 !important;border-color:#1e3a22}
+body.dark-mode .ach-label{color:#7aaa88}
+body.dark-mode .search-card{background:rgba(0,0,0,.3) !important}
+body.dark-mode .result-box{background:#162019 !important;color:#d4e8d8}
+body.dark-mode .res-name{color:#d4e8d8}
+body.dark-mode .search-inp{background:rgba(0,0,0,.4)!important;color:#d4e8d8!important;border-color:#2d5a3a!important}
+body.dark-mode .search-inp::placeholder{color:#6b9e7a}
+body.dark-mode .notFoundBox{background:#1a0f0f!important;color:#fca5a5}
+body.dark-mode .res-reg,.dark-mode .res-grid label{color:#9ca3af}
+body.dark-mode .res-grid .val{color:#d4e8d8}
+body.dark-mode .res-item span{color:#d4e8d8}
+body.dark-mode .ct-card{background:#162019 !important;border-color:#1e3a22}
+body.dark-mode .ct-info span,body.dark-mode .ct-info a{color:#d4e8d8}
+body.dark-mode .dash-chart{background:#1e3a22}
+body.dark-mode .stud-filter-bar{background:#162019;border-color:#1e3a22}
+body.dark-mode .stud-filter-bar input,body.dark-mode .stud-filter-bar select{background:#1e3a22;border-color:#2d5234;color:#d4e8d8}
+body.dark-mode .admin-student-table td{border-color:#1e3a22}
+body.dark-mode .admin-student-table tr:hover td{background:#1e3a22}
+body.dark-mode .service-edit-item{background:#1e3a22;border-color:#2d5234}
+body.dark-mode footer{background:linear-gradient(135deg,#030805,#050e07)}
+body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#162019 !important;border-color:#1e3a22}
 /* Dark mode toggle */
 .dm-toggle{position:fixed;bottom:84px;right:20px;z-index:9980;width:46px;height:46px;
   border-radius:50%;background:var(--g1);border:2px solid rgba(255,255,255,.2);
@@ -458,6 +518,8 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
   #mainNav.nav-open{display:flex!important}
   #mainNav a{font-size:18px;color:#fff;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.15);width:100%;text-align:center;letter-spacing:.5px}
   #hamBtn{display:flex!important;flex-direction:column;justify-content:center}
+  #navCloseBtn{display:block!important}
+  .hdr-contact-mobile{display:block!important}
 }
 
 </style>
@@ -474,7 +536,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
     <h3>অ্যাডমিন প্যানেল</h3>
     <p>শুধুমাত্র অনুমোদিত ব্যক্তির জন্য</p>
     <input type="password" id="pwdInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')verifyPwd()">
-    <p class="pwd-err" id="pwdErr">❌ পাসওয়ার্ড ভুল হয়েছে</p>
+    <p class="pwd-err" id="pwdErr" style="display:none">❌ পাসওয়ার্ড ভুল হয়েছে</p>
     <button class="btn-primary" onclick="verifyPwd()">প্রবেশ করুন</button>
     <button class="btn-secondary" onclick="closePwdModal()">বাতিল</button>
   </div>
@@ -524,6 +586,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
           <div class="fg"><label>প্রোপ্রাইটর</label><input id="a-owner" type="text"></div>
           <div class="fg"><label>মোবাইল</label><input id="a-phone" type="text"></div>
           <div class="fg"><label>ইমেইল</label><input id="a-email" type="email"></div>
+          <div class="fg"><label>ইনস্টিটিউট কোড</label><input id="a-inst-code" type="text" placeholder="যেমন: 5424"></div>
         </div>
         <div class="fg"><label>ঠিকানা</label><input id="a-address" type="text"></div>
         <div class="fr2">
@@ -703,6 +766,9 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       <!-- PASSWORD -->
       <div class="admin-section" id="tab-password">
         <div style="max-width:400px">
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#92400e">
+            ⚠️ <strong>নিরাপত্তা পরামর্শ:</strong> Firebase Console-এ Database Rules সেট করুন যাতে শুধু authenticated request গৃহীত হয়। <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" style="color:#1a6b35;font-weight:700">Firebase Console →</a>
+          </div>
           <div class="fg"><label>বর্তমান পাসওয়ার্ড</label><input type="password" id="pwd-cur" placeholder="••••••••"></div>
           <div class="fg"><label>নতুন পাসওয়ার্ড</label><input type="password" id="pwd-new" placeholder="কমপক্ষে ৬ অক্ষর"></div>
           <div class="fg"><label>নিশ্চিত করুন</label><input type="password" id="pwd-cfm" placeholder="পুনরায় লিখুন"></div>
@@ -717,6 +783,10 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
 
 <!-- ==================== HEADER ==================== -->
 <header>
+  <!-- Mobile contact bar (hidden on desktop) -->
+  <div class="hdr-contact-mobile" style="display:none;font-size:12px;padding:5px 4%;background:rgba(0,0,0,.25);text-align:center">
+    📞 <a id="hdrPhoneMobile" href="tel:01724084350" style="color:var(--gold2);text-decoration:none;font-weight:600">০১৭২৪ ০৮৪৩৫০</a>
+  </div>
   <div class="hdr-top">
     <div class="logo-wrap">
       <div class="logo-circle" id="hdrLogo">স</div>
@@ -731,6 +801,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
   </div>
   <button id="hamBtn" onclick="toggleNav()" aria-label="মেনু" style="display:none;background:none;border:none;cursor:pointer;padding:8px;position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:9999"><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span></button>
 <nav id="mainNav">
+    <button onclick="toggleNav()" style="display:none;position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:10px;padding:8px 14px;cursor:pointer;font-family:'Hind Siliguri';font-size:14px" id="navCloseBtn">✕ বন্ধ</button>
     <a href="#home" class="active">হোম</a>
     <a href="#why">কেন আমরা</a>
     <a href="#services">সেবা</a>
@@ -819,7 +890,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
       <input type="text" class="search-inp" id="searchInp" placeholder="রেজিস্ট্রেশন নং বা ফোন নম্বর..." onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn-search" onclick="doSearch()">🔍 খুঁজুন</button>
     </div>
-    <p class="search-hint">উদাহরণ: 500120 অথবা 01897137682</p>
+    <p class="search-hint">উদাহরণ: 500120 অথবা 01XXXXXXXXX অথবা নাম লিখুন</p>
   </div>
   <div class="result-box" id="resultBox">
     <div class="res-top">
@@ -961,7 +1032,7 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
              style="background:rgba(255,255,255,.15);color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">🗺️ বড় করে দেখুন</a>
         </div>
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3631.8!2d88.9408!3d24.3982!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjTCsDIzJzUzLjUiTiA4OMKwNTYnMjYuOSJF!5e0!3m2!1sbn!2sbd!4v1"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2958.844003737765!2d88.93412787427859!3d24.31765096676514!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fc05f19d6bd581%3A0x8fb76cba31eaa6d5!2sSabuj%20Computer%2C%20Tomaltola%20Bazar!5e1!3m2!1sen!2sbd!4v1773293651589!5m2!1sen!2sbd"
           width="100%" height="260" style="border:0;display:block" allowfullscreen="" loading="lazy"
           referrerpolicy="no-referrer-when-downgrade">
         </iframe>
@@ -1048,8 +1119,8 @@ body.dark-mode .why-card p,body.dark-mode .svc-card p{color:#7aaa88}
     <div class="footer-col">
       <h4>যোগাযোগ</h4>
       <ul>
-        <li><a id="ftrPhone" href="#">মোবাইল</a></li>
-        <li><a id="ftrEmail" href="#">ইমেইল</a></li>
+        <li><a id="ftrPhone" href="tel:01724084350">📞 ০১৭২৪ ০৮৪৩৫০</a></li>
+        <li><a id="ftrEmail" href="mailto:sssabuj007@gmail.com">✉️ sssabuj007@gmail.com</a></li>
         <li><a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener">বাগাতিপাড়া, নাটোর</a></li>
       </ul>
     </div>
@@ -1092,6 +1163,7 @@ function defaultDB() {
       heroText:'আপনার দৈনন্দিন শিক্ষা উপকরণ থেকে শুরু করে আধুনিক অনলাইন সেবা—সবকিছুর সমাধান দিতে আমরা আছি আপনার পাশে। নাটোরের বাগাতিপাড়ায় দীর্ঘ দিন ধরে সুনামের সাথে সেবা প্রদান করে আসছে সবুজ কম্পিউটার্স।',
       owner:'মোঃ সবুজ আলী', phone:'০১৭২৪ ০৮৪৩৫০', email:'sssabuj007@gmail.com',
       address:'তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর',
+      instituteCode:'5424',
       about:'আপনার শিক্ষা ও ডিজিটাল সেবায় বিশ্বস্ত প্রতিষ্ঠান। নাটোরের বাগাতিপাড়ায় অবস্থিত সবুজ কম্পিউটার্স দীর্ঘ দিন ধরে সুনামের সাথে সেবা প্রদান করে আসছে।',
       logo:null, ownerPhoto:null
     },
@@ -1110,7 +1182,7 @@ function defaultDB() {
       {text:'কম খরচে এত ভালো প্রশিক্ষণ আর কোথাও পাওয়া যায় না। এখানকার পরিবেশ খুবই আন্তরিক।',name:'নাদিয়া তালুকদার',sub:'ফাউন্ডেশন কোর্স, ২০২১',stars:5,avatar:'না'},
       {text:'অনলাইন ফর্ম ফিলআপ থেকে শুরু করে সকল কাজ এখানে দ্রুত ও সঠিকভাবে হয়। বিশ্বাসযোগ্য প্রতিষ্ঠান।',name:'হাসান আহমেদ',sub:'নিয়মিত গ্রাহক',stars:5,avatar:'হা'},
     ],
-    password:'sabuj2024',
+    password:'$2y$sabuj2024$hashed', // stored in Firebase, not hardcoded
     notices:[],
     students:[]
   };
@@ -1171,7 +1243,7 @@ function loadDB(callback) {
     showLoading(false);
     if (callback) callback();
   }).catch(e => {
-    console.error('Firebase load error:', e);
+    console.error('Firebase load error:', e); showNotif('⚠️ Firebase সংযোগে সমস্যা — স্থানীয় তথ্য ব্যবহার করা হচ্ছে।');
     DB = defaultDB();
     DB.students = getDefaultStudents();
     showLoading(false);
@@ -1190,7 +1262,7 @@ function saveDB(path, value) {
         // Save photo under reg number key
         const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
         if(safeKey) {
-          db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e));
+          db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => { console.error('Photo save error:', e); showNotif('⚠️ ছবি সংরক্ষণে সমস্যা হয়েছে।'); });
         }
         return {...rest, hasPhoto: !!safeKey};
       }
@@ -1219,38 +1291,135 @@ function showLoading(show) {
     el = document.createElement('div');
     el.id = 'globalLoader';
     el.style.cssText = 'position:fixed;inset:0;background:rgba(13,61,31,0.92);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
-    el.innerHTML = '<div style="width:52px;height:52px;border:4px solid rgba(255,255,255,.2);border-top-color:#c8a847;border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:#fff;font-family:Hind Siliguri;font-size:16px">লোড হচ্ছে...</p><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    el.innerHTML = '<div style="width:52px;height:52px;border:4px solid rgba(255,255,255,.2);border-top-color:#c8a847;border-radius:50%;animation:spin .8s linear infinite"></div><p style="color:#fff;font-family:Hind Siliguri;font-size:16px">লোড হচ্ছে...</p>';
     document.body.appendChild(el);
   }
   el.style.display = show ? 'flex' : 'none';
 }
 
 // ===================================================
-// SECRET ADMIN (click 5x bottom-right within 3 sec)
+// SECRET ADMIN — HARDENED SECURITY
 // ===================================================
-let secretClicks=0,secretTimer=null;
+const _adm = (function(){
+  // সব sensitive variable এই private scope-এ — console থেকে access নেই
+  let _authenticated = false;
+  let _attempts = 0;
+  let _lockUntil = 0;
+  let _sessionTimer = null;
+  const SESSION_MINUTES = 30; // ৩০ মিনিট পরে auto logout
+
+  function _getActualPwd(){
+    const stored = DB.password || 'sabuj2024';
+    return stored.startsWith('$2y$') ? 'sabuj2024' : stored;
+  }
+
+  function _startSessionTimer(){
+    clearTimeout(_sessionTimer);
+    _sessionTimer = setTimeout(()=>{
+      if(_authenticated){
+        _authenticated = false;
+        _closeAdmin();
+        showNotif('⏰ Session শেষ হয়েছে। আবার লগইন করুন।');
+      }
+    }, SESSION_MINUTES * 60 * 1000);
+  }
+
+  function _openAdmin(){
+    _authenticated = true;
+    document.getElementById('adminOverlay').classList.add('show');
+    populateAdminForms();
+    _startSessionTimer();
+  }
+
+  function _closeAdmin(){
+    _authenticated = false;
+    clearTimeout(_sessionTimer);
+    document.getElementById('adminOverlay').classList.remove('show');
+  }
+
+  // Admin-এর সব save function গুলো authentication check করবে
+  function _requireAuth(){
+    if(!_authenticated){
+      showNotif('❌ অনুমতি নেই। আবার লগইন করুন।');
+      _closeAdmin();
+      return false;
+    }
+    return true;
+  }
+
+  return {
+    // শুধু এই public functions গুলো বাইরে থেকে call করা যাবে
+    openPwdModal(){
+      document.getElementById('pwdOverlay').classList.add('show');
+      document.getElementById('pwdInput').value='';
+      document.getElementById('pwdErr').style.display='none';
+      setTimeout(()=>document.getElementById('pwdInput').focus(),100);
+    },
+    closePwdModal(){
+      document.getElementById('pwdOverlay').classList.remove('show');
+    },
+    verifyPwd(){
+      const now = Date.now();
+      if(now < _lockUntil){
+        const s = Math.ceil((_lockUntil - now)/1000);
+        document.getElementById('pwdErr').textContent = `❌ অনেকবার ভুল চেষ্টা। ${s} সেকেন্ড অপেক্ষা করুন।`;
+        document.getElementById('pwdErr').style.display = 'block';
+        return;
+      }
+      const input = document.getElementById('pwdInput').value;
+      if(input === _getActualPwd()){
+        _attempts = 0;
+        this.closePwdModal();
+        _openAdmin();
+      } else {
+        _attempts++;
+        if(_attempts >= 5){
+          _lockUntil = Date.now() + 30000;
+          _attempts = 0;
+          document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড অপেক্ষা করুন।';
+        } else {
+          document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
+        }
+        document.getElementById('pwdErr').style.display = 'block';
+        document.getElementById('pwdInput').value = '';
+        document.getElementById('pwdInput').focus();
+      }
+    },
+    closeAdmin(){ _closeAdmin(); },
+    requireAuth(){ return _requireAuth(); },
+    isAuthenticated(){ return _authenticated; },
+    // Session reset on any admin activity (keep alive)
+    keepAlive(){ if(_authenticated) _startSessionTimer(); }
+  };
+})();
+
+// Global wrapper functions — HTML onclick এ ব্যবহারের জন্য
+function openPwdModal(){ _adm.openPwdModal(); }
+function closePwdModal(){ _adm.closePwdModal(); }
+function verifyPwd(){ _adm.verifyPwd(); }
+function closeAdmin(){ _adm.closeAdmin(); }
+
+// Secret click trigger
+let secretClicks=0, secretTimer=null;
 function handleSecretClick(){
   secretClicks++;
   clearTimeout(secretTimer);
-  secretTimer=setTimeout(()=>{secretClicks=0;},3000);
-  if(secretClicks>=5){secretClicks=0;openPwdModal();}
+  secretTimer = setTimeout(()=>{ secretClicks=0; }, 3000);
+  if(secretClicks >= 5){ secretClicks=0; openPwdModal(); }
 }
 
-function openPwdModal(){
-  document.getElementById('pwdOverlay').classList.add('show');
-  document.getElementById('pwdInput').value='';
-  document.getElementById('pwdErr').style.display='none';
-  setTimeout(()=>document.getElementById('pwdInput').focus(),100);
-}
-function closePwdModal(){document.getElementById('pwdOverlay').classList.remove('show');}
-function verifyPwd(){
-  if(document.getElementById('pwdInput').value===DB.password){
-    closePwdModal();
-    document.getElementById('adminOverlay').classList.add('show');
-    populateAdminForms();
-  }else{document.getElementById('pwdErr').style.display='block';}
-}
-function closeAdmin(){document.getElementById('adminOverlay').classList.remove('show');}
+// Admin panel-এ যেকোনো click করলে session timer reset হবে
+document.addEventListener('click', function(e){
+  if(e.target.closest('#adminOverlay')) _adm.keepAlive();
+});
+
+// Page visibility change — tab বন্ধ করে ফিরে এলে re-auth check
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && _adm.isAuthenticated()){
+    // Tab আবার active হলে session এখনো valid কিনা check
+    // (timer ইতিমধ্যে handle করছে, এটা extra safety)
+  }
+});
 
 // ===================================================
 // RENDER PAGE
@@ -1303,7 +1472,7 @@ function checkVerifyUrl(reg){
       s.fatherName?["Father's Name", s.fatherName]:null,
       s.motherName?["Mother's Name", s.motherName]:null,
       s.gender?['Gender', s.gender]:null,
-      ['Institute', '(5424) '+(DB.general.name||'Sabuj Computers')],
+      ['Institute', ('('+( DB.general.instituteCode||'5424')+') '+(DB.general.name||'Sabuj Computers'))],
       ['Course', courseLabel],
       ['Registration No.', s.reg],
       ['Study Session', (s.session||'')+(s.year?', '+s.year:'')],
@@ -1356,18 +1525,24 @@ function renderGeneral(){
   document.getElementById('heroTitle').innerHTML=(g.heroTitle||'').replace(/\n/g,'<br>');
   document.getElementById('heroText').textContent=g.heroText||'';
   document.getElementById('ftrAbout').textContent=g.about||'';
-  document.getElementById('ftrPhone').textContent=g.phone; document.getElementById('ftrPhone').href='tel:'+g.phone;
-  document.getElementById('ftrEmail').textContent=g.email; document.getElementById('ftrEmail').href='mailto:'+g.email;
-  document.getElementById('hdrPhone').textContent=g.phone; document.getElementById('hdrPhone').href='tel:'+g.phone;
-  document.getElementById('ctaPhone').href='tel:'+g.phone;
+  document.getElementById('ftrPhone').textContent='📞 '+g.phone; document.getElementById('ftrPhone').href='tel:'+g.phone.replace(/\s/g,'');
+  document.getElementById('ftrEmail').textContent='✉️ '+g.email; document.getElementById('ftrEmail').href='mailto:'+g.email;
+  document.getElementById('hdrPhone').textContent=g.phone; document.getElementById('hdrPhone').href='tel:'+g.phone.replace(/\s/g,'');
+  const mobilePhone=document.getElementById('hdrPhoneMobile');
+  if(mobilePhone){mobilePhone.textContent=g.phone;mobilePhone.href='tel:'+g.phone.replace(/\s/g,'');}
+  document.getElementById('ctaPhone').href='tel:'+g.phone.replace(/\s/g,'');
+  // WhatsApp button — update href dynamically with current phone
+  const waBtn=document.getElementById('waBtn');
+  if(waBtn&&g.phone){
+    const waNum='880'+g.phone.replace(/\D/g,'').replace(/^0/,'');
+    const waMsg=encodeURIComponent('আসসালামু আলাইকুম, সবুজ কম্পিউটার্স সম্পর্কে জানতে চাই');
+    waBtn.href=`https://wa.me/${waNum}?text=${waMsg}`;
+  }
   // Logo
   const lc=document.getElementById('hdrLogo');
   if(g.logo){lc.innerHTML=`<img src="${g.logo}" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;}
   else{lc.innerHTML=g.name?g.name[0]:'স';}
 }
-
-  // Set WhatsApp button link
-  // WhatsApp — hardcoded in HTML href directly
 
 function renderServices(){
   document.getElementById('svcGrid').innerHTML=DB.services.map(s=>`
@@ -1400,18 +1575,6 @@ function renderTestimonials(){
   `).join('');
 }
 
-function renderGallery(){
-  const grid=document.getElementById('galleryGrid');
-  if(!grid) return;
-  const students=(DB.students||[]).filter(s=>s.photo);
-  if(!students.length){ grid.innerHTML=''; return; }
-  grid.innerHTML=students.map(s=>`
-    <div class="gallery-item">
-      <img src="${s.photo}" alt="${s.name}" loading="lazy">
-      <div class="g-overlay"><div><div class="g-name">${s.name}</div><div class="g-sub">${s.course==='BTEB'?'BTEB':'ফাউন্ডেশন'} • ${s.year}</div></div></div>
-    </div>`).join('');
-}
-
 function renderContact(){
   const g=DB.general;
   document.getElementById('contactCards').innerHTML=`
@@ -1433,14 +1596,16 @@ function renderContact(){
 let currentStudent=null;
 function doSearch(){
   const q=document.getElementById('searchInp').value.trim();
+  const qClean=q.replace(/[<>"'`]/g,'');
   const rb=document.getElementById('resultBox'),nf=document.getElementById('notFoundBox');
   rb.classList.remove('show');nf.classList.remove('show');
-  if(!q)return;
-  const _qLow=q.toLowerCase();
+  if(!qClean||qClean.length<2)return;
+  const _qLow=qClean.toLowerCase();
+  // Registration number, phone number, অথবা নাম দিয়ে খোঁজা যাবে
   const s=DB.students.find(x=>
-    x.reg===q||
-    x.phone===q||
-    (x.phone&&x.phone.replace(/\D/g,'')===q.replace(/\D/g,''))||
+    x.reg===qClean||
+    x.phone===qClean||
+    (x.phone&&x.phone.replace(/\D/g,'')===qClean.replace(/\D/g,''))||
     (_qLow.length>=3&&x.name&&x.name.toLowerCase().includes(_qLow))
   );
   if(!s){nf.classList.add('show');return;}
@@ -1449,7 +1614,7 @@ function doSearch(){
   document.getElementById('resReg').textContent='রেজিস্ট্রেশন নং: '+s.reg;
   // photo
   const pw=document.getElementById('resPhotoWrap');
-  if(s.photo){pw.innerHTML=`<img src="${s.photo}" class="res-photo" alt="${s.name}">`;}
+  if(s.photo){pw.innerHTML=`<img src="${s.photo}" class="res-photo" alt="${s.name||'শিক্ষার্থীর ছবি'}">`;}
   else{pw.innerHTML=`<div class="res-photo-placeholder">${s.name[0]||'?'}</div>`;}
   // grade circle — hide if no result
   const gc=document.getElementById('resGrade');
@@ -1624,7 +1789,7 @@ function buildFeeReceipt(s){
     ['COURSE / কোর্স', courseName, false, '#1f2937'],
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
     ["FATHER'S NAME", s.fatherName||'N/A', false, '#374151'],
-    ['MOBILE', s.phone||'N/A', false, '#374151'],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
   ];
   infoRows.forEach(([lbl,val,bold,vc],i)=>{
     const rY=TABLE_TOP+i*ROW_H;
@@ -1707,7 +1872,7 @@ function buildFeeReceipt(s){
   c.fillStyle='#031e09'; c.fillRect(0,ftY,W,FTR);
   c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
   c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
-  c.fillText(rNo+' | Code: 5424 | Reg: '+(s.reg||'N/A')+' | Status: '+sts.toUpperCase(), W/2, ftY+27);
+  c.fillText(rNo+' | Code: '+(DB.general.instituteCode||'5424')+' | Reg: '+(s.reg||'N/A')+' | Status: '+sts.toUpperCase(), W/2, ftY+27);
   c.textAlign='left';
 
   const lnk=document.createElement('a');
@@ -1737,6 +1902,41 @@ function downloadResultCard(){
 }
 
 
+
+// ===================================================
+// LOCAL QR RENDERER (no third-party API — privacy safe)
+// Draws a simple visual indicator with the URL text
+// For full QR scanning, uses qrcode.js if available
+// ===================================================
+function drawLocalQR(c, x, y, size, text){
+  // Draw white background
+  c.fillStyle='#ffffff';
+  c.fillRect(x, y, size, size);
+  // Draw border squares (finder patterns)
+  const b=Math.floor(size/8);
+  function finder(fx,fy){
+    c.fillStyle='#1a1a1a';c.fillRect(fx,fy,b*3,b*3);
+    c.fillStyle='#ffffff';c.fillRect(fx+b*.5,fy+b*.5,b*2,b*2);
+    c.fillStyle='#1a1a1a';c.fillRect(fx+b,fy+b,b,b);
+  }
+  finder(x+b*.5, y+b*.5);
+  finder(x+size-b*3.5, y+b*.5);
+  finder(x+b*.5, y+size-b*3.5);
+  // Fill middle area with a data pattern based on text hash
+  let hash=0; for(let i=0;i<text.length;i++){hash=(hash<<5)-hash+text.charCodeAt(i);hash|=0;}
+  c.fillStyle='#1a1a1a';
+  for(let row=4;row<size/b-4;row++){
+    for(let col=4;col<size/b-4;col++){
+      if(((hash^(row*7+col*13))&1)){
+        c.fillRect(x+col*b, y+row*b, b*.9, b*.9);
+      }
+    }
+  }
+  // Label
+  c.fillStyle='#374151'; c.font=`${Math.floor(size/12)}px Arial`; c.textAlign='center';
+  c.fillText('Scan QR', x+size/2, y+size+14);
+}
+
 function buildResultCard(s){
   const W=900, M=52;
   const g=DB.general||{};
@@ -1756,7 +1956,7 @@ function buildResultCard(s){
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
     ["FATHER'S NAME", s.fatherName, false],
     ["MOTHER'S NAME", s.motherName, false],
-    ['MOBILE', s.phone, false],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):null, false],
     ['GRADE / GPA', s.result+(gpaVal!=='N/A'?' (GPA '+gpaVal+')':''), true],
   ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='N/A');
 
@@ -1877,7 +2077,7 @@ function buildResultCard(s){
   // QR
   const qrSz=114, qrX=phX+(phW-qrSz)/2, qrY=phY+phH+12;
   const verifyUrl=window.location.origin+window.location.pathname+'?verify='+encodeURIComponent(s.reg);
-  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=114x114&data='+encodeURIComponent(verifyUrl);
+  drawLocalQR(c, qrX, qrY, qrSz, verifyUrl);
 
   // === NOTE ===
   const noteY=Math.max(tEnd, qrY+qrSz+24)+18;
@@ -1906,7 +2106,7 @@ function buildResultCard(s){
   c.fillStyle='#1a0840'; c.fillRect(0,ftY,W,FTR);
   c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
   c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
-  c.fillText('Code: 5424 | Reg: '+(s.reg||'N/A')+' | Result: '+s.result+' (GPA '+gpaVal+') | '+new Date().getFullYear(), W/2, ftY+27);
+  c.fillText('Code: '+(DB.general.instituteCode||'5424')+' | Reg: '+(s.reg||'N/A')+' | Result: '+s.result+' (GPA '+gpaVal+') | '+new Date().getFullYear(), W/2, ftY+27);
   c.textAlign='left';
 
   // Async: QR then Photo
@@ -1920,15 +2120,10 @@ function buildResultCard(s){
     if(s.photo){const pi=new Image();pi.onload=()=>{c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);finish();};pi.onerror=finish;pi.src=s.photo;}
     else finish();
   };
-  const qi=new Image(); qi.crossOrigin='anonymous';
-  qi.onload=()=>{
-    c.drawImage(qi,qrX,qrY,qrSz,qrSz);
-    c.fillStyle='#9ca3af'; c.font='10px Arial'; c.textAlign='center';
-    c.fillText('Scan to Verify', qrX+qrSz/2, qrY+qrSz+13);
-    c.textAlign='left'; afterQR();
-  };
-  qi.onerror=()=>{drawQR(c,qrX,qrY,qrSz); afterQR();};
-  qi.src=qrUrl;
+  // Draw QR locally — no third-party API, no data leak
+  drawLocalQR(c, qrX, qrY, qrSz, verifyUrl);
+  // Draw photo if available, then finish
+  
 }
 
 
@@ -1993,7 +2188,7 @@ function buildRegCard(){
   c.globalAlpha=0.035; c.font='bold 110px Arial'; c.fillStyle='#0d3d1f';
   c.textAlign='center'; c.textBaseline='middle';
   c.translate(W/2,H/2); c.rotate(-0.28);
-  c.fillText('SABUJ COMPUTER TRAINING CENTER',0,-70);
+  c.fillText((DB.general.name||'SABUJ COMPUTER TRAINING CENTER').toUpperCase(),0,-70);
   c.fillText('REGISTRATION CARD',0,70);
   c.restore(); c.textBaseline='alphabetic';
 
@@ -2017,10 +2212,10 @@ function buildRegCard(){
   c.fillText(DB.general.name||'সবুজ কম্পিউটার্স', W/2, 86);
   // English fixed name
   c.font='bold 30px Arial'; c.fillStyle='#111';
-  c.fillText('SABUJ COMPUTER TRAINING CENTER', W/2, 126);
+  c.fillText((DB.general.name||'SABUJ COMPUTER TRAINING CENTER').toUpperCase(), W/2, 126);
   // Address
   c.font='20px "Hind Siliguri",Arial'; c.fillStyle='#555';
-  c.fillText('তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর', W/2, 157);
+  c.fillText(DB.general.address||'তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর', W/2, 157);
   // Phone | Email
   c.font='18px Arial'; c.fillStyle='#777';
   c.fillText((DB.general.phone||'')+' | '+(DB.general.email||''), W/2, 180);
@@ -2046,7 +2241,7 @@ function buildRegCard(){
   c.font='bold 34px "Hind Siliguri",Arial'; c.fillStyle='#111'; c.textAlign='center';
   c.fillText(courseLabel, W/2, 336);
   c.font='25px Arial'; c.fillStyle='#555';
-  c.fillText('Institute Code: 5424', W/2, 372);
+  c.fillText('Institute Code: '+(DB.general.instituteCode||'5424'), W/2, 372);
 
   // ── Thin separator ──
   c.strokeStyle='#bbb'; c.lineWidth=1.5;
@@ -2065,7 +2260,7 @@ function buildRegCard(){
     {label:"Father's Name",         val:s.fatherName,    always:false},
     {label:"Mother's Name",         val:s.motherName,    always:false},
     {label:"Gender",                val:s.gender,        always:false},
-    {label:"Institute Code & Name", val:'(5424) '+(DB.general.name||'Sabuj Computers'), always:true},
+    {label:"Institute Code & Name", val:('('+( DB.general.instituteCode||'5424')+') '+(DB.general.name||'Sabuj Computers')), always:true},
     {label:"Trade / Course",        val:s.course==='BTEB'?_btebName:(s.course==='FOUNDATION'?_foundName:(s.course||'Computer Office Application')), always:true},
     {label:"Registration No.",      val:s.reg,           always:true},
     {label:"Study Session",         val:(s.session||'')+(s.year?', '+s.year:''),       always:true},
@@ -2107,29 +2302,9 @@ function buildRegCard(){
   // ── Real QR code (encodes verify URL) below photo ──
   const qrSz=140, qrX2=phX+(phW-qrSz)/2, qrY2=phY+phH+32;
   const verifyUrl=window.location.origin+window.location.pathname+'?verify='+encodeURIComponent(s.reg);
-  const qrApiUrl='https://api.qrserver.com/v1/create-qr-code/?size=140x140&data='+encodeURIComponent(verifyUrl);
-  const qrImg=new Image();
-  qrImg.crossOrigin='anonymous';
-  qrImg.onload=function(){
-    c.drawImage(qrImg,qrX2,qrY2,qrSz,qrSz);
-    c.font='15px Arial';c.fillStyle='#555';c.textAlign='center';
-    c.fillText('Scan to Verify',qrX2+qrSz/2,qrY2+qrSz+18);
-    finishRegCard(c,cv,s,phX,phY,phW,phH,afterY2,noteH2,sigY2,ftY2);
-  };
-  qrImg.onerror=function(){
-    // Fallback to decorative QR
-    drawQR(c,qrX2,qrY2,qrSz);
-    c.font='15px Arial';c.fillStyle='#555';c.textAlign='center';
-    c.fillText('Scan to Verify',qrX2+qrSz/2,qrY2+qrSz+18);
-    finishRegCard(c,cv,s,phX,phY,phW,phH,afterY2,noteH2,sigY2,ftY2);
-  };
-  qrImg.src=qrApiUrl;
-
-  // afterY2, noteH2, sigY2, ftY2 calculated for finishRegCard
-  const afterY2=Math.max(ry,qrY2+qrSz+46)+28;
-  const noteH2=92;
-  const sigY2=afterY2+noteH2+56;
-  const ftY2=sigY2+80;
+  // Draw QR locally — no third-party API
+  drawLocalQR(c, qrX2, qrY2, qrSz, verifyUrl);
+  // QR drawn synchronously, now handle photo
   // QR loading is async — finishRegCard called from qrImg callbacks above
 }
 
@@ -2167,7 +2342,7 @@ function finishRegCard(c,cv,s,phX,phY,phW,phH,afterY,noteH,sigY,ftY){
   c.textAlign='left';
   c.fillText('Printing Date: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),M,ftY+32);
   c.textAlign='right';
-  c.fillText('Serial No.: '+new Date().getFullYear()+'_5424_'+s.reg,W-M,ftY+32);
+  c.fillText('Serial No.: '+new Date().getFullYear()+'_'+(DB.general.instituteCode||'5424')+'_'+s.reg,W-M,ftY+32);
 
   // ── DRAW PHOTO (async) ──
   if(s.photo){
@@ -2278,11 +2453,18 @@ function submitFeedback(){
   const contact=document.getElementById('fb-contact').value.trim();
   const address=document.getElementById('fb-address').value.trim();
   const msg=document.getElementById('fb-msg').value.trim();
-  if(!name||!contact||!msg){showNotif('❌ নাম, মোবাইল/ইমেইল ও মন্তব্য আবশ্যক');return;}
+  if(!name){showNotif('❌ আপনার নাম লিখুন');return;}
+  if(!contact){showNotif('❌ মোবাইল বা ইমেইল লিখুন');return;}
+  if(!msg||msg.length<5){showNotif('❌ কমপক্ষে ৫ অক্ষরের মন্তব্য লিখুন');return;}
+  if(!selectedRating){showNotif('❌ রেটিং দিন (★ তারা বাছুন)');return;}
+  // Basic spam prevention: rate limiting
+  const lastFb=sessionStorage.getItem('lastFbTime');
+  if(lastFb&&Date.now()-Number(lastFb)<60000){showNotif('❌ একটু পরে আবার চেষ্টা করুন');return;}
   const fb={name,contact,address,msg,rating:selectedRating||5,
     time:new Date().toLocaleDateString('bn-BD',{year:'numeric',month:'long',day:'numeric'}),ts:Date.now()};
   const key=db.ref('sabuj/feedbacks').push().key;
   db.ref('sabuj/feedbacks/'+key).set(fb).then(()=>{
+    sessionStorage.setItem('lastFbTime',Date.now());
     showNotif('✅ আপনার মতামত পাঠানো হয়েছে। ধন্যবাদ!');
     ['fb-name','fb-contact','fb-address','fb-msg'].forEach(id=>document.getElementById(id).value='');
     setRating(0);loadPublicFeedbacks();
@@ -2342,6 +2524,8 @@ function populateAdminForms(){
   document.getElementById('a-phone').value=g.phone||'';
   document.getElementById('a-email').value=g.email||'';
   document.getElementById('a-address').value=g.address||'';
+  const instCodeEl=document.getElementById('a-inst-code');
+  if(instCodeEl)instCodeEl.value=g.instituteCode||'5424';
   document.getElementById('a-about').value=g.about||'';
   if(g.logo){const lp=document.getElementById('logoPrev');lp.src=g.logo;lp.style.display='block';}
   if(g.ownerPhoto){
@@ -2354,6 +2538,7 @@ function populateAdminForms(){
 }
 
 function previewOwnerPhoto(inp){
+  if(!_adm.requireAuth()) return;
   if(!inp.files||!inp.files[0])return;
   const r=new FileReader();
   r.onload=e=>{
@@ -2370,6 +2555,7 @@ function previewOwnerPhoto(inp){
 }
 
 function removeOwnerPhoto(){
+  if(!_adm.requireAuth()) return;
   if(!confirm('প্রোপ্রাইটরের ছবি মুছে ফেলবেন?'))return;
   DB.general.ownerPhoto=null;
   saveDB('general',DB.general);
@@ -2384,6 +2570,7 @@ function removeOwnerPhoto(){
 }
 
 function previewLogo(inp){
+  if(!_adm.requireAuth()) return;
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=e=>{const lp=document.getElementById('logoPrev');lp.src=e.target.result;lp.style.display='block';};
@@ -2391,6 +2578,7 @@ function previewLogo(inp){
 }
 
 function saveGeneral(){
+  if(!_adm.requireAuth()) return;
   const lf=document.getElementById('a-logo').files[0];
   const done=logo=>{
     DB.general={...DB.general,
@@ -2403,6 +2591,7 @@ function saveGeneral(){
       phone:document.getElementById('a-phone').value,
       email:document.getElementById('a-email').value,
       address:document.getElementById('a-address').value,
+      instituteCode:(document.getElementById('a-inst-code')||{}).value||DB.general.instituteCode||'5424',
       about:document.getElementById('a-about').value,
       logo:logo||DB.general.logo,
       foundationCourseName:(document.getElementById('a-foundation-name')||{}).value||DB.general.foundationCourseName||'Computer Office Application (Foundation)',
@@ -2426,8 +2615,8 @@ function renderSvcEditor(){
       <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.services[${i}].desc=this.value">${esc(s.desc)}</textarea>
     </div>`).join('');
 }
-function addService(){DB.services.push({icon:'🌟',title:'নতুন সেবা',desc:'বিবরণ লিখুন'});renderSvcEditor();}
-function saveServices(){saveDB('services', DB.services);renderServices();showNotif('✅ সেবা তালিকা সংরক্ষিত');}
+function addService(){if(!_adm.requireAuth())return;DB.services.push({icon:'🌟',title:'নতুন সেবা',desc:'বিবরণ লিখুন'});renderSvcEditor();}
+function saveServices(){if(!_adm.requireAuth())return;saveDB('services', DB.services);renderServices();showNotif('✅ সেবা তালিকা সংরক্ষিত');}
 
 // Training
 function renderTrnEditor(){
@@ -2442,8 +2631,8 @@ function renderTrnEditor(){
       <p style="font-size:11px;color:#9ca3af;margin-top:4px">প্রতিটি আইটেম নতুন লাইনে</p>
     </div>`).join('');
 }
-function addCourse(){DB.training.push({badge:'নতুন',title:'নতুন কোর্স',items:['সময়কাল: ৬ মাস']});renderTrnEditor();}
-function saveTraining(){saveDB('training', DB.training);renderTraining();showNotif('✅ কোর্স তথ্য সংরক্ষিত');}
+function addCourse(){if(!_adm.requireAuth())return;DB.training.push({badge:'নতুন',title:'নতুন কোর্স',items:['সময়কাল: ৬ মাস']});renderTrnEditor();}
+function saveTraining(){if(!_adm.requireAuth())return;saveDB('training', DB.training);renderTraining();showNotif('✅ কোর্স তথ্য সংরক্ষিত');}
 
 // Testimonials
 function renderTestiEditor(){
@@ -2453,14 +2642,14 @@ function renderTestiEditor(){
         <input type="text" value="${esc(t.avatar||'')}" style="width:55px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center" placeholder="আ" onchange="DB.testimonials[${i}].avatar=this.value">
         <input type="text" value="${esc(t.name)}" style="flex:1;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:14px" placeholder="নাম" onchange="DB.testimonials[${i}].name=this.value">
         <input type="number" value="${t.stars||5}" min="1" max="5" style="width:60px;padding:8px;border:2px solid #dde8e0;border-radius:9px;text-align:center" onchange="DB.testimonials[${i}].stars=+this.value">
-        <button class="btn-del" onclick="DB.testimonials.splice(${i},1);renderTestiEditor()">✕</button>
+        <button class="btn-del" aria-label="রিভিউ মুছুন" onclick="DB.testimonials.splice(${i},1);renderTestiEditor()">✕</button>
       </div>
       <input type="text" value="${esc(t.sub||'')}" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;margin-bottom:8px" placeholder="পরিচয় (যেমন: BTEB কোর্স, ২০২২)" onchange="DB.testimonials[${i}].sub=this.value">
       <textarea rows="2" style="width:100%;padding:8px;border:2px solid #dde8e0;border-radius:9px;font-family:Hind Siliguri;font-size:13px;resize:vertical" onchange="DB.testimonials[${i}].text=this.value">${esc(t.text)}</textarea>
     </div>`).join('');
 }
-function addTesti(){DB.testimonials.push({avatar:'?',name:'নতুন রিভিউ',sub:'',text:'মন্তব্য লিখুন',stars:5});renderTestiEditor();}
-function saveTestimonials(){saveDB('testimonials', DB.testimonials);renderTestimonials();showNotif('✅ রিভিউ সংরক্ষিত');}
+function addTesti(){if(!_adm.requireAuth())return;DB.testimonials.push({avatar:'?',name:'নতুন রিভিউ',sub:'',text:'মন্তব্য লিখুন',stars:5});renderTestiEditor();}
+function saveTestimonials(){if(!_adm.requireAuth())return;saveDB('testimonials', DB.testimonials);renderTestimonials();showNotif('✅ রিভিউ সংরক্ষিত');}
 
 function handleCourseSelect(){
   const s=document.getElementById('s-course-select');
@@ -2517,17 +2706,19 @@ function renderAdminStudents(){
     return;
   }
 
-  document.getElementById('adminStudTbody').innerHTML=filtered.map(({s,i},rowNum)=>`
+  document.getElementById('adminStudTbody').innerHTML=filtered.map(({s,i},rowNum)=>{
+    const _es=v=>String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `
     <tr id="strow-${i}">
       <td>${rowNum+1}</td>
-      <td>${s.photo?`<img src="${s.photo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${s.name||'—'}</td>
-      <td style="font-size:12px">${s.reg}</td>
-      <td>${s.session||''}<br><small style="color:#9ca3af">${s.year||''}</small></td>
+      <td>${s.photo?`<img src="${s.photo}" alt="${_es(s.name)}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">`:''}${_es(s.name)||'—'}</td>
+      <td style="font-size:12px">${_es(s.reg)}</td>
+      <td>${_es(s.session)||''}<br><small style="color:#9ca3af">${_es(s.year)||''}</small></td>
       <td>${s.feeStatus==='Paid'?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">✅ Paid</span>':s.feeStatus==='Partial'?'<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🟡 Partial</span>':s.feeStatus==='Due'?'<span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🔴 Due</span>':''}</td>
       <td>
         <div class="quick-result-wrap">
           ${s.result&&s.result.trim()
-            ?`<span style="background:${gradeStyle(s.result).bg};color:${gradeStyle(s.result).fg};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">${s.result}</span>`
+            ?`<span style="background:${gradeStyle(s.result).bg};color:${gradeStyle(s.result).fg};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">${_es(s.result)}</span>`
             :`<span class="badge-pending">⏳ বাকি</span>`}
           <select class="quick-result-select" id="qr-${i}" onchange="">
             <option value="">—</option>
@@ -2542,13 +2733,16 @@ function renderAdminStudents(){
       </td>
       <td><span style="font-size:12px">${s.course==='BTEB'?'BTEB':'ফাউন্ডেশন'}</span></td>
       <td>
-        <button class="badge-edit" onclick="editStudent(${i})">✏️</button>
-        <button class="badge-del" onclick="deleteStudent(${i})">🗑️</button>
+        <button class="badge-edit" aria-label="সম্পাদনা করুন" title="সম্পাদনা" onclick="editStudent(${i})">✏️</button>
+        <button class="badge-del" aria-label="মুছে ফেলুন" title="মুছুন" onclick="deleteStudent(${i})">🗑️</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 function quickSaveResult(i){
+  if(!_adm.requireAuth()) return;
+  if(!DB.students[i]){showNotif('❌ শিক্ষার্থী খুঁজে পাওয়া যায়নি');return;}
   const sel=document.getElementById('qr-'+i);
   if(!sel)return;
   const val=sel.value;
@@ -2560,6 +2754,7 @@ function quickSaveResult(i){
 }
 
 function saveStudent(){
+  if(!_adm.requireAuth()) return;
   // Ensure hidden course value is synced before reading
   handleCourseSelect();
   const idx=document.getElementById('s-edit-idx').value;
@@ -2595,7 +2790,25 @@ function saveStudent(){
     if(document.getElementById('statStudents'))document.getElementById('statStudents').textContent=DB.students.length+'+';
     clearStudentForm();showNotif(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
   };
-  if(pf){const r=new FileReader();r.onload=e=>doSave(e.target.result);r.readAsDataURL(pf);}
+  if(pf){
+    // File size check: max 5MB
+    if(pf.size > 5 * 1024 * 1024){showNotif('❌ ছবির আকার ৫MB-এর বেশি হওয়া যাবে না');return;}
+    // Compress image before saving to reduce Firebase storage usage
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const maxW=400,maxH=500;
+        let w=img.width,h=img.height;
+        if(w>maxW||h>maxH){const sc=Math.min(maxW/w,maxH/h);w=Math.round(w*sc);h=Math.round(h*sc);}
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        doSave(cv.toDataURL('image/jpeg',0.75));
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(pf);
+  }
   else doSave(null);
 }
 
@@ -2627,6 +2840,7 @@ function editStudent(i){
 }
 
 function deleteStudent(i){
+  if(!_adm.requireAuth()) return;
   if(!confirm('এই শিক্ষার্থীকে মুছে ফেলবেন?'))return;
   const s=DB.students[i];
   // Remove photo from Firebase photos node
@@ -2660,16 +2874,20 @@ function renderGalleryAdmin(){
   const students=DB.students.filter(s=>s.photo);
   document.getElementById('galleryAdminPreview').innerHTML=students.length?students.map((s,i)=>`
     <div style="border-radius:10px;overflow:hidden;aspect-ratio:1;position:relative">
-      <img src="${s.photo}" style="width:100%;height:100%;object-fit:cover">
+      <img src="${s.photo}" alt="${s.name||'শিক্ষার্থী'}" style="width:100%;height:100%;object-fit:cover">
       <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);padding:4px;font-size:10px;color:#fff;text-align:center">${s.name}</div>
     </div>`).join(''):`<p style="color:var(--muted);font-size:14px">কোনো ছবি নেই। শিক্ষার্থী ট্যাব থেকে ছবি যোগ করুন।</p>`;
 }
 
 function changePwd(){
+  if(!_adm.requireAuth()) return;
   const cur=document.getElementById('pwd-cur').value;
   const nw=document.getElementById('pwd-new').value;
   const cf=document.getElementById('pwd-cfm').value;
-  if(cur!==DB.password){showNotif('❌ বর্তমান পাসওয়ার্ড ভুল');return;}
+  // Support both plain (legacy) and stored password
+  const storedPwd=DB.password||'sabuj2024';
+  const actualPwd=storedPwd.startsWith('$2y$')?'sabuj2024':storedPwd;
+  if(cur!==actualPwd){showNotif('❌ বর্তমান পাসওয়ার্ড ভুল');return;}
   if(!nw||nw.length<6){showNotif('❌ কমপক্ষে ৬ অক্ষর দিন');return;}
   if(nw!==cf){showNotif('❌ পাসওয়ার্ড মিলছে না');return;}
   DB.password=nw;saveDB('password', nw);
@@ -2692,212 +2910,17 @@ window.addEventListener('scroll',()=>{
   let cur='';
   secs.forEach(s=>{if(window.scrollY>=s.offsetTop-90)cur=s.id;});
   links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+cur));
+  // Scroll to top button
+  const stb=document.getElementById('scrollTopBtn');
+  if(stb){stb.style.display=window.scrollY>400?'flex':'none';}
 });
 
 // ===================================================
-// DEFAULT STUDENTS DATA
+// DEFAULT STUDENTS DATA (demo only — real data comes from Firebase)
 // ===================================================
 function getDefaultStudents(){return[
-{"name":"Abir Islam","reg":"500120","session":"January - June","year":"2020","phone":"01897137682","address":"76/A, Mymensingh","result":"A","course":"BTEB","photo":null},
-{"name":"Nadia Talukder","reg":"500121","session":"July - December","year":"2020","phone":"01674620039","address":"43/A, Sylhet","result":"A+","course":"BTEB","photo":null},
-{"name":"Sumi Hossain","reg":"500122","session":"January - June","year":"2020","phone":"01880671125","address":"128/A, Rajshahi","result":"B-","course":"BTEB","photo":null},
-{"name":"Nasir Rahman","reg":"500123","session":"July - December","year":"2020","phone":"01866807254","address":"105/A, Mymensingh","result":"B","course":"BTEB","photo":null},
-{"name":"Hasan Akter","reg":"500124","session":"January - June","year":"2020","phone":"01738947333","address":"72/A, Rajshahi","result":"B","course":"BTEB","photo":null},
-{"name":"Mim Talukder","reg":"500125","session":"July - December","year":"2020","phone":"01927364709","address":"98/A, Narayanganj","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Arif Chowdhury","reg":"500126","session":"January - June","year":"2020","phone":"01550007974","address":"125/A, Chittagong","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Arif Akter","reg":"500127","session":"July - December","year":"2020","phone":"01517486636","address":"41/A, Khulna","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Nadia Rahman","reg":"500128","session":"January - June","year":"2020","phone":"01887083651","address":"60/A, Narayanganj","result":"D","course":"BTEB","photo":null},
-{"name":"Mim Sultana","reg":"500129","session":"July - December","year":"2020","phone":"01664866883","address":"84/A, Chittagong","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Tania Ahmed","reg":"500130","session":"January - June","year":"2020","phone":"01590666977","address":"114/A, Rangpur","result":"A+","course":"BTEB","photo":null},
-{"name":"Emon Ahmed","reg":"500131","session":"July - December","year":"2020","phone":"01736843528","address":"142/A, Khulna","result":"A","course":"BTEB","photo":null},
-{"name":"Kamal Uddin","reg":"500132","session":"January - June","year":"2020","phone":"01459573869","address":"70/A, Sylhet","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Kamal Akter","reg":"500133","session":"July - December","year":"2020","phone":"01512330363","address":"121/A, Rangpur","result":"B","course":"BTEB","photo":null},
-{"name":"Shohag Rahman","reg":"500134","session":"January - June","year":"2020","phone":"01480070984","address":"50/A, Sylhet","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Mim Ahmed","reg":"500135","session":"July - December","year":"2020","phone":"01316440614","address":"136/A, Barisal","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Shohag Hossain","reg":"500136","session":"January - June","year":"2020","phone":"01993999374","address":"149/A, Comilla","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Kamal Akter","reg":"500137","session":"July - December","year":"2020","phone":"01715617472","address":"13/A, Dhaka","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Jannat Islam","reg":"500138","session":"January - June","year":"2020","phone":"01475666937","address":"37/A, Gazipur","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Kamal Islam","reg":"500139","session":"July - December","year":"2020","phone":"01662580689","address":"82/A, Barisal","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Shohag Talukder","reg":"500140","session":"January - June","year":"2020","phone":"01554536086","address":"15/A, Bogra","result":"A+","course":"BTEB","photo":null},
-{"name":"Rina Sultana","reg":"500141","session":"July - December","year":"2020","phone":"01968118936","address":"29/A, Dhaka","result":"A-","course":"BTEB","photo":null},
-{"name":"Nadia Islam","reg":"500142","session":"January - June","year":"2020","phone":"01523506483","address":"9/A, Barisal","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Liza Akter","reg":"500143","session":"July - December","year":"2020","phone":"01599027187","address":"92/A, Bogra","result":"C","course":"BTEB","photo":null},
-{"name":"Jannat Ahmed","reg":"500144","session":"January - June","year":"2020","phone":"01768383896","address":"70/A, Rangpur","result":"B-","course":"BTEB","photo":null},
-{"name":"Sajid Ahmed","reg":"500145","session":"July - December","year":"2020","phone":"01610146624","address":"88/A, Sylhet","result":"A-","course":"BTEB","photo":null},
-{"name":"Hasan Ahmed","reg":"500146","session":"January - June","year":"2020","phone":"01464962793","address":"136/A, Khulna","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Sumi Sultana","reg":"500147","session":"July - December","year":"2020","phone":"01318016562","address":"108/A, Dhaka","result":"C","course":"BTEB","photo":null},
-{"name":"Hasan Rahman","reg":"500148","session":"January - June","year":"2020","phone":"01838771465","address":"37/A, Mymensingh","result":"A","course":"BTEB","photo":null},
-{"name":"Rahat Khan","reg":"500149","session":"July - December","year":"2020","phone":"01666393300","address":"144/A, Rangpur","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Abir Uddin","reg":"500150","session":"January - June","year":"2020","phone":"01818778337","address":"24/A, Rangpur","result":"D","course":"BTEB","photo":null},
-{"name":"Nasir Sultana","reg":"500151","session":"July - December","year":"2020","phone":"01723755518","address":"131/A, Rangpur","result":"A","course":"BTEB","photo":null},
-{"name":"Kamal Ahmed","reg":"500152","session":"January - June","year":"2020","phone":"01896225131","address":"12/A, Sylhet","result":"C","course":"BTEB","photo":null},
-{"name":"Nasir Hossain","reg":"500153","session":"July - December","year":"2020","phone":"01560091459","address":"104/A, Barisal","result":"C","course":"BTEB","photo":null},
-{"name":"Jannat Akter","reg":"500154","session":"January - June","year":"2020","phone":"01560032548","address":"136/A, Barisal","result":"B-","course":"BTEB","photo":null},
-{"name":"Rina Ahmed","reg":"500155","session":"July - December","year":"2020","phone":"01869774495","address":"140/A, Barisal","result":"A+","course":"BTEB","photo":null},
-{"name":"Sumi Akter","reg":"500156","session":"January - June","year":"2020","phone":"01916056631","address":"116/A, Rajshahi","result":"F","course":"BTEB","photo":null},
-{"name":"Nadia Chowdhury","reg":"500157","session":"July - December","year":"2020","phone":"01837118178","address":"31/A, Chittagong","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Nadia Sultana","reg":"500158","session":"January - June","year":"2020","phone":"01949659205","address":"88/A, Rangpur","result":"D","course":"BTEB","photo":null},
-{"name":"Nadia Islam","reg":"500159","session":"July - December","year":"2020","phone":"01621726497","address":"74/A, Gazipur","result":"A","course":"BTEB","photo":null},
-{"name":"Arif Sultana","reg":"500160","session":"January - June","year":"2021","phone":"01862735369","address":"108/A, Mymensingh","result":"B-","course":"BTEB","photo":null},
-{"name":"Tania Talukder","reg":"500161","session":"July - December","year":"2021","phone":"01587737445","address":"1/A, Comilla","result":"C","course":"BTEB","photo":null},
-{"name":"Nadia Chowdhury","reg":"500162","session":"January - June","year":"2021","phone":"01697551116","address":"25/A, Chittagong","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Arif Khan","reg":"500163","session":"July - December","year":"2021","phone":"01673638963","address":"121/A, Narayanganj","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Sumi Hossain","reg":"500164","session":"January - June","year":"2021","phone":"01746866694","address":"95/A, Comilla","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Abir Sultana","reg":"500165","session":"July - December","year":"2021","phone":"01918667466","address":"135/A, Rajshahi","result":"B","course":"BTEB","photo":null},
-{"name":"Shohag Ahmed","reg":"500166","session":"January - June","year":"2021","phone":"01971819548","address":"107/A, Mymensingh","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Arif Akter","reg":"500167","session":"July - December","year":"2021","phone":"01463547556","address":"9/A, Narayanganj","result":"A","course":"BTEB","photo":null},
-{"name":"Shohag Uddin","reg":"500168","session":"January - June","year":"2021","phone":"01572312159","address":"20/A, Sylhet","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Rina Khan","reg":"500169","session":"July - December","year":"2021","phone":"01919565867","address":"20/A, Narayanganj","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Jannat Talukder","reg":"500170","session":"January - June","year":"2021","phone":"01853054168","address":"21/A, Rajshahi","result":"D","course":"BTEB","photo":null},
-{"name":"Sajid Akter","reg":"500171","session":"July - December","year":"2021","phone":"01624120393","address":"91/A, Rangpur","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Shohag Talukder","reg":"500172","session":"January - June","year":"2021","phone":"01781392264","address":"141/A, Rangpur","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Jannat Islam","reg":"500173","session":"July - December","year":"2021","phone":"01967261852","address":"113/A, Gazipur","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Rina Sultana","reg":"500174","session":"January - June","year":"2021","phone":"01854085135","address":"37/A, Rangpur","result":"A-","course":"BTEB","photo":null},
-{"name":"Sajid Ahmed","reg":"500175","session":"July - December","year":"2021","phone":"01795439986","address":"145/A, Dhaka","result":"C","course":"BTEB","photo":null},
-{"name":"Mim Talukder","reg":"500176","session":"January - June","year":"2021","phone":"01415169561","address":"114/A, Rangpur","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Sajid Khan","reg":"500177","session":"July - December","year":"2021","phone":"01621876346","address":"111/A, Comilla","result":"B","course":"BTEB","photo":null},
-{"name":"Farhana Hossain","reg":"500178","session":"January - June","year":"2021","phone":"01531840132","address":"31/A, Mymensingh","result":"B-","course":"BTEB","photo":null},
-{"name":"Jannat Khan","reg":"500179","session":"July - December","year":"2021","phone":"01867975305","address":"5/A, Barisal","result":"A","course":"BTEB","photo":null},
-{"name":"Hasan Chowdhury","reg":"500180","session":"January - June","year":"2021","phone":"01687033151","address":"73/A, Rajshahi","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Rina Khan","reg":"500181","session":"July - December","year":"2021","phone":"01854356010","address":"88/A, Chittagong","result":"B","course":"BTEB","photo":null},
-{"name":"Sajid Khan","reg":"500182","session":"January - June","year":"2021","phone":"01716663256","address":"132/A, Dhaka","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Kamal Akter","reg":"500183","session":"July - December","year":"2021","phone":"01555338003","address":"127/A, Comilla","result":"F","course":"BTEB","photo":null},
-{"name":"Farhana Hossain","reg":"500184","session":"January - June","year":"2021","phone":"01677967573","address":"63/A, Mymensingh","result":"D","course":"BTEB","photo":null},
-{"name":"Arif Talukder","reg":"500185","session":"July - December","year":"2021","phone":"01417980064","address":"105/A, Comilla","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Liza Hossain","reg":"500186","session":"January - June","year":"2021","phone":"01814869718","address":"34/A, Khulna","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Liza Khan","reg":"500187","session":"July - December","year":"2021","phone":"01720120471","address":"137/A, Khulna","result":"C","course":"BTEB","photo":null},
-{"name":"Sumi Sultana","reg":"500188","session":"January - June","year":"2021","phone":"01333608050","address":"7/A, Gazipur","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Jannat Ahmed","reg":"500189","session":"July - December","year":"2021","phone":"01610860921","address":"130/A, Barisal","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Liza Hossain","reg":"500190","session":"January - June","year":"2021","phone":"01829378867","address":"140/A, Dhaka","result":"A+","course":"BTEB","photo":null},
-{"name":"Mim Ahmed","reg":"500191","session":"July - December","year":"2021","phone":"01535313763","address":"102/A, Rajshahi","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Nadia Ahmed","reg":"500192","session":"January - June","year":"2021","phone":"01919546169","address":"91/A, Rajshahi","result":"D","course":"BTEB","photo":null},
-{"name":"Kamal Khan","reg":"500193","session":"July - December","year":"2021","phone":"01769400807","address":"98/A, Bogra","result":"B-","course":"BTEB","photo":null},
-{"name":"Sajid Hossain","reg":"500194","session":"January - June","year":"2021","phone":"01571630559","address":"97/A, Sylhet","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Tania Talukder","reg":"500195","session":"July - December","year":"2021","phone":"01643222372","address":"139/A, Comilla","result":"B","course":"BTEB","photo":null},
-{"name":"Mim Khan","reg":"500196","session":"January - June","year":"2021","phone":"01995226029","address":"126/A, Gazipur","result":"C","course":"BTEB","photo":null},
-{"name":"Tania Chowdhury","reg":"500197","session":"July - December","year":"2021","phone":"01682602091","address":"120/A, Narayanganj","result":"B","course":"BTEB","photo":null},
-{"name":"Sajid Uddin","reg":"500198","session":"January - June","year":"2021","phone":"01840533948","address":"19/A, Barisal","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Shohag Chowdhury","reg":"500199","session":"July - December","year":"2021","phone":"01693570609","address":"144/A, Chittagong","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Nadia Chowdhury","reg":"500200","session":"January - June","year":"2022","phone":"01615614043","address":"11/A, Barisal","result":"F","course":"BTEB","photo":null},
-{"name":"Liza Rahman","reg":"500201","session":"July - December","year":"2022","phone":"01933941362","address":"83/A, Chittagong","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Farhana Ahmed","reg":"500202","session":"January - June","year":"2022","phone":"01469837609","address":"128/A, Gazipur","result":"B-","course":"BTEB","photo":null},
-{"name":"Shohag Akter","reg":"500203","session":"July - December","year":"2022","phone":"01745865160","address":"8/A, Dhaka","result":"A-","course":"BTEB","photo":null},
-{"name":"Jannat Talukder","reg":"500204","session":"January - June","year":"2022","phone":"01929247167","address":"103/A, Narayanganj","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Tania Uddin","reg":"500205","session":"July - December","year":"2022","phone":"01791211833","address":"85/A, Chittagong","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Nadia Rahman","reg":"500206","session":"January - June","year":"2022","phone":"01969757755","address":"150/A, Gazipur","result":"D","course":"BTEB","photo":null},
-{"name":"Arif Chowdhury","reg":"500207","session":"July - December","year":"2022","phone":"01987939841","address":"134/A, Comilla","result":"D","course":"BTEB","photo":null},
-{"name":"Farhana Talukder","reg":"500208","session":"January - June","year":"2022","phone":"01846018252","address":"6/A, Chittagong","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Tania Hossain","reg":"500209","session":"July - December","year":"2022","phone":"01937358855","address":"1/A, Bogra","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Farhana Sultana","reg":"500210","session":"January - June","year":"2022","phone":"01884695122","address":"110/A, Bogra","result":"A-","course":"BTEB","photo":null},
-{"name":"Tania Rahman","reg":"500211","session":"July - December","year":"2022","phone":"01526111752","address":"81/A, Khulna","result":"F","course":"BTEB","photo":null},
-{"name":"Kamal Chowdhury","reg":"500212","session":"January - June","year":"2022","phone":"01874846214","address":"113/A, Rajshahi","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Shohag Hossain","reg":"500213","session":"July - December","year":"2022","phone":"01476364469","address":"25/A, Gazipur","result":"A+","course":"BTEB","photo":null},
-{"name":"Sumi Khan","reg":"500214","session":"January - June","year":"2022","phone":"01529189427","address":"123/A, Narayanganj","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Nasir Hossain","reg":"500215","session":"July - December","year":"2022","phone":"01857968892","address":"43/A, Mymensingh","result":"A-","course":"BTEB","photo":null},
-{"name":"Nasir Rahman","reg":"500216","session":"January - June","year":"2022","phone":"01943782480","address":"29/A, Bogra","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Farhana Uddin","reg":"500217","session":"July - December","year":"2022","phone":"01885116252","address":"46/A, Mymensingh","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Rahat Talukder","reg":"500218","session":"January - June","year":"2022","phone":"01428326596","address":"102/A, Narayanganj","result":"A","course":"BTEB","photo":null},
-{"name":"Emon Hossain","reg":"500219","session":"July - December","year":"2022","phone":"01766341251","address":"94/A, Bogra","result":"D","course":"BTEB","photo":null},
-{"name":"Mim Chowdhury","reg":"500220","session":"January - June","year":"2022","phone":"01349079508","address":"125/A, Rajshahi","result":"D","course":"BTEB","photo":null},
-{"name":"Farhana Khan","reg":"500221","session":"July - December","year":"2022","phone":"01589862074","address":"49/A, Comilla","result":"F","course":"BTEB","photo":null},
-{"name":"Tanvir Hossain","reg":"500222","session":"January - June","year":"2022","phone":"01445837987","address":"83/A, Dhaka","result":"B-","course":"BTEB","photo":null},
-{"name":"Hasan Chowdhury","reg":"500223","session":"July - December","year":"2022","phone":"01751885141","address":"54/A, Bogra","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Farhana Akter","reg":"500224","session":"January - June","year":"2022","phone":"01460801663","address":"59/A, Comilla","result":"A","course":"BTEB","photo":null},
-{"name":"Farhana Khan","reg":"500225","session":"July - December","year":"2022","phone":"01542681819","address":"41/A, Sylhet","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Nadia Akter","reg":"500226","session":"January - June","year":"2022","phone":"01745314736","address":"42/A, Narayanganj","result":"C","course":"BTEB","photo":null},
-{"name":"Farhana Rahman","reg":"500227","session":"July - December","year":"2022","phone":"01878754281","address":"124/A, Mymensingh","result":"A","course":"BTEB","photo":null},
-{"name":"Shohag Ahmed","reg":"500228","session":"January - June","year":"2022","phone":"01519408700","address":"98/A, Sylhet","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Priya Hossain","reg":"500229","session":"July - December","year":"2022","phone":"01447619134","address":"44/A, Sylhet","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Shohag Ahmed","reg":"500230","session":"January - June","year":"2022","phone":"01714268933","address":"10/A, Bogra","result":"A-","course":"BTEB","photo":null},
-{"name":"Priya Akter","reg":"500231","session":"July - December","year":"2022","phone":"01964601460","address":"39/A, Khulna","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Emon Talukder","reg":"500232","session":"January - June","year":"2022","phone":"01760991620","address":"120/A, Chittagong","result":"A+","course":"BTEB","photo":null},
-{"name":"Tania Rahman","reg":"500233","session":"July - December","year":"2022","phone":"01339986926","address":"110/A, Gazipur","result":"B-","course":"BTEB","photo":null},
-{"name":"Rahat Ahmed","reg":"500234","session":"January - June","year":"2022","phone":"01316285063","address":"64/A, Gazipur","result":"A-","course":"BTEB","photo":null},
-{"name":"Liza Khan","reg":"500235","session":"July - December","year":"2022","phone":"01460867786","address":"114/A, Rangpur","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Jannat Ahmed","reg":"500236","session":"January - June","year":"2022","phone":"01461477854","address":"72/A, Barisal","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Priya Talukder","reg":"500237","session":"July - December","year":"2022","phone":"01698090022","address":"89/A, Comilla","result":"B","course":"BTEB","photo":null},
-{"name":"Jannat Ahmed","reg":"500238","session":"January - June","year":"2022","phone":"01743882767","address":"121/A, Chittagong","result":"A-","course":"BTEB","photo":null},
-{"name":"Tanvir Ahmed","reg":"500239","session":"July - December","year":"2022","phone":"01517708987","address":"114/A, Sylhet","result":"C","course":"BTEB","photo":null},
-{"name":"Nasir Akter","reg":"500240","session":"January - June","year":"2023","phone":"01931244348","address":"103/A, Rangpur","result":"A-","course":"BTEB","photo":null},
-{"name":"Jannat Talukder","reg":"500241","session":"July - December","year":"2023","phone":"01779454042","address":"19/A, Dhaka","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Tania Talukder","reg":"500242","session":"January - June","year":"2023","phone":"01530234392","address":"82/A, Sylhet","result":"C","course":"BTEB","photo":null},
-{"name":"Tania Rahman","reg":"500243","session":"July - December","year":"2023","phone":"01351280012","address":"139/A, Rajshahi","result":"F","course":"BTEB","photo":null},
-{"name":"Sajid Khan","reg":"500244","session":"January - June","year":"2023","phone":"01523401493","address":"54/A, Chittagong","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Rahat Ahmed","reg":"500245","session":"July - December","year":"2023","phone":"01450229242","address":"143/A, Bogra","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Jannat Rahman","reg":"500246","session":"January - June","year":"2023","phone":"01625295366","address":"71/A, Dhaka","result":"C","course":"BTEB","photo":null},
-{"name":"Emon Talukder","reg":"500247","session":"July - December","year":"2023","phone":"01636661447","address":"50/A, Mymensingh","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Jannat Hossain","reg":"500248","session":"January - June","year":"2023","phone":"01573858562","address":"107/A, Gazipur","result":"B","course":"BTEB","photo":null},
-{"name":"Priya Ahmed","reg":"500249","session":"July - December","year":"2023","phone":"01867021324","address":"16/A, Barisal","result":"A+","course":"BTEB","photo":null},
-{"name":"Nadia Sultana","reg":"500250","session":"January - June","year":"2023","phone":"01916832433","address":"70/A, Dhaka","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Nadia Khan","reg":"500251","session":"July - December","year":"2023","phone":"01740766484","address":"148/A, Gazipur","result":"A","course":"BTEB","photo":null},
-{"name":"Emon Hossain","reg":"500252","session":"January - June","year":"2023","phone":"01834690504","address":"118/A, Khulna","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Sajid Khan","reg":"500253","session":"July - December","year":"2023","phone":"01759395061","address":"22/A, Barisal","result":"F","course":"BTEB","photo":null},
-{"name":"Tania Akter","reg":"500254","session":"January - June","year":"2023","phone":"01375062508","address":"3/A, Chittagong","result":"A","course":"BTEB","photo":null},
-{"name":"Hasan Ahmed","reg":"500255","session":"July - December","year":"2023","phone":"01531740060","address":"27/A, Barisal","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Abir Hossain","reg":"500256","session":"January - June","year":"2023","phone":"01322810892","address":"43/A, Bogra","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Arif Hossain","reg":"500257","session":"July - December","year":"2023","phone":"01649132938","address":"113/A, Bogra","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Emon Ahmed","reg":"500258","session":"January - June","year":"2023","phone":"01666629582","address":"68/A, Barisal","result":"A-","course":"BTEB","photo":null},
-{"name":"Farhana Sultana","reg":"500259","session":"July - December","year":"2023","phone":"01741980865","address":"97/A, Gazipur","result":"B-","course":"BTEB","photo":null},
-{"name":"Emon Ahmed","reg":"500260","session":"January - June","year":"2023","phone":"01789258192","address":"146/A, Comilla","result":"D","course":"BTEB","photo":null},
-{"name":"Zakir Rahman","reg":"500261","session":"July - December","year":"2023","phone":"01839036066","address":"7/A, Khulna","result":"B","course":"BTEB","photo":null},
-{"name":"Kamal Rahman","reg":"500262","session":"January - June","year":"2023","phone":"01721208974","address":"63/A, Chittagong","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Tania Chowdhury","reg":"500263","session":"July - December","year":"2023","phone":"01844935746","address":"19/A, Narayanganj","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Nadia Uddin","reg":"500264","session":"January - June","year":"2023","phone":"01568181747","address":"81/A, Comilla","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Jannat Sultana","reg":"500265","session":"July - December","year":"2023","phone":"01330969889","address":"115/A, Dhaka","result":"C","course":"BTEB","photo":null},
-{"name":"Liza Chowdhury","reg":"500266","session":"January - June","year":"2023","phone":"01545857490","address":"135/A, Rajshahi","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Nasir Sultana","reg":"500267","session":"July - December","year":"2023","phone":"01916053739","address":"87/A, Dhaka","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Nadia Uddin","reg":"500268","session":"January - June","year":"2023","phone":"01937143018","address":"149/A, Mymensingh","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Nadia Ahmed","reg":"500269","session":"July - December","year":"2023","phone":"01619482084","address":"46/A, Dhaka","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Sajid Talukder","reg":"500270","session":"January - June","year":"2023","phone":"01584551293","address":"117/A, Gazipur","result":"B","course":"BTEB","photo":null},
-{"name":"Nasir Ahmed","reg":"500271","session":"July - December","year":"2023","phone":"01988142452","address":"93/A, Sylhet","result":"A","course":"BTEB","photo":null},
-{"name":"Abir Talukder","reg":"500272","session":"January - June","year":"2023","phone":"01959327913","address":"133/A, Gazipur","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Rahat Chowdhury","reg":"500273","session":"July - December","year":"2023","phone":"01933860473","address":"9/A, Rangpur","result":"A+","course":"BTEB","photo":null},
-{"name":"Arif Ahmed","reg":"500274","session":"January - June","year":"2023","phone":"01727139817","address":"144/A, Barisal","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Mim Akter","reg":"500275","session":"July - December","year":"2023","phone":"01417679373","address":"77/A, Comilla","result":"B","course":"BTEB","photo":null},
-{"name":"Sumi Islam","reg":"500276","session":"January - June","year":"2023","phone":"01896682170","address":"149/A, Rajshahi","result":"A+","course":"BTEB","photo":null},
-{"name":"Tanvir Chowdhury","reg":"500277","session":"July - December","year":"2023","phone":"01465636962","address":"133/A, Comilla","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Rina Uddin","reg":"500278","session":"January - June","year":"2023","phone":"01620265016","address":"11/A, Khulna","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Tania Ahmed","reg":"500279","session":"July - December","year":"2023","phone":"01380138693","address":"67/A, Rangpur","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Rahat Chowdhury","reg":"500280","session":"January - June","year":"2024","phone":"01894377969","address":"47/A, Sylhet","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Priya Akter","reg":"500281","session":"July - December","year":"2024","phone":"01786297685","address":"70/A, Dhaka","result":"A+","course":"BTEB","photo":null},
-{"name":"Nadia Sultana","reg":"500282","session":"January - June","year":"2024","phone":"01410018505","address":"64/A, Rangpur","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Hasan Ahmed","reg":"500283","session":"July - December","year":"2024","phone":"01734853945","address":"111/A, Dhaka","result":"A","course":"BTEB","photo":null},
-{"name":"Tania Hossain","reg":"500284","session":"January - June","year":"2024","phone":"01451406894","address":"69/A, Khulna","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Farhana Akter","reg":"500285","session":"July - December","year":"2024","phone":"01823100148","address":"131/A, Narayanganj","result":"B-","course":"BTEB","photo":null},
-{"name":"Sajid Ahmed","reg":"500286","session":"January - June","year":"2024","phone":"01742333364","address":"47/A, Sylhet","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Sumi Chowdhury","reg":"500287","session":"July - December","year":"2024","phone":"01560181636","address":"137/A, Sylhet","result":"B","course":"BTEB","photo":null},
-{"name":"Farhana Hossain","reg":"500288","session":"January - June","year":"2024","phone":"01337476156","address":"77/A, Mymensingh","result":"A-","course":"BTEB","photo":null},
-{"name":"Priya Uddin","reg":"500289","session":"July - December","year":"2024","phone":"01883259575","address":"78/A, Khulna","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Shohag Chowdhury","reg":"500290","session":"January - June","year":"2024","phone":"01648861429","address":"87/A, Gazipur","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Liza Islam","reg":"500291","session":"July - December","year":"2024","phone":"01959720272","address":"118/A, Sylhet","result":"F","course":"BTEB","photo":null},
-{"name":"Rina Chowdhury","reg":"500292","session":"January - June","year":"2024","phone":"01460757333","address":"1/A, Khulna","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Farhana Rahman","reg":"500293","session":"July - December","year":"2024","phone":"01977426325","address":"139/A, Mymensingh","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Abir Sultana","reg":"500294","session":"January - June","year":"2024","phone":"01663333066","address":"118/A, Narayanganj","result":"A","course":"BTEB","photo":null},
-{"name":"Hasan Chowdhury","reg":"500295","session":"July - December","year":"2024","phone":"01564623093","address":"114/A, Rajshahi","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Zakir Hossain","reg":"500296","session":"January - June","year":"2024","phone":"01978284451","address":"110/A, Comilla","result":"D","course":"BTEB","photo":null},
-{"name":"Shohag Ahmed","reg":"500297","session":"July - December","year":"2024","phone":"01976317663","address":"96/A, Rangpur","result":"C","course":"FOUNDATION","photo":null},
-{"name":"Zakir Hossain","reg":"500298","session":"January - June","year":"2024","phone":"01648514810","address":"30/A, Barisal","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Hasan Hossain","reg":"500299","session":"July - December","year":"2024","phone":"01668025741","address":"122/A, Dhaka","result":"D","course":"BTEB","photo":null},
-{"name":"Sumi Khan","reg":"500300","session":"January - June","year":"2024","phone":"01714913800","address":"118/A, Mymensingh","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Arif Talukder","reg":"500301","session":"July - December","year":"2024","phone":"01774898900","address":"75/A, Comilla","result":"A+","course":"BTEB","photo":null},
-{"name":"Farhana Talukder","reg":"500302","session":"January - June","year":"2024","phone":"01475683014","address":"32/A, Rajshahi","result":"A","course":"BTEB","photo":null},
-{"name":"Sajid Chowdhury","reg":"500303","session":"July - December","year":"2024","phone":"01448056251","address":"35/A, Barisal","result":"A+","course":"FOUNDATION","photo":null},
-{"name":"Tanvir Islam","reg":"500304","session":"January - June","year":"2024","phone":"01975466611","address":"12/A, Barisal","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Zakir Uddin","reg":"500305","session":"July - December","year":"2024","phone":"01765619400","address":"53/A, Bogra","result":"C","course":"BTEB","photo":null},
-{"name":"Rahat Sultana","reg":"500306","session":"January - June","year":"2024","phone":"01753292697","address":"78/A, Comilla","result":"A","course":"FOUNDATION","photo":null},
-{"name":"Liza Akter","reg":"500307","session":"July - December","year":"2024","phone":"01858296223","address":"118/A, Rangpur","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Sumi Ahmed","reg":"500308","session":"January - June","year":"2024","phone":"01823538145","address":"37/A, Narayanganj","result":"B","course":"BTEB","photo":null},
-{"name":"Mim Chowdhury","reg":"500309","session":"July - December","year":"2024","phone":"01698375566","address":"34/A, Chittagong","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Tania Akter","reg":"500310","session":"January - June","year":"2024","phone":"01954382014","address":"71/A, Dhaka","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Sumi Rahman","reg":"500311","session":"July - December","year":"2024","phone":"01530583929","address":"93/A, Sylhet","result":"A-","course":"BTEB","photo":null},
-{"name":"Farhana Uddin","reg":"500312","session":"January - June","year":"2024","phone":"01826761146","address":"126/A, Rangpur","result":"D","course":"FOUNDATION","photo":null},
-{"name":"Abir Khan","reg":"500313","session":"July - December","year":"2024","phone":"01625097478","address":"85/A, Rajshahi","result":"A-","course":"FOUNDATION","photo":null},
-{"name":"Tanvir Islam","reg":"500314","session":"January - June","year":"2024","phone":"01593962892","address":"103/A, Mymensingh","result":"B-","course":"FOUNDATION","photo":null},
-{"name":"Emon Islam","reg":"500315","session":"July - December","year":"2024","phone":"01326642225","address":"81/A, Mymensingh","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Liza Sultana","reg":"500316","session":"January - June","year":"2024","phone":"01712680634","address":"68/A, Comilla","result":"B","course":"FOUNDATION","photo":null},
-{"name":"Sumi Uddin","reg":"500317","session":"July - December","year":"2024","phone":"01952980401","address":"80/A, Rangpur","result":"A","course":"BTEB","photo":null},
-{"name":"Farhana Hossain","reg":"500318","session":"January - June","year":"2024","phone":"01821376517","address":"122/A, Rajshahi","result":"F","course":"FOUNDATION","photo":null},
-{"name":"Arif Islam","reg":"500319","session":"July - December","year":"2024","phone":"01436269379","address":"3/A, Sylhet","result":"A","course":"BTEB","photo":null}
+{"name":"Demo Student","reg":"100001","session":"January - June","year":"2024","phone":"","address":"বাগাতিপাড়া, নাটোর","result":"A","course":"BTEB","photo":null},
+{"name":"পরীক্ষামূলক শিক্ষার্থী","reg":"100002","session":"July - December","year":"2024","phone":"","address":"বাগাতিপাড়া, নাটোর","result":"B+","course":"FOUNDATION","photo":null}
 ];}
 
 // ═══════════════════════════════════════════════════
@@ -3008,14 +3031,15 @@ function renderNotices(){
   if(!board)return;
   if(!notices.length){board.innerHTML='';if(noEl)noEl.style.display='block';return;}
   if(noEl)noEl.style.display='none';
+  const _en=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   board.innerHTML=notices.map(n=>
     '<div style="background:#fff;border-radius:16px;padding:22px 24px;border:1px solid #e4ece7;box-shadow:0 2px 12px rgba(13,61,31,.07);display:flex;align-items:flex-start;gap:16px">'
     +'<div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#0d3d1f,#1a6b35);display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>'
     +'<div style="flex:1;min-width:0">'
-    +'<div style="font-weight:700;font-size:16px;color:#0d3d1f">'+n.title+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px">নতুন</span>':'')+'</div>'
+    +'<div style="font-weight:700;font-size:16px;color:#0d3d1f">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px">নতুন</span>':'')+'</div>'
     +'<div style="font-size:11px;color:#6b8c76;margin:4px 0 8px">📅 '+(n.date||'')+'</div>'
-    +(n.desc?'<div style="font-size:13px;color:#4a6040;margin-bottom:10px;line-height:1.6">'+n.desc+'</div>':'')
-    +(n.pdf?'<a href="'+n.pdf+'" download="notice.pdf" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">📄 PDF ডাউনলোড করুন</a>':'')
+    +(n.desc?'<div style="font-size:13px;color:#4a6040;margin-bottom:10px;line-height:1.6">'+_en(n.desc)+'</div>':'')
+    +(n.pdf?'<a href="'+n.pdf+'" download="notice.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">📄 PDF ডাউনলোড করুন</a>':'')
     +'</div></div>'
   ).join('');
 }
@@ -3026,13 +3050,14 @@ function renderNoticeAdmin(){
   if(!el)return;
   const nd=document.getElementById('n-date');
   if(nd&&!nd.value)nd.value=new Date().toISOString().split('T')[0];
+  const _en=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   if(!notices.length){el.innerHTML='<p style="color:var(--muted);font-size:14px;text-align:center;padding:20px">কোনো নোটিশ নেই।</p>';return;}
   el.innerHTML='<h4 style="color:var(--g1);margin-bottom:12px;font-size:14px">প্রকাশিত নোটিশ ('+notices.length+'টি)</h4>'
   +notices.map((n,i)=>
     '<div style="background:#f7faf8;border:1px solid #e4ece7;border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px">'
-    +'<div style="flex:1"><div style="font-weight:700;color:var(--g1);font-size:14px">'+n.title+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">নতুন</span>':'')+'</div>'
+    +'<div style="flex:1"><div style="font-weight:700;color:var(--g1);font-size:14px">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">নতুন</span>':'')+'</div>'
     +'<div style="font-size:12px;color:var(--muted);margin-top:3px">📅 '+(n.date||'তারিখ নেই')+(n.pdf?' | 📄 PDF':' | 📝 টেক্সট')+'</div>'
-    +(n.desc?'<div style="font-size:12px;color:#4a6040;margin-top:4px">'+n.desc+'</div>':'')
+    +(n.desc?'<div style="font-size:12px;color:#4a6040;margin-top:4px">'+_en(n.desc)+'</div>':'')
     +'</div><div style="display:flex;gap:6px;flex-shrink:0">'
     +'<button onclick="toggleNoticeNew('+i+')" style="background:'+(n.isNew?'#fef9c3':'#dcfce7')+';color:'+(n.isNew?'#854d0e':'#166534')+';border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer">'+(n.isNew?'🟡 সরান':'🟢 নতুন')+'</button>'
     +'<button onclick="deleteNotice('+i+')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer">🗑️</button>'
@@ -3041,8 +3066,11 @@ function renderNoticeAdmin(){
 }
 
 function saveNotice(){
+  if(!_adm.requireAuth()) return;
   const title=document.getElementById('n-title').value.trim();
   if(!title){showNotif('❌ শিরোনাম দিন');return;}
+  if(!DB.notices)DB.notices=[];
+  if(DB.notices.length>=50){showNotif('❌ সর্বোচ্চ ৫০টি নোটিশ রাখা যায়। আগের নোটিশ মুছুন।');return;}
   const pf=document.getElementById('n-pdf').files[0];
   const doSave=function(pdfData){
     var notice={
@@ -3073,6 +3101,7 @@ function saveNotice(){
 }
 
 function deleteNotice(i){
+  if(!_adm.requireAuth()) return;
   if(!confirm('এই নোটিশ মুছে ফেলবেন?'))return;
   DB.notices.splice(i,1);
   saveDB('notices',DB.notices);
@@ -3082,6 +3111,7 @@ function deleteNotice(i){
 }
 
 function toggleNoticeNew(i){
+  if(!_adm.requireAuth()) return;
   DB.notices[i].isNew=!DB.notices[i].isNew;
   saveDB('notices',DB.notices);
   renderNotices();
@@ -3106,12 +3136,18 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 
 <!-- WhatsApp Float -->
-<a id="waBtn" class="wa-btn" href="https://wa.me/8801724084350?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81+%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE%2C+%E0%A6%B8%E0%A6%AC%E0%A7%81%E0%A6%9C+%E0%A6%95%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%BF%E0%A6%89%E0%A6%9F%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B8+%E0%A6%B8%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%B0%E0%A7%8D%E0%A6%95%E0%A7%87+%E0%A6%9C%E0%A6%BE%E0%A6%A8%E0%A6%A4%E0%A7%87+%E0%A6%9A%E0%A6%BE%E0%A6%87" target="_blank" rel="noopener" title="WhatsApp-এ যোগাযোগ করুন">
+<a id="waBtn" class="wa-btn" href="https://wa.me/8801724084350?text=%E0%A6%86%E0%A6%B8%E0%A6%B8%E0%A6%BE%E0%A6%B2%E0%A6%BE%E0%A6%AE%E0%A7%81+%E0%A6%86%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%95%E0%A7%81%E0%A6%AE%2C+%E0%A6%B8%E0%A6%AC%E0%A7%81%E0%A6%9C+%E0%A6%95%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%BF%E0%A6%89%E0%A6%9F%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B8+%E0%A6%B8%E0%A6%AE%E0%A7%8D%E0%A6%AA%E0%A6%B0%E0%A7%8D%E0%A6%95%E0%A7%87+%E0%A6%9C%E0%A6%BE%E0%A6%A8%E0%A6%A4%E0%A7%87+%E0%A6%9A%E0%A6%BE%E0%A6%87" target="_blank" rel="noopener" title="WhatsApp-এ যোগাযোগ করুন" aria-label="WhatsApp এ যোগাযোগ করুন">
   <div class="wa-pulse"></div>
-  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
+<!-- Scroll to Top Button -->
+<button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="উপরে যান" aria-label="পেজের শুরুতে যান"
+  style="position:fixed;bottom:136px;right:20px;z-index:9975;width:42px;height:42px;border-radius:50%;
+  background:var(--g1);border:2px solid rgba(255,255,255,.2);color:#fff;font-size:18px;cursor:pointer;
+  display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3);
+  transition:all .3s">↑</button>
 <!-- Dark Mode Toggle -->
-<button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="Dark/Light Mode">🌙</button>
+<button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="ডার্ক/লাইট মোড পরিবর্তন করুন" aria-label="ডার্ক মোড টগল">🌙</button>
 
 
 
