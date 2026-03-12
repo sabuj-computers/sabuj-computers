@@ -543,7 +543,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
       <button class="admin-tab" onclick="switchTab('training')">🎓 কোর্স</button>
       <button class="admin-tab" onclick="switchTab('testimonials')">⭐ রিভিউ</button>
       <button class="admin-tab" onclick="switchTab('students')">👩‍🎓 শিক্ষার্থী</button>
-      <button class="admin-tab" onclick="switchTab('gallery')">🖼️ গ্যালারি</button>
+
       <button class="admin-tab" onclick="switchTab('notices')">📢 নোটিশ</button>
       <button class="admin-tab" onclick="switchTab('password')">🔑 পাসওয়ার্ড</button>
     </div>
@@ -723,11 +723,6 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
         </div>
       </div>
 
-      <!-- GALLERY -->
-      <div class="admin-section" id="tab-gallery">
-        <p style="font-size:14px;color:var(--muted);margin-bottom:20px">শিক্ষার্থীদের ছবি গ্যালারিতে দেখাবে। ছবি যোগ করতে শিক্ষার্থী ট্যাবে গিয়ে ছবি আপলোড করুন।</p>
-        <div id="galleryAdminPreview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px"></div>
-      </div>
 
       <!-- NOTICES ADMIN -->
       <div class="admin-section" id="tab-notices">
@@ -2522,12 +2517,12 @@ function loadPublicFeedbacks(){
 function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function switchTab(name){
-  const names=['dashboard','general','services','training','testimonials','students','gallery','notices','password'];
+  const names=['dashboard','general','services','training','testimonials','students','notices','password'];
   document.querySelectorAll('.admin-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  const tabEl=document.getElementById('tab-'+name);
+  if(tabEl)tabEl.classList.add('active');
   if(name==='students')renderAdminStudents();
-  if(name==='gallery')renderGalleryAdmin();
   if(name==='dashboard')renderDashboard();
   if(name==='notices')renderNoticeAdmin();
 }
@@ -2557,7 +2552,7 @@ function populateAdminForms(){
     if(op){op.src=g.ownerPhoto;op.style.display='block';}
     if(rb)rb.style.display='inline-block';
   }
-  renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();renderGalleryAdmin();
+  renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();
 }
 
 function previewOwnerPhoto(inp){
