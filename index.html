@@ -21,6 +21,7 @@
 <!-- Firebase (loaded synchronously before any app code) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <!-- Real scannable QR code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -1364,11 +1365,8 @@ const _adm = (function(){
         return;
       }
       const input = document.getElementById('pwdInput').value;
-      if(input === _getActualPwd()){
-        _attempts = 0;
-        this.closePwdModal();
-        _openAdmin();
-      } else {
+      // প্রথমে local password চেক করি
+      if(input !== _getActualPwd()){
         _attempts++;
         if(_attempts >= 5){
           _lockUntil = Date.now() + 30000;
@@ -1380,9 +1378,27 @@ const _adm = (function(){
         document.getElementById('pwdErr').style.display = 'block';
         document.getElementById('pwdInput').value = '';
         document.getElementById('pwdInput').focus();
+        return;
       }
+      // Local password সঠিক — এখন Firebase-এও login করি
+      _attempts = 0;
+      const ADMIN_EMAIL = 'sssabuj007@gmail.com';
+      const FIREBASE_PASS = 'sabuj@01724084350#'; // Firebase account password
+      firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, FIREBASE_PASS)
+        .then(()=>{
+          this.closePwdModal();
+          _openAdmin();
+        })
+        .catch(()=>{
+          // Firebase login fail হলেও local password সঠিক থাকলে admin খুলবে
+          this.closePwdModal();
+          _openAdmin();
+        });
     },
-    closeAdmin(){ _closeAdmin(); },
+    closeAdmin(){ 
+      firebase.auth().signOut().catch(()=>{});
+      _closeAdmin(); 
+    },
     requireAuth(){ return _requireAuth(); },
     isAuthenticated(){ return _authenticated; },
     // Session reset on any admin activity (keep alive)
