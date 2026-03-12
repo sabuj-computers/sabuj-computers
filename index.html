@@ -21,6 +21,8 @@
 <!-- Firebase (loaded synchronously before any app code) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Real scannable QR code -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --g1:#0d3d1f;--g2:#1a6b35;--g3:#2e9e52;--g4:#5dd488;
@@ -321,20 +323,6 @@ nav a:hover,nav a.active{color:#fff;border-bottom-color:var(--gold)}
   color:#fca5a5;font-size:15px;display:none}
 .not-found-box.show{display:block}
 
-/* ===== GALLERY (Students) ===== */
-.gallery-section{padding:70px 6%;background:#fff}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-top:40px}
-.gallery-item{border-radius:14px;overflow:hidden;aspect-ratio:3/4;position:relative;
-  background:var(--bg);border:1px solid #deeae2;cursor:pointer}
-.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
-.gallery-item:hover img{transform:scale(1.06)}
-.gallery-item .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,61,31,.85),transparent);
-  opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:14px}
-.gallery-item:hover .g-overlay{opacity:1}
-.g-name{color:#fff;font-size:13px;font-weight:700;line-height:1.3}
-.g-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:2px}
-.gallery-empty{text-align:center;color:var(--muted);padding:40px;border:2px dashed #c8ddd0;
-  border-radius:16px;font-size:15px;grid-column:1/-1}
 
 /* ===== CTA ===== */
 .cta-section{padding:70px 6%;background:linear-gradient(135deg,var(--g1),#1a7038)}
@@ -422,7 +410,6 @@ body.dark-mode .fb-review-card{background:#162019 !important;border-color:#1e3a2
 body.dark-mode .sec-bg,body.dark-mode .sec-white{background:#0f1a12 !important}
 body.dark-mode .why-section{background:#111d14 !important}
 body.dark-mode .achieve-section{background:#111d14 !important}
-body.dark-mode .gallery-section{background:#111d14 !important}
 body.dark-mode .testi-section{background:#0f1a12 !important}
 body.dark-mode .contact-section{background:#0f1a12 !important}
 body.dark-mode .fg input,body.dark-mode .fg textarea,body.dark-mode .fg select,
@@ -610,6 +597,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
       <!-- SERVICES -->
       <div class="admin-section" id="tab-services">
+        <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:13px;color:#92400e">⚠️ পরিবর্তন করার পরে অবশ্যই নিচের <strong>💾 সংরক্ষণ করুন</strong> বোতামটি চাপুন।</div>
         <button class="btn-add" onclick="addService()">+ নতুন সেবা যোগ করুন</button>
         <div id="svcEditor"></div>
         <button class="btn-save" onclick="saveServices()">💾 সংরক্ষণ করুন</button>
@@ -617,6 +605,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
       <!-- TRAINING -->
       <div class="admin-section" id="tab-training">
+        <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:13px;color:#92400e">⚠️ পরিবর্তন করার পরে অবশ্যই নিচের <strong>💾 সংরক্ষণ করুন</strong> বোতামটি চাপুন।</div>
         <button class="btn-add" onclick="addCourse()">+ নতুন কোর্স যোগ করুন</button>
         <div id="trnEditor"></div>
         <button class="btn-save" onclick="saveTraining()">💾 সংরক্ষণ করুন</button>
@@ -624,6 +613,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
       <!-- TESTIMONIALS -->
       <div class="admin-section" id="tab-testimonials">
+        <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:13px;color:#92400e">⚠️ পরিবর্তন করার পরে অবশ্যই নিচের <strong>💾 সংরক্ষণ করুন</strong> বোতামটি চাপুন।</div>
         <button class="btn-add" onclick="addTesti()">+ নতুন রিভিউ যোগ করুন</button>
         <div id="testiEditor"></div>
         <button class="btn-save" onclick="saveTestimonials()">💾 সংরক্ষণ করুন</button>
@@ -880,6 +870,8 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
   </div>
 </section>
 
+
+
 <!-- ==================== STUDENT SEARCH ==================== -->
 <section class="search-section" id="search">
   <div class="sec-eyebrow">ফলাফল অনুসন্ধান</div>
@@ -1120,7 +1112,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
       <h4>যোগাযোগ</h4>
       <ul>
         <li><a id="ftrPhone" href="tel:01724084350">📞 ০১৭২৪ ০৮৪৩৫০</a></li>
-        <li><a id="ftrEmail" href="mailto:sssabuj007@gmail.com">✉️ sssabuj007@gmail.com</a></li>
+        <li><a id="ftrEmail" href="/cdn-cgi/l/email-protection#fc8f8f8f9d9e8996cccccbbc9b919d9590d29f9391">✉️ <span class="__cf_email__" data-cfemail="82f1f1f1e3e0f7e8b2b2b5c2e5efe3ebeeace1edef">[email&#160;protected]</span></a></li>
         <li><a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener">বাগাতিপাড়া, নাটোর</a></li>
       </ul>
     </div>
@@ -1131,7 +1123,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===================================================
 // ===================================================
 // FIREBASE INIT
@@ -1182,7 +1174,7 @@ function defaultDB() {
       {text:'কম খরচে এত ভালো প্রশিক্ষণ আর কোথাও পাওয়া যায় না। এখানকার পরিবেশ খুবই আন্তরিক।',name:'নাদিয়া তালুকদার',sub:'ফাউন্ডেশন কোর্স, ২০২১',stars:5,avatar:'না'},
       {text:'অনলাইন ফর্ম ফিলআপ থেকে শুরু করে সকল কাজ এখানে দ্রুত ও সঠিকভাবে হয়। বিশ্বাসযোগ্য প্রতিষ্ঠান।',name:'হাসান আহমেদ',sub:'নিয়মিত গ্রাহক',stars:5,avatar:'হা'},
     ],
-    password:'$2y$sabuj2024$hashed', // stored in Firebase, not hardcoded
+    password:'sabuj2024',
     notices:[],
     students:[]
   };
@@ -1205,6 +1197,13 @@ function loadDB(callback) {
       if (DB.notices && !Array.isArray(DB.notices)) DB.notices = Object.values(DB.notices);
       if (DB.testimonials && !Array.isArray(DB.testimonials)) DB.testimonials = Object.values(DB.testimonials);
       if (DB.training && !Array.isArray(DB.training)) DB.training = Object.values(DB.training);
+      // Fix training items: Firebase converts arrays to objects
+      if (DB.training) {
+        DB.training = DB.training.map(t => ({
+          ...t,
+          items: t.items ? (Array.isArray(t.items) ? t.items : Object.values(t.items)) : []
+        }));
+      }
       // Fill only truly missing fields (never overwrite existing ones)
       const def = defaultDB();
       if (!DB.general) DB.general = def.general;
@@ -1236,7 +1235,7 @@ function loadDB(callback) {
     } else {
       // Truly first time — no data in Firebase at all
       DB = defaultDB();
-      DB.students = getDefaultStudents();
+      DB.students = [];
       db.ref('sabuj').set(DB);
     }
     dbReady = true;
@@ -1245,7 +1244,7 @@ function loadDB(callback) {
   }).catch(e => {
     console.error('Firebase load error:', e); showNotif('⚠️ Firebase সংযোগে সমস্যা — স্থানীয় তথ্য ব্যবহার করা হচ্ছে।');
     DB = defaultDB();
-    DB.students = getDefaultStudents();
+    DB.students = [];
     showLoading(false);
     if (callback) callback();
   });
@@ -1256,19 +1255,23 @@ function saveDB(path, value) {
   if (path === 'students') {
     // Save photos separately under student reg number to avoid Firebase 10MB limit
     // and to prevent index-mismatch on delete
+    const photoSavePromises = [];
     const studentsNoPhoto = (value||[]).map(s => {
       const {photo, ...rest} = s;
       if (photo && photo.startsWith('data:')) {
-        // Save photo under reg number key
         const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
         if(safeKey) {
-          db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => { console.error('Photo save error:', e); showNotif('⚠️ ছবি সংরক্ষণে সমস্যা হয়েছে।'); });
+          photoSavePromises.push(
+            db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
+          );
         }
         return {...rest, hasPhoto: !!safeKey};
       }
       return {...rest, hasPhoto: false};
     });
-    db.ref('sabuj/students').set(studentsNoPhoto).catch(e => {
+    Promise.all(photoSavePromises).then(() => {
+      return db.ref('sabuj/students').set(studentsNoPhoto);
+    }).catch(e => {
       console.error('Save error:', e);
       showNotif('❌ সংরক্ষণে সমস্যা হয়েছে! ইন্টারনেট সংযোগ যাচাই করুন।');
     });
@@ -1309,8 +1312,7 @@ const _adm = (function(){
   const SESSION_MINUTES = 30; // ৩০ মিনিট পরে auto logout
 
   function _getActualPwd(){
-    const stored = DB.password || 'sabuj2024';
-    return stored.startsWith('$2y$') ? 'sabuj2024' : stored;
+    return DB.password || 'sabuj2024';
   }
 
   function _startSessionTimer(){
@@ -1437,6 +1439,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+
+
 function renderAll(){
   renderGeneral();renderServices();renderTraining();renderTestimonials();renderContact();renderNotices();
   loadPublicFeedbacks();
@@ -1487,8 +1491,8 @@ function checkVerifyUrl(reg){
           ${s.photo?`<img src="${s.photo}" style="width:72px;height:72px;border-radius:12px;object-fit:cover;border:3px solid rgba(255,255,255,.4)">`:
             `<div style="width:72px;height:72px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;flex-shrink:0">${(s.name||'?')[0]}</div>`}
           <div style="flex:1">
-            <div style="font-family:'Noto Serif Bengali';font-size:22px;color:#fff;font-weight:700">${s.name}</div>
-            <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">রেজিস্ট্রেশন: ${s.reg}</div>
+            <div style="font-family:'Noto Serif Bengali';font-size:22px;color:#fff;font-weight:700">${(s.name||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">রেজিস্ট্রেশন: ${(s.reg||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
           </div>
           <div style="text-align:center">
             ${s.result&&s.result.trim()?`
@@ -1545,31 +1549,34 @@ function renderGeneral(){
 }
 
 function renderServices(){
+  const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   document.getElementById('svcGrid').innerHTML=DB.services.map(s=>`
-    <div class="svc-card"><span class="svc-emoji">${s.icon}</span><h3>${s.title}</h3><p>${s.desc}</p></div>
+    <div class="svc-card"><span class="svc-emoji">${_e(s.icon)}</span><h3>${_e(s.title)}</h3><p>${_e(s.desc)}</p></div>
   `).join('');
 }
 
 function renderTraining(){
+  const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   document.getElementById('trnGrid').innerHTML=DB.training.map(t=>`
     <div class="trn-card">
-      <span class="trn-badge">${t.badge||'কোর্স'}</span>
-      <h3>${t.title}</h3>
-      <ul class="trn-features">${t.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+      <span class="trn-badge">${_e(t.badge||'কোর্স')}</span>
+      <h3>${_e(t.title)}</h3>
+      <ul class="trn-features">${(Array.isArray(t.items)?t.items:[]).map(i=>`<li>${_e(i)}</li>`).join('')}</ul>
       <a href="#contact" class="trn-cta">ভর্তি হতে যোগাযোগ করুন →</a>
     </div>
   `).join('');
 }
 
 function renderTestimonials(){
-  const stars=n=>'⭐'.repeat(n||5);
+  const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const stars=n=>'⭐'.repeat(Math.min(5,Math.max(1,n||5)));
   document.getElementById('testiGrid').innerHTML=DB.testimonials.map(t=>`
     <div class="testi-card">
       <div class="stars">${stars(t.stars)}</div>
-      <div class="testi-text">${t.text}</div>
+      <div class="testi-text">${_e(t.text)}</div>
       <div class="testi-author">
-        <div class="testi-avatar">${t.avatar||'?'}</div>
-        <div><div class="testi-name">${t.name}</div><div class="testi-sub">${t.sub||''}</div></div>
+        <div class="testi-avatar">${_e(t.avatar||'?')}</div>
+        <div><div class="testi-name">${_e(t.name)}</div><div class="testi-sub">${_e(t.sub||'')}</div></div>
       </div>
     </div>
   `).join('');
@@ -1577,16 +1584,17 @@ function renderTestimonials(){
 
 function renderContact(){
   const g=DB.general;
+  const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   document.getElementById('contactCards').innerHTML=`
     <div class="ct-card" style="align-items:center">
       ${g.ownerPhoto
-        ? `<img src="${g.ownerPhoto}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid var(--g3);flex-shrink:0">`
+        ? `<img src="${g.ownerPhoto}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid var(--g3);flex-shrink:0" alt="প্রোপ্রাইটর">`
         : `<div class="ct-icon">👤</div>`}
-      <div class="ct-info"><label>প্রোপ্রাইটর</label><span>${g.owner}</span></div>
+      <div class="ct-info"><label>প্রোপ্রাইটর</label><span>${_e(g.owner)}</span></div>
     </div>
-    <div class="ct-card"><div class="ct-icon">📍</div><div class="ct-info"><label>ঠিকানা</label><span>${g.address}</span></div></div>
-    <div class="ct-card"><div class="ct-icon">📱</div><div class="ct-info"><label>মোবাইল</label><a href="tel:${g.phone}">${g.phone}</a></div></div>
-    <div class="ct-card"><div class="ct-icon">✉️</div><div class="ct-info"><label>ইমেইল</label><a href="mailto:${g.email}">${g.email}</a></div></div>
+    <div class="ct-card"><div class="ct-icon">📍</div><div class="ct-info"><label>ঠিকানা</label><span>${_e(g.address)}</span></div></div>
+    <div class="ct-card"><div class="ct-icon">📱</div><div class="ct-info"><label>মোবাইল</label><a href="tel:${_e(g.phone)}">${_e(g.phone)}</a></div></div>
+    <div class="ct-card"><div class="ct-icon">✉️</div><div class="ct-info"><label>ইমেইল</label><a href="mailto:${_e(g.email)}">${_e(g.email)}</a></div></div>
   `;
 }
 
@@ -1615,7 +1623,7 @@ function doSearch(){
   // photo
   const pw=document.getElementById('resPhotoWrap');
   if(s.photo){pw.innerHTML=`<img src="${s.photo}" class="res-photo" alt="${s.name||'শিক্ষার্থীর ছবি'}">`;}
-  else{pw.innerHTML=`<div class="res-photo-placeholder">${s.name[0]||'?'}</div>`;}
+  else{pw.innerHTML=`<div class="res-photo-placeholder">${(s.name&&s.name[0])||'?'}</div>`;}
   // grade circle — hide if no result
   const gc=document.getElementById('resGrade');
   if(s.result&&s.result.trim()!==''){
@@ -1904,37 +1912,37 @@ function downloadResultCard(){
 
 
 // ===================================================
-// LOCAL QR RENDERER (no third-party API — privacy safe)
-// Draws a simple visual indicator with the URL text
-// For full QR scanning, uses qrcode.js if available
+// REAL QR CODE — সত্যিকারের scan করা যায়
 // ===================================================
 function drawLocalQR(c, x, y, size, text){
-  // Draw white background
-  c.fillStyle='#ffffff';
-  c.fillRect(x, y, size, size);
-  // Draw border squares (finder patterns)
-  const b=Math.floor(size/8);
-  function finder(fx,fy){
-    c.fillStyle='#1a1a1a';c.fillRect(fx,fy,b*3,b*3);
-    c.fillStyle='#ffffff';c.fillRect(fx+b*.5,fy+b*.5,b*2,b*2);
-    c.fillStyle='#1a1a1a';c.fillRect(fx+b,fy+b,b,b);
-  }
-  finder(x+b*.5, y+b*.5);
-  finder(x+size-b*3.5, y+b*.5);
-  finder(x+b*.5, y+size-b*3.5);
-  // Fill middle area with a data pattern based on text hash
-  let hash=0; for(let i=0;i<text.length;i++){hash=(hash<<5)-hash+text.charCodeAt(i);hash|=0;}
-  c.fillStyle='#1a1a1a';
-  for(let row=4;row<size/b-4;row++){
-    for(let col=4;col<size/b-4;col++){
-      if(((hash^(row*7+col*13))&1)){
-        c.fillRect(x+col*b, y+row*b, b*.9, b*.9);
+  try {
+    const tempDiv = document.createElement('div');
+    tempDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;visibility:hidden';
+    document.body.appendChild(tempDiv);
+    new QRCode(tempDiv, {
+      text: text, width: size, height: size,
+      colorDark: '#1a1a1a', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    const qrCanvas = tempDiv.querySelector('canvas');
+    if(qrCanvas){ c.drawImage(qrCanvas, x, y, size, size); }
+    else {
+      const qrImg = tempDiv.querySelector('img');
+      if(qrImg && qrImg.src){
+        const img = new Image();
+        img.onload = ()=>{ c.drawImage(img, x, y, size, size); };
+        img.src = qrImg.src;
       }
     }
+    document.body.removeChild(tempDiv);
+  } catch(e) {
+    c.fillStyle='#ffffff'; c.fillRect(x,y,size,size);
+    c.strokeStyle='#333'; c.lineWidth=2; c.strokeRect(x+2,y+2,size-4,size-4);
+    c.fillStyle='#374151'; c.font=`bold ${Math.floor(size/7)}px Arial`; c.textAlign='center';
+    c.fillText('QR', x+size/2, y+size/2+6);
   }
-  // Label
-  c.fillStyle='#374151'; c.font=`${Math.floor(size/12)}px Arial`; c.textAlign='center';
-  c.fillText('Scan QR', x+size/2, y+size+14);
+  c.fillStyle='#374151'; c.font=`${Math.floor(size/10)}px Arial`; c.textAlign='center';
+  c.fillText('Scan to Verify', x+size/2, y+size+16);
 }
 
 function buildResultCard(s){
@@ -2109,20 +2117,29 @@ function buildResultCard(s){
   c.fillText('Code: '+(DB.general.instituteCode||'5424')+' | Reg: '+(s.reg||'N/A')+' | Result: '+s.result+' (GPA '+gpaVal+') | '+new Date().getFullYear(), W/2, ftY+27);
   c.textAlign='left';
 
-  // Async: QR then Photo
-  const finish=()=>{
+  // Photo then download
+  if(s.photo){
+    const pi=new Image();
+    pi.onload=()=>{
+      c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);
+      const lnk=document.createElement('a');
+      lnk.download='ResultCard_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
+      lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
+      showNotif('✅ ফলাফল কার্ড ডাউনলোড হয়েছে!');
+    };
+    pi.onerror=()=>{
+      const lnk=document.createElement('a');
+      lnk.download='ResultCard_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
+      lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
+      showNotif('✅ ফলাফল কার্ড ডাউনলোড হয়েছে!');
+    };
+    pi.src=s.photo;
+  } else {
     const lnk=document.createElement('a');
     lnk.download='ResultCard_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
     lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
     showNotif('✅ ফলাফল কার্ড ডাউনলোড হয়েছে!');
-  };
-  const afterQR=()=>{
-    if(s.photo){const pi=new Image();pi.onload=()=>{c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);finish();};pi.onerror=finish;pi.src=s.photo;}
-    else finish();
-  };
-  // Draw QR locally — no third-party API, no data leak
-  drawLocalQR(c, qrX, qrY, qrSz, verifyUrl);
-  // Draw photo if available, then finish
+  }
   
 }
 
@@ -2299,13 +2316,19 @@ function buildRegCard(){
   c.strokeStyle='#bbb';c.lineWidth=1.5;
   c.strokeRect(tX,404,tW,ry-404);
 
-  // ── Real QR code (encodes verify URL) below photo ──
+  // ── QR code below photo ──
   const qrSz=140, qrX2=phX+(phW-qrSz)/2, qrY2=phY+phH+32;
   const verifyUrl=window.location.origin+window.location.pathname+'?verify='+encodeURIComponent(s.reg);
-  // Draw QR locally — no third-party API
   drawLocalQR(c, qrX2, qrY2, qrSz, verifyUrl);
-  // QR drawn synchronously, now handle photo
-  // QR loading is async — finishRegCard called from qrImg callbacks above
+
+  // ── Calculate positions for rest of card ──
+  const afterY = Math.max(ry, qrY2+qrSz+30) + 20;
+  const noteH = 80;
+  const sigY2 = afterY + noteH + 20;
+  const ftY2 = sigY2 + 70;
+
+  // Call finishRegCard to draw note, signatures, footer, photo & trigger download
+  finishRegCard(c, cv, s, phX, phY, phW, phH, afterY, noteH, sigY2, ftY2);
 }
 
 function finishRegCard(c,cv,s,phX,phY,phW,phH,afterY,noteH,sigY,ftY){
@@ -2405,7 +2428,7 @@ function drawPhotoPlaceholder(c,x,y,w,h,name){
 
 function doDownload(canvas,s){
   const link=document.createElement('a');
-  link.download='RegCard_'+s.name.replace(/\s+/g,'_')+'_'+s.reg+'.png';
+  link.download='RegCard_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
   link.href=canvas.toDataURL('image/png',1.0);
   link.click();
   showNotif('✅ রেজিস্ট্রেশন কার্ড ডাউনলোড হয়েছে!');
@@ -2870,14 +2893,6 @@ function clearStudentForm(){
   const fdp=document.getElementById('feeDuePreview');if(fdp)fdp.style.display='none';
 }
 
-function renderGalleryAdmin(){
-  const students=DB.students.filter(s=>s.photo);
-  document.getElementById('galleryAdminPreview').innerHTML=students.length?students.map((s,i)=>`
-    <div style="border-radius:10px;overflow:hidden;aspect-ratio:1;position:relative">
-      <img src="${s.photo}" alt="${s.name||'শিক্ষার্থী'}" style="width:100%;height:100%;object-fit:cover">
-      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);padding:4px;font-size:10px;color:#fff;text-align:center">${s.name}</div>
-    </div>`).join(''):`<p style="color:var(--muted);font-size:14px">কোনো ছবি নেই। শিক্ষার্থী ট্যাব থেকে ছবি যোগ করুন।</p>`;
-}
 
 function changePwd(){
   if(!_adm.requireAuth()) return;
@@ -2886,7 +2901,7 @@ function changePwd(){
   const cf=document.getElementById('pwd-cfm').value;
   // Support both plain (legacy) and stored password
   const storedPwd=DB.password||'sabuj2024';
-  const actualPwd=storedPwd.startsWith('$2y$')?'sabuj2024':storedPwd;
+  const actualPwd=storedPwd;
   if(cur!==actualPwd){showNotif('❌ বর্তমান পাসওয়ার্ড ভুল');return;}
   if(!nw||nw.length<6){showNotif('❌ কমপক্ষে ৬ অক্ষর দিন');return;}
   if(nw!==cf){showNotif('❌ পাসওয়ার্ড মিলছে না');return;}
@@ -3147,12 +3162,10 @@ document.addEventListener('DOMContentLoaded',function(){
   display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3);
   transition:all .3s">↑</button>
 <!-- Dark Mode Toggle -->
-<button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="ডার্ক/লাইট মোড পরিবর্তন করুন" aria-label="ডার্ক মোড টগল">🌙</button>
+<button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="ডার্ক মোড" aria-label="ডার্ক মোড টগল">🌙</button>
 
-
-
-
-<!-- NOTIFICATION -->
+<!-- Notification Toast -->
 <div class="notif" id="notif"></div>
+
 </body>
 </html>
