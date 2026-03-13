@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sabuj-computers.github.io/sabuj-computers/sitemap.xml
