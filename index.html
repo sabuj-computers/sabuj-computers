@@ -1573,10 +1573,9 @@ function renderGeneral(){
   document.getElementById('ctaPhone').href='tel:'+g.phone.replace(/\s/g,'');
   // WhatsApp button — update href dynamically with current phone
   const waBtn=document.getElementById('waBtn');
-  if(waBtn&&g.phone){
-    const waNum='880'+g.phone.replace(/\D/g,'').replace(/^0/,'');
+  if(waBtn){
     const waMsg=encodeURIComponent('আসসালামু আলাইকুম, সবুজ কম্পিউটার্স সম্পর্কে জানতে চাই');
-    waBtn.href=`https://wa.me/${waNum}?text=${waMsg}`;
+    waBtn.href=`https://wa.me/8801724084350?text=${waMsg}`;
   }
   // Logo
   const lc=document.getElementById('hdrLogo');
