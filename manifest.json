@@ -1,0 +1,21 @@
+﻿{
+  "short_name": "SCTC",
+  "name": "Sabuj Computer Training Center",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/sabuj-computers/",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#005696",
+  "scope": "/sabuj-computers/"
+}
