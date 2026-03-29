@@ -1396,53 +1396,42 @@ const _adm = (function(){
     closePwdModal(){
       document.getElementById('pwdOverlay').classList.remove('show');
     },
-verifyPwd(){
-      const now = Date.now();
-      if(now < _lockUntil){
-        const s = Math.ceil((_lockUntil - now)/1000);
-        document.getElementById('pwdErr').textContent = `❌ অনেকবার ভুল চেষ্টা। ${s} সেকেন্ড অপেক্ষা করুন।`;
+verifyPwd() {
+      const inputPass = document.getElementById('pwdInput').value;
+      if (!inputPass) {
+        document.getElementById('pwdErr').textContent = '❌ পাসওয়ার্ড দিন';
         document.getElementById('pwdErr').style.display = 'block';
         return;
       }
-      
-      const inputPass = document.getElementById('pwdInput').value;
-      const ADMIN_EMAIL = 'sssabuj007@gmail.com';
 
-      // সরাসরি ফায়ারবেস দিয়ে লগইন চেক করা হচ্ছে
+      if (Date.now() < _lockUntil) {
+        const remaining = Math.ceil((_lockUntil - Date.now()) / 1000);
+        document.getElementById('pwdErr').textContent = `❌ অ্যাকাউন্ট লকড। ${remaining} সেকেন্ড পর চেষ্টা করুন।`;
+        document.getElementById('pwdErr').style.display = 'block';
+        return;
+      }
+
+      const ADMIN_EMAIL = 'sssabuj007@gmail.com'; // আপনার অ্যাডমিন ইমেইল
+
+      // সরাসরি ফায়ারবেস দিয়ে লগইন চেক
       firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, inputPass)
-        .then(()=>{
+        .then((userCredential) => {
           _attempts = 0;
           this.closePwdModal();
           _openAdmin();
         })
-        .catch(()=>{
+        .catch((error) => {
           _attempts++;
-          if(_attempts >= 5){
+          if (_attempts >= 5) {
             _lockUntil = Date.now() + 30000;
             _attempts = 0;
-            document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড অপেক্ষা করুন।';
+            document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড পর আবার চেষ্টা করুন।';
           } else {
-            document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
+            document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
           }
           document.getElementById('pwdErr').style.display = 'block';
           document.getElementById('pwdInput').value = '';
           document.getElementById('pwdInput').focus();
-        });
-    },
-// Local password সঠিক — এখন Firebase-এও login করি
-      _attempts = 0;
-      const ADMIN_EMAIL = 'sssabuj007@gmail.com';
-      const inputPass = document.getElementById('pwdInput').value; // ইউজারের টাইপ করা পাসওয়ার্ড নেবে
-      
-      firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, inputPass)
-        .then(()=>{
-          this.closePwdModal();
-          _openAdmin();
-        })
-        .catch(()=>{
-          // Firebase login fail হলেও local password সঠিক থাকলে admin খুলবে
-          this.closePwdModal();
-          _openAdmin();
         });
     },
     closeAdmin(){ 
