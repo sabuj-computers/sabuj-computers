@@ -1,8 +1,8 @@
-﻿const cacheName = 'sabuj-comp-v1';
+﻿const cacheName = 'sabuj-comp-v2';
 const assets = [
-  '/sabuj-computers/',
-  '/sabuj-computers/index.html',
-  '/sabuj-computers/manifest.json'
+  '/',
+  '/index.html',
+  '/manifest.json'
 ];
 
 self.addEventListener('install', e => {
