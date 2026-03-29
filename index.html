@@ -2526,6 +2526,14 @@ function submitFeedback(){
   const contact=document.getElementById('fb-contact').value.trim();
   const address=document.getElementById('fb-address').value.trim();
   const msg=document.getElementById('fb-msg').value.trim();
+
+  // HTML ট্যাগ চেক করার জন্য রেজেক্স (Regex)
+  const hasTags = /<[^>]*>/;
+  if(hasTags.test(name) || hasTags.test(msg) || hasTags.test(address) || hasTags.test(contact)) {
+     showNotif('❌ অবৈধ অক্ষর (HTML Tags) ব্যবহার করা যাবে না');
+     return;
+  }
+
   if(!name){showNotif('❌ আপনার নাম লিখুন');return;}
   if(!contact){showNotif('❌ মোবাইল বা ইমেইল লিখুন');return;}
   if(!msg||msg.length<5){showNotif('❌ কমপক্ষে ৫ অক্ষরের মন্তব্য লিখুন');return;}
