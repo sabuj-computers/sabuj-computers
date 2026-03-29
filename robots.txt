@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sabuj-computers.github.io/sabuj-computers/sitemap.xml
+Sitemap: https://sabujcomputers.pro.bd/sitemap.xml
