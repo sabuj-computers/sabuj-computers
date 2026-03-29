@@ -1396,7 +1396,7 @@ const _adm = (function(){
     closePwdModal(){
       document.getElementById('pwdOverlay').classList.remove('show');
     },
-    verifyPwd(){
+verifyPwd(){
       const now = Date.now();
       if(now < _lockUntil){
         const s = Math.ceil((_lockUntil - now)/1000);
@@ -1404,27 +1404,37 @@ const _adm = (function(){
         document.getElementById('pwdErr').style.display = 'block';
         return;
       }
-      const input = document.getElementById('pwdInput').value;
-      // প্রথমে local password চেক করি
-      if(input !== _getActualPwd()){
-        _attempts++;
-        if(_attempts >= 5){
-          _lockUntil = Date.now() + 30000;
+      
+      const inputPass = document.getElementById('pwdInput').value;
+      const ADMIN_EMAIL = 'sssabuj007@gmail.com';
+
+      // সরাসরি ফায়ারবেস দিয়ে লগইন চেক করা হচ্ছে
+      firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, inputPass)
+        .then(()=>{
           _attempts = 0;
-          document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড অপেক্ষা করুন।';
-        } else {
-          document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
-        }
-        document.getElementById('pwdErr').style.display = 'block';
-        document.getElementById('pwdInput').value = '';
-        document.getElementById('pwdInput').focus();
-        return;
-      }
-      // Local password সঠিক — এখন Firebase-এও login করি
+          this.closePwdModal();
+          _openAdmin();
+        })
+        .catch(()=>{
+          _attempts++;
+          if(_attempts >= 5){
+            _lockUntil = Date.now() + 30000;
+            _attempts = 0;
+            document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড অপেক্ষা করুন।';
+          } else {
+            document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
+          }
+          document.getElementById('pwdErr').style.display = 'block';
+          document.getElementById('pwdInput').value = '';
+          document.getElementById('pwdInput').focus();
+        });
+    },
+// Local password সঠিক — এখন Firebase-এও login করি
       _attempts = 0;
       const ADMIN_EMAIL = 'sssabuj007@gmail.com';
-      const FIREBASE_PASS = 'Ss@231990'; // Firebase account password
-      firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, FIREBASE_PASS)
+      const inputPass = document.getElementById('pwdInput').value; // ইউজারের টাইপ করা পাসওয়ার্ড নেবে
+      
+      firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, inputPass)
         .then(()=>{
           this.closePwdModal();
           _openAdmin();
@@ -2957,15 +2967,32 @@ function changePwd(){
   const cur=document.getElementById('pwd-cur').value;
   const nw=document.getElementById('pwd-new').value;
   const cf=document.getElementById('pwd-cfm').value;
-  // Support both plain (legacy) and stored password
-  const storedPwd=DB.password||'sabuj2024';
-  const actualPwd=storedPwd;
-  if(cur!==actualPwd){showNotif('❌ বর্তমান পাসওয়ার্ড ভুল');return;}
+  
   if(!nw||nw.length<6){showNotif('❌ কমপক্ষে ৬ অক্ষর দিন');return;}
-  if(nw!==cf){showNotif('❌ পাসওয়ার্ড মিলছে না');return;}
-  DB.password=nw;saveDB('password', nw);
-  ['pwd-cur','pwd-new','pwd-cfm'].forEach(id=>document.getElementById(id).value='');
-  showNotif('✅ পাসওয়ার্ড পরিবর্তিত হয়েছে');
+  if(nw!==cf){showNotif('❌ নতুন পাসওয়ার্ড মিলছে না');return;}
+  
+  const user = firebase.auth().currentUser;
+  if(user) {
+    // বর্তমান পাসওয়ার্ডটি ফায়ারবেসের সাথে মিলিয়ে দেখা হচ্ছে
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, cur);
+    
+    user.reauthenticateWithCredential(credential).then(() => {
+      // বর্তমান পাসওয়ার্ড সঠিক হলে, নতুন পাসওয়ার্ড ফায়ারবেসে সেভ করবে
+      user.updatePassword(nw).then(() => {
+        // ডাটাবেসেও সেভ করে রাখছি শুধু ব্যাকআপ হিসেবে
+        DB.password = nw; 
+        saveDB('password', nw);
+        ['pwd-cur','pwd-new','pwd-cfm'].forEach(id=>document.getElementById(id).value='');
+        showNotif('✅ পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে');
+      }).catch((error) => {
+        showNotif('❌ পাসওয়ার্ড পরিবর্তনে সমস্যা: ' + error.message);
+      });
+    }).catch(() => {
+      showNotif('❌ বর্তমান পাসওয়ার্ড ভুল হয়েছে!');
+    });
+  } else {
+    showNotif('❌ আপনি সঠিকভাবে লগইন অবস্থায় নেই!');
+  }
 }
 
 // ===================================================
