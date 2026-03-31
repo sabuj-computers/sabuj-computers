@@ -2870,22 +2870,58 @@ function saveStudent(){
     if(document.getElementById('statStudents'))document.getElementById('statStudents').textContent=DB.students.length+'+';
     clearStudentForm();showNotif(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
   };
-  if(pf){
-    // File size check: max 5MB
+ if(pf){
     if(pf.size > 5 * 1024 * 1024){showNotif('❌ ছবির আকার ৫MB-এর বেশি হওয়া যাবে না');return;}
-    // Compress image before saving to reduce Firebase storage usage
-    const r=new FileReader();
-    r.onload=e=>{
-      const img=new Image();
-      img.onload=()=>{
-        const maxW=400,maxH=500;
-        let w=img.width,h=img.height;
-        if(w>maxW||h>maxH){const sc=Math.min(maxW/w,maxH/h);w=Math.round(w*sc);h=Math.round(h*sc);}
-        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
-        cv.getContext('2d').drawImage(img,0,0,w,h);
-        doSave(cv.toDataURL('image/jpeg',0.75));
+    
+    showNotif('⏳ ছবি প্রসেস ও আপলোড হচ্ছে, অপেক্ষা করুন...');
+
+    // ছবি রিসাইজ এবং কোয়ালিটি ঠিক রাখার স্মার্ট কোড
+    const r = new FileReader();
+    r.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        // রেজুলেশন ভালো রাখার জন্য সাইজ ৬০০x৮০০ পিক্সেল রাখছি (পাসপোর্ট সাইজের জন্য পারফেক্ট)
+        const maxW = 600, maxH = 800;
+        let w = img.width, h = img.height;
+
+        // ছবির অনুপাত (Aspect Ratio) ঠিক রেখে সাইজ কমানো
+        if(w > maxW || h > maxH){
+          const sc = Math.min(maxW/w, maxH/h);
+          w = Math.round(w*sc);
+          h = Math.round(h*sc);
+        }
+
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+
+        // ছবির কোয়ালিটি 0.95 (95%) রাখছি যাতে ছবি একদম ক্লিয়ার থাকে এবং ঘোলা না হয়
+        const base64Image = cv.toDataURL('image/jpeg', 0.95);
+
+        // এবার এই প্রসেস করা হাই-কোয়ালিটি ছবিটা Cloudinary তে পাঠাবো
+        let formData = new FormData();
+        formData.append("file", base64Image); // Cloudinary সরাসরি Base64 সাপোর্ট করে
+        formData.append("upload_preset", "eopkol2t"); // আপনার Preset Name
+
+        fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", { // আপনার Cloud Name
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+          if(result.secure_url) {
+             doSave(result.secure_url); // Cloudinary থেকে পাওয়া লিংক Firebase এ সেভ হবে
+          } else {
+             showNotif('❌ ছবি আপলোডে সমস্যা হয়েছে');
+             doSave(null);
+          }
+        })
+        .catch(err => {
+          showNotif('❌ ইন্টারনেট সমস্যা');
+          doSave(null);
+        });
       };
-      img.src=e.target.result;
+      img.src = e.target.result;
     };
     r.readAsDataURL(pf);
   }
@@ -3181,13 +3217,37 @@ function saveNotice(){
     document.getElementById('n-new').checked=true;
     showNotif('✅ নোটিশ প্রকাশিত হয়েছে!');
   };
-  if(pf){
-    if(pf.size>5*1024*1024){showNotif('❌ PDF ৫MB এর বেশি হবে না');return;}
-    var r=new FileReader();
-    r.onload=function(e){doSave(e.target.result);};
-    r.readAsDataURL(pf);
-  } else {doSave(null);}
-}
+ if(pf){
+    // ৫ এমবি লিমিট চেক
+    if(pf.size > 5 * 1024 * 1024){showNotif('❌ PDF ৫MB এর বেশি হবে না');return;}
+    
+    showNotif('⏳ PDF আপলোড হচ্ছে, অপেক্ষা করুন...');
+
+    let formData = new FormData();
+    formData.append("file", pf);
+    formData.append("upload_preset", "eopkol2t"); // আপনার Cloudinary Preset
+
+    // PDF এর জন্য 'auto' বা 'raw' ব্যবহার করতে হয়
+    fetch("https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload", { 
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+      if(result.secure_url) {
+         doSave(result.secure_url); // Cloudinary এর PDF লিংক Firebase এ সেভ হবে
+      } else {
+         showNotif('❌ PDF আপলোডে সমস্যা হয়েছে');
+         doSave(null);
+      }
+    })
+    .catch(err => {
+      showNotif('❌ ইন্টারনেট সমস্যা');
+      doSave(null);
+    });
+  } else {
+      doSave(null);
+  }
 
 function deleteNotice(i){
   if(!_adm.requireAuth()) return;
