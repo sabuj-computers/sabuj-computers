@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#005696">
+<meta name="theme-color" content="#0d3d1f">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <script>
   if ('serviceWorker' in navigator) {
@@ -59,9 +59,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <!-- Firebase (loaded synchronously before any app code) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <!-- Real scannable QR code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -555,7 +555,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 <body>
 
 <!-- SECRET ADMIN TRIGGER (bottom-right corner, invisible, click 5 times fast) -->
-<div id="secretTrigger" onclick="handleSecretClick()"></div>
+<div class="logo-circle" id="hdrLogo" onclick="handleSecretClick()" style="cursor:pointer;">স</div>
 
 <!-- PASSWORD MODAL -->
 <div class="pwd-overlay" id="pwdOverlay">
@@ -2167,8 +2167,9 @@ function buildResultCard(s){
   c.textAlign='left';
 
   // Photo then download
-  if(s.photo){
+ if(s.photo){
     const pi=new Image();
+    pi.crossOrigin = "Anonymous"; // <--- এই লাইনটি যুক্ত করুন
     pi.onload=()=>{
       c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);
       const lnk=document.createElement('a');
@@ -2417,8 +2418,9 @@ function finishRegCard(c,cv,s,phX,phY,phW,phH,afterY,noteH,sigY,ftY){
   c.fillText('Serial No.: '+new Date().getFullYear()+'_'+(DB.general.instituteCode||'5424')+'_'+s.reg,W-M,ftY+32);
 
   // ── DRAW PHOTO (async) ──
-  if(s.photo){
+if(s.photo){
     const img=new Image();
+    img.crossOrigin = "Anonymous"; // <--- এই লাইনটি যুক্ত করুন
     img.onload=()=>{
       c.drawImage(img,phX+3,phY+3,phW-6,phH-6);
       c.strokeStyle='#444';c.lineWidth=2.5;c.strokeRect(phX,phY,phW,phH);
@@ -3004,9 +3006,6 @@ function changePwd(){
     user.reauthenticateWithCredential(credential).then(() => {
       // বর্তমান পাসওয়ার্ড সঠিক হলে, নতুন পাসওয়ার্ড ফায়ারবেসে সেভ করবে
       user.updatePassword(nw).then(() => {
-        // ডাটাবেসেও সেভ করে রাখছি শুধু ব্যাকআপ হিসেবে
-        DB.password = nw; 
-        saveDB('password', nw);
         ['pwd-cur','pwd-new','pwd-cfm'].forEach(id=>document.getElementById(id).value='');
         showNotif('✅ পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে');
       }).catch((error) => {
