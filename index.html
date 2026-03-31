@@ -2616,21 +2616,65 @@ function populateAdminForms(){
   renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();
 }
 
+// ===================================================
+// CLOUDINARY UPLOAD HELPER (For Logo & Owner Photo)
+// ===================================================
+function uploadToCloudinary(file, callback) {
+  const maxW = 600, maxH = 600;
+  const r = new FileReader();
+  r.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if(w > maxW || h > maxH){
+        const sc = Math.min(maxW/w, maxH/h);
+        w = Math.round(w*sc);
+        h = Math.round(h*sc);
+      }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      const base64Image = cv.toDataURL('image/jpeg', 0.95);
+
+      let formData = new FormData();
+      formData.append("file", base64Image);
+      formData.append("upload_preset", "eopkol2t"); // Cloudinary Preset
+
+      fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(result => {
+        if(result.secure_url) callback(result.secure_url);
+        else callback(null);
+      })
+      .catch(err => callback(null));
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
 function previewOwnerPhoto(inp){
   if(!_adm.requireAuth()) return;
   if(!inp.files||!inp.files[0])return;
-  const r=new FileReader();
-  r.onload=e=>{
-    DB.general.ownerPhoto=e.target.result;
-    saveDB('general',DB.general);
-    const op=document.getElementById('ownerPhotoPrev');
-    const rb=document.getElementById('ownerPhotoRemoveBtn');
-    if(op){op.src=e.target.result;op.style.display='block';}
-    if(rb)rb.style.display='inline-block';
-    renderContact();
-    showNotif('✅ ছবি সংরক্ষিত হয়েছে');
-  };
-  r.readAsDataURL(inp.files[0]);
+  
+  showNotif('⏳ ছবি আপলোড হচ্ছে, অপেক্ষা করুন...');
+  uploadToCloudinary(inp.files[0], url => {
+    if(url) {
+      DB.general.ownerPhoto = url;
+      saveDB('general', DB.general);
+      const op=document.getElementById('ownerPhotoPrev');
+      const rb=document.getElementById('ownerPhotoRemoveBtn');
+      if(op){op.src=url;op.style.display='block';}
+      if(rb)rb.style.display='inline-block';
+      renderContact();
+      showNotif('✅ ছবি সংরক্ষিত হয়েছে');
+    } else {
+      showNotif('❌ ছবি আপলোডে সমস্যা হয়েছে');
+    }
+  });
 }
 
 function removeOwnerPhoto(){
@@ -2659,7 +2703,8 @@ function previewLogo(inp){
 function saveGeneral(){
   if(!_adm.requireAuth()) return;
   const lf=document.getElementById('a-logo').files[0];
-  const done=logo=>{
+  
+  const doSave = (logoUrl) => {
     DB.general={...DB.general,
       name:document.getElementById('a-name').value,
       tagline:document.getElementById('a-tagline').value,
@@ -2672,16 +2717,26 @@ function saveGeneral(){
       address:document.getElementById('a-address').value,
       instituteCode:(document.getElementById('a-inst-code')||{}).value||DB.general.instituteCode||'5424',
       about:document.getElementById('a-about').value,
-      logo:logo||DB.general.logo,
+      logo:logoUrl||DB.general.logo,
       foundationCourseName:(document.getElementById('a-foundation-name')||{}).value||DB.general.foundationCourseName||'Computer Office Application (Foundation)',
       btebCourseName:(document.getElementById('a-bteb-name')||{}).value||DB.general.btebCourseName||'Computer Office Application (BTEB)'
     };
     saveDB('general', DB.general); renderAll(); showNotif('✅ সাধারণ তথ্য সংরক্ষিত');
   };
-  if(lf){const r=new FileReader();r.onload=e=>done(e.target.result);r.readAsDataURL(lf);}
-  else done(null);
-}
 
+  if(lf){
+    showNotif('⏳ লোগো আপলোড হচ্ছে, অপেক্ষা করুন...');
+    uploadToCloudinary(lf, url => {
+      if(url) doSave(url);
+      else {
+        showNotif('❌ লোগো আপলোডে সমস্যা হয়েছে');
+        doSave(null);
+      }
+    });
+  } else {
+    doSave(null);
+  }
+}
 // Services
 function renderSvcEditor(){
   document.getElementById('svcEditor').innerHTML=DB.services.map((s,i)=>`
