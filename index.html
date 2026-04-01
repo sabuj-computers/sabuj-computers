@@ -2445,7 +2445,7 @@ function buildRegCard(){
   c.beginPath(); c.moveTo(M,208); c.lineTo(W-M,208); c.stroke();
 
   // ── TITLE ──
-  c.font='bold 56px Arial'; c.fillStyle='#CC0000'; c.textAlign='center';
+  c.font='bold 56px Arial'; c.fillStyle='#8B0000'; c.textAlign='center';
   c.fillText('REGISTRATION CARD', W/2, 278);
   // Underline
   const tw=c.measureText('REGISTRATION CARD').width;
@@ -2478,7 +2478,7 @@ function buildRegCard(){
     {label:"Father's Name",         val:s.fatherName,    always:false},
     {label:"Mother's Name",         val:s.motherName,    always:false},
     {label:"Gender",                val:s.gender,        always:false},
-    {label:"Institute Code & Name", val:('('+( DB.general.instituteCode||'5424')+') '+(DB.general.name||'Sabuj Computers')), always:true},
+    {label:"Institute Code & Name", val:('('+( DB.general.instituteCode||'5424')+') SABUJ COMPUTER TRAINING CENTER'), always:true},
     {label:"Trade / Course",        val:s.course==='BTEB'?_btebName:(s.course==='FOUNDATION'?_foundName:(s.course||'Computer Office Application')), always:true},
     {label:"Registration No.",      val:s.reg,           always:true},
     {label:"Study Session",         val:(s.session||'')+(s.year?', '+s.year:''),       always:true},
@@ -2564,7 +2564,7 @@ function finishRegCard(c,cv,s,phX,phY,phW,phH,afterY,noteH,sigY,ftY){
   c.beginPath();c.moveTo(M,ftY+7);c.lineTo(W-M,ftY+7);c.stroke();
   c.font='19px Arial';c.fillStyle='#333';
   c.textAlign='left';
-  c.fillText('Printing Date: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),M,ftY+32);
+  c.fillText('Printing Date: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),M,ftY+25);
   c.textAlign='right';
   c.fillText('Serial No.: '+new Date().getFullYear()+'_'+(DB.general.instituteCode||'5424')+'_'+s.reg,W-M,ftY+32);
 
