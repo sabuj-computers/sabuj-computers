@@ -70,6 +70,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <!-- Excel Upload Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ZIP & FileSaver Library (নতুন যুক্ত হলো) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <style>
 :root{
   --g1:#0d3d1f;--g2:#1a6b35;--g3:#2e9e52;--g4:#5dd488;
@@ -753,12 +756,32 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 <div class="student-add-form">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
             <h4 style="color:var(--g1);font-size:16px;margin:0">শিক্ষার্থী যোগ / সম্পাদনা</h4>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
-              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#e2e8f0; color:#1e293b" onclick="document.getElementById('bulkExcelInput').click()">📥 Excel থেকে আপলোড</button>
-              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dcfce7; color:#166534" onclick="printStudentList()">🖨️ প্রিন্ট / PDF (ছবিসহ)</button>
-              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dbeafe; color:#1e3a8a" onclick="downloadExcelTemplate()">📄 ডেমো ফাইল ডাউনলোড</button>
-            </div>
+            <div style="display:flex; flex-direction:column; gap:10px; width: 100%;">
+    <!-- Top Row: Excel Actions -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content: flex-end;">
+      <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
+      <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#e2e8f0; color:#1e293b" onclick="document.getElementById('bulkExcelInput').click()">📥 Excel থেকে আপলোড</button>
+      <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dbeafe; color:#1e3a8a" onclick="downloadExcelTemplate()">📄 ডেমো ফাইল ডাউনলোড</button>
+    </div>
+    
+    <!-- Bottom Row: Advanced Export & ZIP -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items: flex-end; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; justify-content: flex-end;">
+        <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
+            <label style="font-size:12px; font-weight:bold; color:#334155;">সিরিয়াল নম্বর (যেমন: 1-5, 8, All)</label>
+            <input type="text" id="studentSelection" value="All" placeholder="All বা 1-10, 15" style="padding:8px 12px; border:2px solid #dde8e0; border-radius:8px; font-size:13px; width: 180px; outline:none;">
+        </div>
+        <button class="btn-secondary" style="margin:0; padding:10px 16px; font-size:13px; background:#dcfce7; color:#166534; font-weight:bold; width: auto;" onclick="printStudentList()">🖨️ প্রিন্ট লিস্ট</button>
+        
+        <div style="width: 2px; background: #cbd5e1; height: 36px; margin: 0 5px;"></div>
+        
+        <select id="bulkCardType" style="padding:9px 12px; border:2px solid #dde8e0; border-radius:8px; font-size:13px; outline:none; background:#fff; cursor:pointer;">
+            <option value="reg">Registration Card</option>
+            <option value="result">Result Card</option>
+            <option value="roshid">Fee Receipt</option>
+        </select>
+        <button class="btn-secondary" style="margin:0; padding:10px 16px; font-size:13px; background:#ede9fe; color:#4c1d95; font-weight:bold; width: auto;" onclick="downloadBulkCardsZip()">📦 ZIP ডাউনলোড</button>
+    </div>
+</div>
           </div>
           <input type="hidden" id="s-edit-idx" value="">
           <div class="fr3">
@@ -3311,116 +3334,242 @@ function handleBulkUpload(event) {
   };
   reader.readAsArrayBuffer(file);
 }
-// ===================================================
-// PRINT / SAVE AS PDF (OFFICIAL SHEET WITH PHOTOS)
-// ===================================================
+
+// ==========================================
+// ADVANCED EXPORT & BULK ZIP LOGIC
+// ==========================================
+
+// 1. Get Selected Students based on input
+function getSelectedStudents() {
+    const input = document.getElementById('studentSelection').value.trim();
+    const validStudents = DB.students.filter(s => s.name && s.reg); // শুধু ভ্যালিড স্টুডেন্ট
+    const max = validStudents.length;
+    
+    if (!input || input.toLowerCase() === 'all') {
+        return validStudents;
+    }
+
+    let selectedIndices = new Set();
+    let parts = input.split(',');
+
+    for (let part of parts) {
+        part = part.trim();
+        if (part.includes('-')) {
+            let [start, end] = part.split('-').map(Number);
+            if (!isNaN(start) && !isNaN(end)) {
+                for (let i = start; i <= end; i++) {
+                    if (i > 0 && i <= max) selectedIndices.add(i - 1);
+                }
+            }
+        } else {
+            let num = Number(part);
+            if (!isNaN(num) && num > 0 && num <= max) {
+                selectedIndices.add(num - 1);
+            }
+        }
+    }
+
+    let sortedIndices = Array.from(selectedIndices).sort((a, b) => a - b);
+    return sortedIndices.map(index => validStudents[index]);
+}
+
+// 2. Override printStudentList for Selective Printing
 function printStudentList() {
-  if(!_adm.requireAuth()) return;
-  if (!DB.students || DB.students.length === 0) {
-    showNotif('❌ প্রিন্ট করার মতো কোনো ডেটা নেই!');
-    return;
-  }
-
-  showNotif('⏳ PDF/প্রিন্ট পেজ তৈরি হচ্ছে...');
-
-  // নতুন একটি উইন্ডো ওপেন করে সেখানে ডিজাইন তৈরি করা হবে
-  const w = window.open('', '_blank');
-  
-  // প্রতিষ্ঠানের লোগো থাকলে সেটা দেখাবে
-  const logoHtml = DB.general.logo ? `<img src="${DB.general.logo}" crossorigin="anonymous" style="height: 60px; margin-bottom: 5px;">` : '';
-
-  let html = `
-  <html>
-  <head>
-    <title>Student Details Report - ${DB.general.name || 'SCTC'}</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
-      .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0d3d1f; padding-bottom: 10px; }
-      h2 { color: #0d3d1f; margin: 0 0 5px 0; font-size: 24px; }
-      p { margin: 0; font-size: 14px; color: #555; }
-      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-      th, td { border: 1px solid #888; padding: 8px 10px; text-align: left; font-size: 13px; vertical-align: middle; }
-      th { background-color: #e8f4ee; color: #0d3d1f; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-      .photo { width: 50px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
-      .no-photo { width: 50px; height: 60px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa; border-radius: 4px; border: 1px dashed #ccc; text-align: center; }
-      
-      /* প্রিন্ট করার সময় ডিজাইন ঠিক রাখার কোড */
-      @media print {
-        @page { margin: 1cm; size: A4 portrait; }
-        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        table { page-break-inside: auto; }
-        tr { page-break-inside: avoid; page-break-after: auto; }
-        thead { display: table-header-group; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      ${logoHtml}
-      <h2>${DB.general.name || 'SABUJ COMPUTER TRAINING CENTER'}</h2>
-      <p><strong>Official Student Details Report</strong></p>
-      <p>Date: ${new Date().toLocaleDateString('en-GB')} | Total Students: ${DB.students.length}</p>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 40px; text-align: center;">Sl</th>
-          <th style="width: 70px; text-align: center;">Photo</th>
-          <th>Name & Reg. No</th>
-          <th>Course & Session</th>
-          <th>Contact Info</th>
-          <th style="width: 80px; text-align: center;">Result</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  // সব স্টুডেন্টের ডেটা টেবিলে বসানো
-  DB.students.forEach((s, i) => {
-    // ছবি থাকলে দেখাবে, না থাকলে No Photo দেখাবে (crossorigin="anonymous" যুক্ত করা হয়েছে)
-    const photoHtml = s.photo 
-        ? `<img src="${s.photo}" crossorigin="anonymous" class="photo">` 
-        : `<div class="no-photo">No<br>Photo</div>`;
+    if(!_adm.requireAuth()) return;
+    const selectedStudents = getSelectedStudents();
     
-    html += `
-        <tr>
-          <td style="text-align: center;">${i + 1}</td>
-          <td style="text-align: center;">${photoHtml}</td>
-          <td>
-            <strong style="font-size: 15px; color: #0d3d1f;">${s.name || '—'}</strong><br>
-            <span style="color:#555; font-size:12px;">Reg: <strong>${s.reg || '—'}</strong></span>
-          </td>
-          <td>
-            <strong>${s.course || '—'}</strong><br>
-            <span style="color:#555; font-size:12px;">${s.session || ''} ${s.year ? '('+s.year+')' : ''}</span>
-          </td>
-          <td>
-            ${s.phone || '—'}<br>
-            <span style="color:#555; font-size:12px;">${s.address || '—'}</span>
-          </td>
-          <td style="text-align: center;">
-            <strong style="color: ${s.result === 'F' ? 'red' : '#0d3d1f'};">${s.result || 'Pending'}</strong>
-          </td>
-        </tr>
+    if (selectedStudents.length === 0) {
+        showNotif('❌ প্রিন্ট করার মতো কোনো ডেটা নেই বা সিরিয়াল ভুল!');
+        return;
+    }
+
+    showNotif('⏳ PDF/প্রিন্ট পেজ তৈরি হচ্ছে...');
+    const w = window.open('', '_blank');
+    const logoHtml = DB.general.logo ? `<img src="${DB.general.logo}" crossorigin="anonymous" style="height: 60px; margin-bottom: 5px;">` : '';
+
+    let html = `
+    <html>
+    <head>
+        <title>Student Details Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0d3d1f; padding-bottom: 10px; }
+            h2 { color: #0d3d1f; margin: 0 0 5px 0; font-size: 24px; }
+            p { margin: 0; font-size: 14px; color: #555; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #888; padding: 8px 10px; text-align: left; font-size: 13px; vertical-align: middle; }
+            th { background-color: #e8f4ee; color: #0d3d1f; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+            .photo { width: 50px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+            .no-photo { width: 50px; height: 60px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa; border-radius: 4px; border: 1px dashed #ccc; text-align: center; }
+            @media print {
+                @page { margin: 1cm; size: A4 portrait; }
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                table { page-break-inside: auto; }
+                tr { page-break-inside: avoid; page-break-after: auto; }
+                thead { display: table-header-group; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            ${logoHtml}
+            <h2>${DB.general.name || 'SABUJ COMPUTER TRAINING CENTER'}</h2>
+            <p><strong>Official Student Details Report</strong></p>
+            <p>Date: ${new Date().toLocaleDateString('en-GB')} | Selected Students: ${selectedStudents.length}</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;">Sl</th>
+                    <th style="width: 70px; text-align: center;">Photo</th>
+                    <th>Name & Reg. No</th>
+                    <th>Course & Session</th>
+                    <th>Contact Info</th>
+                    <th style="width: 80px; text-align: center;">Result</th>
+                </tr>
+            </thead>
+            <tbody>
     `;
-  });
 
-  html += `
-      </tbody>
-    </table>
+    selectedStudents.forEach((s, i) => {
+        const photoHtml = s.photo 
+            ? `<img src="${s.photo}" crossorigin="anonymous" class="photo">` 
+            : `<div class="no-photo">No<br>Photo</div>`;
+        
+        html += `
+            <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td style="text-align: center;">${photoHtml}</td>
+                <td>
+                    <strong style="font-size: 15px; color: #0d3d1f;">${s.name || '—'}</strong><br>
+                    <span style="color:#555; font-size:12px;">Reg: <strong>${s.reg || '—'}</strong></span>
+                </td>
+                <td>
+                    <strong>${s.course || '—'}</strong><br>
+                    <span style="color:#555; font-size:12px;">${s.session || ''} ${s.year ? '('+s.year+')' : ''}</span>
+                </td>
+                <td>
+                    ${s.phone || '—'}<br>
+                    <span style="color:#555; font-size:12px;">${s.address || '—'}</span>
+                </td>
+                <td style="text-align: center;">
+                    <strong style="color: ${s.result === 'F' ? 'red' : '#0d3d1f'};">${s.result || 'Pending'}</strong>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <script>
+            window.onload = function() {
+                setTimeout(() => { window.print(); }, 800);
+            };
+        <\/script>
+    </body>
+    </html>
+    `;
+    w.document.write(html);
+    w.document.close();
+}
+
+// 3. Smart Interceptor to get Base64 from existing drawing functions
+async function getCardBase64(student, type) {
+    return new Promise((resolve) => {
+        const origClick = HTMLAnchorElement.prototype.click;
+        const origNotif = window.showNotif;
+        const origStudent = currentStudent;
+
+        currentStudent = student;
+        window.showNotif = function() {}; // Mute notifications during bulk process
+
+        // Fallback timeout in case image fails to load
+        const timeout = setTimeout(() => {
+            restoreAndResolve(null);
+        }, 5000);
+
+        function restoreAndResolve(data) {
+            clearTimeout(timeout);
+            HTMLAnchorElement.prototype.click = origClick;
+            window.showNotif = origNotif;
+            currentStudent = origStudent;
+            resolve(data);
+        }
+
+        // Intercept the download click
+        HTMLAnchorElement.prototype.click = function() {
+            if (this.download && this.href.startsWith('data:image')) {
+                const base64data = this.href.split(',')[1];
+                const fileName = this.download;
+                restoreAndResolve({ fileName, base64data });
+            } else {
+                origClick.call(this);
+            }
+        };
+
+        try {
+            if (type === 'reg') {
+                if (student.course !== 'FOUNDATION') return restoreAndResolve(null);
+                buildRegCard(); 
+            } else if (type === 'result') {
+                if (!student.result || !student.result.trim()) return restoreAndResolve(null);
+                buildResultCard(student);
+            } else if (type === 'roshid') {
+                buildFeeReceipt(student);
+            }
+        } catch (e) {
+            console.error(e);
+            restoreAndResolve(null);
+        }
+    });
+}
+
+// 4. Download ZIP Function
+async function downloadBulkCardsZip() {
+    if(!_adm.requireAuth()) return;
+    const selectedStudents = getSelectedStudents();
+    const cardType = document.getElementById('bulkCardType').value;
     
-    <!-- পেজ লোড হওয়ার সাথে সাথে অটোমেটিক প্রিন্ট ডায়ালগ ওপেন হবে -->
-    <script>
-      window.onload = function() {
-        setTimeout(() => { window.print(); }, 800);
-      };
-    <\/script>
-  </body>
-  </html>
-  `;
+    if (selectedStudents.length === 0) {
+        showNotif('❌ কোনো শিক্ষার্থী নির্বাচন করা হয়নি!');
+        return;
+    }
 
-  w.document.write(html);
-  w.document.close();
+    // Show a progress indicator
+    const loader = document.createElement('div');
+    loader.id = 'zipLoader';
+    loader.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#4c1d95;color:#fff;padding:12px 24px;border-radius:30px;z-index:999999;font-weight:bold;box-shadow:0 10px 25px rgba(0,0,0,0.3); text-align:center;';
+    loader.innerHTML = 'প্রসেসিং শুরু হচ্ছে...';
+    document.body.appendChild(loader);
+
+    const zip = new JSZip();
+    const folderName = cardType.toUpperCase() + "_Cards";
+    const imgFolder = zip.folder(folderName);
+    let successCount = 0;
+
+    for (let i = 0; i < selectedStudents.length; i++) {
+        loader.innerHTML = `প্রসেসিং: ${i + 1} / ${selectedStudents.length} <br><small style="font-weight:normal">${selectedStudents[i].name}</small>`;
+        
+        const cardData = await getCardBase64(selectedStudents[i], cardType);
+        if (cardData && cardData.base64data) {
+            imgFolder.file(cardData.fileName, cardData.base64data, {base64: true});
+            successCount++;
+        }
+    }
+
+    document.body.removeChild(loader);
+
+    if (successCount === 0) {
+        showNotif('❌ নির্বাচিত শিক্ষার্থীদের জন্য এই কার্ডটি প্রযোজ্য নয় (যেমন: BTEB এর রেজি. কার্ড বা ফলাফল বিহীন রেজাল্ট কার্ড)।');
+        return;
+    }
+
+    showNotif('⏳ ZIP ফাইল প্যাক করা হচ্ছে...');
+    zip.generateAsync({type:"blob"}).then(function(content) {
+        saveAs(content, `${folderName}_SCTC.zip`);
+        showNotif(`✅ ${successCount} টি কার্ডসহ ZIP ডাউনলোড সম্পন্ন হয়েছে!`);
+    });
 }
 function changePwd(){
   if(!_adm.requireAuth()) return;
