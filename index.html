@@ -54,8 +54,12 @@
   ]
 }
 </script>
-<meta property="og:image" content="https://sabujcomputers.pro.bd/icon-192.png">
+<meta property="og:image" content="https://sabujcomputers.pro.bd/logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <!-- Favicon -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <!-- Firebase (loaded synchronously before any app code) -->
@@ -410,7 +414,80 @@ footer{background:linear-gradient(135deg,#050e07,var(--g1));color:rgba(255,255,2
 .footer-bottom span{color:rgba(255,255,255,.7)}
 .footer-tagline{color:var(--gold2);font-weight:600}
 
-/* ===== LOADER ANIMATION ===== */
+/* ===== PAGE LOADER ===== */
+#pageLoader{
+  position:fixed;inset:0;z-index:999999;
+  background:linear-gradient(145deg,var(--g1) 0%,#0a2e14 50%,#1a5e30 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+  transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);
+}
+#pageLoader.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+.loader-logo{font-family:'Noto Serif Bengali';font-size:22px;color:#fff;font-weight:700;
+  opacity:0;animation:loaderFadeIn .5s ease .2s forwards;letter-spacing:.5px;text-align:center}
+.loader-logo span{color:var(--gold2)}
+.loader-ring{width:64px;height:64px;position:relative}
+.loader-ring svg{width:64px;height:64px;animation:loaderSpin 1.2s linear infinite}
+.loader-ring circle{fill:none;stroke:rgba(255,255,255,.12);stroke-width:5}
+.loader-ring .arc{fill:none;stroke-width:5;stroke:var(--gold);stroke-linecap:round;
+  stroke-dasharray:80 120;animation:loaderSpin 1.2s cubic-bezier(.6,.1,.4,.9) infinite}
+.loader-dots{display:flex;gap:8px;opacity:0;animation:loaderFadeIn .5s ease .4s forwards}
+.loader-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+.loader-dots span:nth-child(1){animation:loaderDot 1.2s ease .0s infinite}
+.loader-dots span:nth-child(2){animation:loaderDot 1.2s ease .2s infinite}
+.loader-dots span:nth-child(3){animation:loaderDot 1.2s ease .4s infinite}
+@keyframes loaderFadeIn{to{opacity:1}}
+@keyframes loaderSpin{to{transform:rotate(360deg)}}
+@keyframes loaderDot{0%,80%,100%{transform:scale(1);opacity:.35}40%{transform:scale(1.5);opacity:1;background:var(--gold)}}
+
+/* ===== SMART GLASSMORPHISM NAVBAR ===== */
+header{
+  background:linear-gradient(160deg,var(--g1) 0%,#0f4a20 100%);
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
+  transition:transform .35s cubic-bezier(.4,0,.2,1),background .35s ease,box-shadow .35s ease,backdrop-filter .35s ease;
+}
+header.nav-hidden{transform:translateY(-100%)}
+header.nav-glass{
+  background:rgba(10,35,18,.72)!important;
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.06);
+}
+
+/* ===== SCROLL REVEAL ANIMATION ===== */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+.reveal-delay-5{transition-delay:.5s}
+
+/* ===== PREMIUM CARD HOVER ===== */
+.why-card,.svc-card,.trn-card,.ach-card,.testi-card{
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease,border-color .3s ease!important;
+}
+.why-card:hover,.svc-card:hover,.ach-card:hover,.testi-card:hover{
+  transform:translateY(-8px) scale(1.015)!important;
+  box-shadow:0 20px 48px rgba(13,61,31,.18)!important;
+}
+.trn-card:hover{
+  transform:translateY(-6px) scale(1.01)!important;
+  background:rgba(255,255,255,.15)!important;
+}
+
+/* ===== MAC-STYLE SCROLLBAR ===== */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(13,61,31,.3);border-radius:99px;transition:background .2s}
+::-webkit-scrollbar-thumb:hover{background:var(--g2)}
+*{scrollbar-width:thin;scrollbar-color:rgba(13,61,31,.3) transparent}
+
+/* ===== CUSTOM TEXT SELECTION ===== */
+::selection{background:var(--g3);color:#fff}
+::-moz-selection{background:var(--g3);color:#fff}
+
+/* ===== LOADER ANIMATION (legacy) ===== */
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===== iOS ZOOM FIX — admin inputs need font-size >= 16px ===== */
@@ -553,6 +630,18 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 </style>
 </head>
 <body>
+
+<!-- ==================== PAGE LOADER ==================== -->
+<div id="pageLoader">
+  <div class="loader-logo">সবুজ <span>কম্পিউটার্স</span></div>
+  <div class="loader-ring">
+    <svg viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="27"/>
+      <circle class="arc" cx="32" cy="32" r="27"/>
+    </svg>
+  </div>
+  <div class="loader-dots"><span></span><span></span><span></span></div>
+</div>
 
 <!-- PASSWORD MODAL -->
 <div class="pwd-overlay" id="pwdOverlay">
@@ -839,9 +928,9 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 <!-- ==================== HERO ==================== -->
 <section class="hero" id="home">
   <div class="hero-inner">
-    <div class="hero-tag" id="heroTag">✦ বাগাতিপাড়া, নাটোরের সেরা প্রতিষ্ঠান</div>
-    <h2 id="heroTitle">আপনার শিক্ষা ও ডিজিটাল সেবায়<br><span>বিশ্বস্ত সঙ্গী</span></h2>
-    <p id="heroText">আপনার দৈনন্দিন শিক্ষা উপকরণ থেকে শুরু করে আধুনিক অনলাইন সেবা—সবকিছুর সমাধান দিতে আমরা আছি আপনার পাশে। নাটোরের বাগাতিপাড়ায় দীর্ঘ দিন ধরে সুনামের সাথে সেবা প্রদান করে আসছে সবুজ কম্পিউটার্স।</p>
+    <div class="hero-tag reveal" id="heroTag">✦ বাগাতিপাড়া, নাটোরের সেরা প্রতিষ্ঠান</div>
+    <h2 class="reveal reveal-delay-1" id="heroTitle">আপনার শিক্ষা ও ডিজিটাল সেবায়<br><span>বিশ্বস্ত সঙ্গী</span></h2>
+    <p class="reveal reveal-delay-2" id="heroText">আপনার দৈনন্দিন শিক্ষা উপকরণ থেকে শুরু করে আধুনিক অনলাইন সেবা—সবকিছুর সমাধান দিতে আমরা আছি আপনার পাশে। নাটোরের বাগাতিপাড়ায় দীর্ঘ দিন ধরে সুনামের সাথে সেবা প্রদান করে আসছে সবুজ কম্পিউটার্স।</p>
     <div class="hero-btns">
       <a href="#training" class="btn-hero-main">🎓 কোর্সে ভর্তি হন</a>
       <a href="#search" class="btn-hero-sec">🔍 ফলাফল দেখুন</a>
@@ -860,46 +949,46 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
 <!-- ==================== WHY US ==================== -->
 <section class="why-section" id="why">
-  <div class="sec-eyebrow">কেন আমাদের বেছে নেবেন</div>
-  <div class="sec-title">অন্যদের চেয়ে আমরা <span>কেন আলাদা?</span></div>
-  <div class="sec-desc">আমরা শুধু সেবা দিই না, আমরা আপনার ডিজিটাল জীবনকে সহজ করি। বিশ্বাসযোগ্যতা, দক্ষতা এবং আন্তরিকতা—এই তিনটি স্তম্ভের উপর দাঁড়িয়ে আছে আমাদের প্রতিষ্ঠান।</div>
+  <div class="sec-eyebrow reveal">কেন আমাদের বেছে নেবেন</div>
+  <div class="sec-title reveal reveal-delay-1">অন্যদের চেয়ে আমরা <span>কেন আলাদা?</span></div>
+  <div class="sec-desc reveal reveal-delay-2">আমরা শুধু সেবা দিই না, আমরা আপনার ডিজিটাল জীবনকে সহজ করি। বিশ্বাসযোগ্যতা, দক্ষতা এবং আন্তরিকতা—এই তিনটি স্তম্ভের উপর দাঁড়িয়ে আছে আমাদের প্রতিষ্ঠান।</div>
   <div class="why-grid" id="whyGrid">
-    <div class="why-card"><div class="why-icon">💰</div><h3>সাশ্রয়ী মূল্য</h3><p>বাজারের তুলনায় সর্বনিম্ন খরচে সর্বোচ্চ মানের সেবা ও প্রশিক্ষণ প্রদান করা হয়।</p></div>
-    <div class="why-card"><div class="why-icon">🏆</div><h3>অভিজ্ঞ পরিচালনা</h3><p>দক্ষ ও অভিজ্ঞ পরিচালকের তত্ত্বাবধানে প্রতিটি সেবা সর্বোচ্চ মান বজায় রেখে পরিচালিত হয়।</p></div>
-    <div class="why-card"><div class="why-icon">📜</div><h3>সরকারি স্বীকৃত সার্টিফিকেট</h3><p>BTEB অনুমোদিত কোর্সে সার্টিফিকেট প্রদান করা হয় যা চাকরির বাজারে সম্পূর্ণ গ্রহণযোগ্য।</p></div>
-    <div class="why-card"><div class="why-icon">⚡</div><h3>দ্রুত ও নির্ভরযোগ্য সেবা</h3><p>আপনার মূল্যবান সময় বাঁচাতে আমরা সবচেয়ে দ্রুত সময়ে সকল সেবা প্রদান করে থাকি।</p></div>
-    <div class="why-card"><div class="why-icon">🌿</div><h3>আন্তরিক পরিবেশ</h3><p>পারিবারিক আবহে শেখার সুযোগ। শিক্ষার্থীদের ব্যক্তিগত যত্ন ও মনোযোগ দেওয়া হয়।</p></div>
-    <div class="why-card"><div class="why-icon">📍</div><h3>সহজলভ্য অবস্থান</h3><p>তমালতলা বাজারের প্রাণকেন্দ্রে অবস্থিত হওয়ায় সহজেই যোগাযোগ ও যাতায়াত করা যায়।</p></div>
+    <div class="why-card reveal reveal-delay-1"><div class="why-icon">💰</div><h3>সাশ্রয়ী মূল্য</h3><p>বাজারের তুলনায় সর্বনিম্ন খরচে সর্বোচ্চ মানের সেবা ও প্রশিক্ষণ প্রদান করা হয়।</p></div>
+    <div class="why-card reveal reveal-delay-2"><div class="why-icon">🏆</div><h3>অভিজ্ঞ পরিচালনা</h3><p>দক্ষ ও অভিজ্ঞ পরিচালকের তত্ত্বাবধানে প্রতিটি সেবা সর্বোচ্চ মান বজায় রেখে পরিচালিত হয়।</p></div>
+    <div class="why-card reveal reveal-delay-3"><div class="why-icon">📜</div><h3>সরকারি স্বীকৃত সার্টিফিকেট</h3><p>BTEB অনুমোদিত কোর্সে সার্টিফিকেট প্রদান করা হয় যা চাকরির বাজারে সম্পূর্ণ গ্রহণযোগ্য।</p></div>
+    <div class="why-card reveal reveal-delay-4"><div class="why-icon">⚡</div><h3>দ্রুত ও নির্ভরযোগ্য সেবা</h3><p>আপনার মূল্যবান সময় বাঁচাতে আমরা সবচেয়ে দ্রুত সময়ে সকল সেবা প্রদান করে থাকি।</p></div>
+    <div class="why-card reveal reveal-delay-5"><div class="why-icon">🌿</div><h3>আন্তরিক পরিবেশ</h3><p>পারিবারিক আবহে শেখার সুযোগ। শিক্ষার্থীদের ব্যক্তিগত যত্ন ও মনোযোগ দেওয়া হয়।</p></div>
+    <div class="why-card reveal reveal-delay-5"><div class="why-icon">📍</div><h3>সহজলভ্য অবস্থান</h3><p>তমালতলা বাজারের প্রাণকেন্দ্রে অবস্থিত হওয়ায় সহজেই যোগাযোগ ও যাতায়াত করা যায়।</p></div>
   </div>
 </section>
 
 <!-- ==================== SERVICES ==================== -->
 <section class="services-section" id="services">
-  <div class="sec-eyebrow">আমাদের সেবাসমূহ</div>
-  <div class="sec-title">যা যা পাবেন <span>সবুজ কম্পিউটার্সে</span></div>
-  <div class="sec-desc">একটি জায়গায় সকল প্রয়োজনীয় ডিজিটাল ও শিক্ষা সেবা পাওয়ার সুবিধা কেবল আমরাই দিতে পারি।</div>
+  <div class="sec-eyebrow reveal">আমাদের সেবাসমূহ</div>
+  <div class="sec-title reveal reveal-delay-1">যা যা পাবেন <span>সবুজ কম্পিউটার্সে</span></div>
+  <div class="sec-desc reveal reveal-delay-2">একটি জায়গায় সকল প্রয়োজনীয় ডিজিটাল ও শিক্ষা সেবা পাওয়ার সুবিধা কেবল আমরাই দিতে পারি।</div>
   <div class="services-grid" id="svcGrid"></div>
 </section>
 
 <!-- ==================== TRAINING ==================== -->
 <section class="training-section" id="training">
-  <div class="sec-eyebrow">প্রশিক্ষণ কেন্দ্র</div>
-  <div class="sec-title">আপনার ক্যারিয়ার গড়ুন <span>আমাদের সাথে</span></div>
-  <div class="sec-desc">মনোরম পরিবেশে স্বল্প খরচে প্রফেশনাল কম্পিউটার প্রশিক্ষণ। কোর্স শেষে অবশ্যই সার্টিফিকেট প্রদান করা হবে।</div>
+  <div class="sec-eyebrow reveal">প্রশিক্ষণ কেন্দ্র</div>
+  <div class="sec-title reveal reveal-delay-1">আপনার ক্যারিয়ার গড়ুন <span>আমাদের সাথে</span></div>
+  <div class="sec-desc reveal reveal-delay-2">মনোরম পরিবেশে স্বল্প খরচে প্রফেশনাল কম্পিউটার প্রশিক্ষণ। কোর্স শেষে অবশ্যই সার্টিফিকেট প্রদান করা হবে।</div>
   <div class="training-cards" id="trnGrid"></div>
 </section>
 
 <!-- ==================== ACHIEVEMENTS ==================== -->
 <section class="achieve-section" id="achievements">
-  <div class="sec-eyebrow">আমাদের সাফল্য</div>
-  <div class="sec-title">সংখ্যায় <span>আমাদের গল্প</span></div>
-  <div class="sec-desc">প্রতিটি সংখ্যার পেছনে রয়েছে একটি সফল গল্প। আমাদের শিক্ষার্থীরাই আমাদের সবচেয়ে বড় অর্জন।</div>
+  <div class="sec-eyebrow reveal">আমাদের সাফল্য</div>
+  <div class="sec-title reveal reveal-delay-1">সংখ্যায় <span>আমাদের গল্প</span></div>
+  <div class="sec-desc reveal reveal-delay-2">প্রতিটি সংখ্যার পেছনে রয়েছে একটি সফল গল্প। আমাদের শিক্ষার্থীরাই আমাদের সবচেয়ে বড় অর্জন।</div>
   <div class="achieve-grid">
-    <div class="ach-card"><div class="ach-num" id="achTotal">৩১৯+</div><div class="ach-label">মোট শিক্ষার্থী</div></div>
-    <div class="ach-card"><div class="ach-num">৯৫%+</div><div class="ach-label">পাস রেট</div></div>
-    <div class="ach-card"><div class="ach-num">২টি</div><div class="ach-label">সার্টিফিকেট কোর্স</div></div>
-    <div class="ach-card"><div class="ach-num">৫+</div><div class="ach-label">বছরের অভিজ্ঞতা</div></div>
-    <div class="ach-card"><div class="ach-num">৪টি</div><div class="ach-label">ডিজিটাল সেবা</div></div>
+    <div class="ach-card reveal reveal-delay-1"><div class="ach-num" id="achTotal">৩১৯+</div><div class="ach-label">মোট শিক্ষার্থী</div></div>
+    <div class="ach-card reveal reveal-delay-2"><div class="ach-num">৯৫%+</div><div class="ach-label">পাস রেট</div></div>
+    <div class="ach-card reveal reveal-delay-3"><div class="ach-num">২টি</div><div class="ach-label">সার্টিফিকেট কোর্স</div></div>
+    <div class="ach-card reveal reveal-delay-4"><div class="ach-num">৫+</div><div class="ach-label">বছরের অভিজ্ঞতা</div></div>
+    <div class="ach-card reveal reveal-delay-5"><div class="ach-num">৪টি</div><div class="ach-label">ডিজিটাল সেবা</div></div>
   </div>
 </section>
 
@@ -949,9 +1038,9 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
 <!-- ═══════════════ NOTICE BOARD ═══════════════ -->
 <section class="sec sec-white" id="notice" style="padding:70px 6%">
-  <div class="sec-eyebrow">গুরুত্বপূর্ণ তথ্য</div>
-  <div class="sec-title">নোটিশ <span>বোর্ড</span></div>
-  <div class="sec-desc">সবুজ কম্পিউটার্সের সকল গুরুত্বপূর্ণ নোটিশ ও বিজ্ঞপ্তি এখানে পাওয়া যাবে।</div>
+  <div class="sec-eyebrow reveal">গুরুত্বপূর্ণ তথ্য</div>
+  <div class="sec-title reveal reveal-delay-1">নোটিশ <span>বোর্ড</span></div>
+  <div class="sec-desc reveal reveal-delay-2">সবুজ কম্পিউটার্সের সকল গুরুত্বপূর্ণ নোটিশ ও বিজ্ঞপ্তি এখানে পাওয়া যাবে।</div>
   <div id="noticeBoard" style="margin-top:36px;display:grid;gap:16px;max-width:860px;margin-left:auto;margin-right:auto"></div>
   <div id="noNotice" style="text-align:center;padding:40px;color:var(--muted);font-size:15px;display:none">
     📋 এই মুহূর্তে কোনো নোটিশ নেই।
@@ -979,8 +1068,8 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
 <section class="cta-section">
   <div class="cta-inner">
-    <h2>আজই যোগ দিন আমাদের সাথে</h2>
-    <p>দক্ষ ও অভিজ্ঞ প্রশিক্ষকের তত্ত্বাবধানে মাত্র ৬ মাসে সম্পূর্ণ কম্পিউটার প্রশিক্ষণ নিন এবং আপনার স্বপ্নের ক্যারিয়ার গড়ে তুলুন।</p>
+    <h2 class="reveal">আজই যোগ দিন আমাদের সাথে</h2>
+    <p class="reveal reveal-delay-1">দক্ষ ও অভিজ্ঞ প্রশিক্ষকের তত্ত্বাবধানে মাত্র ৬ মাসে সম্পূর্ণ কম্পিউটার প্রশিক্ষণ নিন এবং আপনার স্বপ্নের ক্যারিয়ার গড়ে তুলুন।</p>
     <div class="cta-btns">
       <a href="tel:01724084350" id="ctaPhone" class="btn-cta1">📞 এখনই যোগাযোগ করুন</a>
       <a href="#training" class="btn-cta2">🎓 কোর্স দেখুন</a>
@@ -990,9 +1079,9 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
 <!-- ==================== CONTACT ==================== -->
 <section class="contact-section" id="contact">
-  <div class="sec-eyebrow">যোগাযোগ করুন</div>
-  <div class="sec-title">আমাদের সাথে <span>কথা বলুন</span></div>
-  <div class="sec-desc">যেকোনো প্রশ্ন, মতামত বা ভর্তির জন্য সরাসরি যোগাযোগ করুন। আমরা সবসময় আপনার পাশে আছি।</div>
+  <div class="sec-eyebrow reveal">যোগাযোগ করুন</div>
+  <div class="sec-title reveal reveal-delay-1">আমাদের সাথে <span>কথা বলুন</span></div>
+  <div class="sec-desc reveal reveal-delay-2">যেকোনো প্রশ্ন, মতামত বা ভর্তির জন্য সরাসরি যোগাযোগ করুন। আমরা সবসময় আপনার পাশে আছি।</div>
 
   <!-- INFO + HOURS -->
   <div class="contact-inner" style="margin-top:40px">
@@ -1117,8 +1206,8 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
   <!-- Public Feedback Display -->
   <div style="margin-top:50px">
-    <div class="sec-eyebrow">গ্রাহকদের মতামত</div>
-    <div class="sec-title" style="margin-bottom:8px">তারা কী বলছেন <span>আমাদের সম্পর্কে</span></div>
+    <div class="sec-eyebrow reveal">গ্রাহকদের মতামত</div>
+    <div class="sec-title reveal reveal-delay-1" style="margin-bottom:8px">তারা কী বলছেন <span>আমাদের সম্পর্কে</span></div>
     <div class="testi-grid" id="testiGrid" style="margin-top:30px"></div>
     <div id="publicFeedbacks" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px"></div>
   </div>
@@ -1155,6 +1244,73 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
     <span style="font-size:12px">বাগাতিপাড়া, নাটোর</span>
   </div>
 </footer>
+
+<script>
+// ===== PAGE LOADER =====
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var loader = document.getElementById('pageLoader');
+    if(loader) {
+      loader.classList.add('hide');
+      setTimeout(function(){ 
+        loader.style.display='none';
+        // Trigger hero section reveals immediately after loader
+        document.querySelectorAll('.hero .reveal').forEach(function(el){
+          el.classList.add('visible');
+        });
+      }, 300);
+    }
+  }, 600);
+});
+
+// ===== SMART GLASSMORPHISM NAVBAR =====
+(function(){
+  var header = document.querySelector('header');
+  var lastY = 0;
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){
+      window.requestAnimationFrame(function(){
+        var y = window.scrollY;
+        if(y > lastY && y > 80){
+          header.classList.add('nav-hidden');
+        } else {
+          header.classList.remove('nav-hidden');
+        }
+        if(y > 50){
+          header.classList.add('nav-glass');
+        } else {
+          header.classList.remove('nav-glass');
+        }
+        lastY = y;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+})();
+
+// ===== SCROLL REVEAL =====
+(function(){
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.12, rootMargin: '0px 0px -40px 0px'});
+  function observeAll(){
+    document.querySelectorAll('.reveal').forEach(function(el){
+      observer.observe(el);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', observeAll);
+  // Also re-observe after dynamic content renders
+  window._revealObserver = observer;
+  window._reObserveReveal = observeAll;
+})();
+</script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===================================================
@@ -1596,28 +1752,33 @@ function renderGeneral(){
 
 function renderServices(){
   const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  document.getElementById('svcGrid').innerHTML=DB.services.map(s=>`
-    <div class="svc-card"><span class="svc-emoji">${_e(s.icon)}</span><h3>${_e(s.title)}</h3><p>${_e(s.desc)}</p></div>
+  const delays=['','reveal-delay-1','reveal-delay-2','reveal-delay-3','reveal-delay-4','reveal-delay-5'];
+  document.getElementById('svcGrid').innerHTML=DB.services.map((s,i)=>`
+    <div class="svc-card reveal ${delays[i%6]}"><span class="svc-emoji">${_e(s.icon)}</span><h3>${_e(s.title)}</h3><p>${_e(s.desc)}</p></div>
   `).join('');
+  if(window._reObserveReveal) window._reObserveReveal();
 }
 
 function renderTraining(){
   const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  document.getElementById('trnGrid').innerHTML=DB.training.map(t=>`
-    <div class="trn-card">
+  const delays=['','reveal-delay-1','reveal-delay-2','reveal-delay-3','reveal-delay-4','reveal-delay-5'];
+  document.getElementById('trnGrid').innerHTML=DB.training.map((t,i)=>`
+    <div class="trn-card reveal ${delays[i%6]}">
       <span class="trn-badge">${_e(t.badge||'কোর্স')}</span>
       <h3>${_e(t.title)}</h3>
       <ul class="trn-features">${(Array.isArray(t.items)?t.items:[]).map(i=>`<li>${_e(i)}</li>`).join('')}</ul>
       <a href="#contact" class="trn-cta">ভর্তি হতে যোগাযোগ করুন →</a>
     </div>
   `).join('');
+  if(window._reObserveReveal) window._reObserveReveal();
 }
 
 function renderTestimonials(){
   const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const stars=n=>'⭐'.repeat(Math.min(5,Math.max(1,n||5)));
-  document.getElementById('testiGrid').innerHTML=DB.testimonials.map(t=>`
-    <div class="testi-card">
+  const delays=['','reveal-delay-1','reveal-delay-2','reveal-delay-3','reveal-delay-4','reveal-delay-5'];
+  document.getElementById('testiGrid').innerHTML=DB.testimonials.map((t,i)=>`
+    <div class="testi-card reveal ${delays[i%6]}">
       <div class="stars">${stars(t.stars)}</div>
       <div class="testi-text">${_e(t.text)}</div>
       <div class="testi-author">
@@ -1626,6 +1787,7 @@ function renderTestimonials(){
       </div>
     </div>
   `).join('');
+  if(window._reObserveReveal) window._reObserveReveal();
 }
 
 function renderContact(){
