@@ -2438,7 +2438,7 @@ function buildRegCard(){
   c.fillText(DB.general.name||'সবুজ কম্পিউটার্স', W/2, 86);
   // English fixed name
   c.font='bold 30px Arial'; c.fillStyle='#111';
-  c.fillText((DB.general.name||'SABUJ COMPUTER TRAINING CENTER').toUpperCase(), W/2, 126);
+  c.fillText('SABUJ COMPUTER TRAINING CENTER', W/2, 126);
   // Address
   c.font='20px "Hind Siliguri",Arial'; c.fillStyle='#555';
   c.fillText(DB.general.address||'তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর', W/2, 157);
@@ -2531,7 +2531,7 @@ function buildRegCard(){
   drawLocalQR(c, qrX2, qrY2, qrSz, verifyUrl);
 
   // ── Calculate positions for rest of card ──
-  const afterY = Math.max(ry, qrY2+qrSz+30) + 20;
+  const afterY = Math.max(ry, qrY2+qrSz+30) + 150;
   const noteH = 80;
   const sigY2 = afterY + noteH + 20;
   const ftY2 = sigY2 + 70;
