@@ -68,6 +68,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <!-- Real scannable QR code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Excel Upload Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --g1:#0d3d1f;--g2:#1a6b35;--g3:#2e9e52;--g4:#5dd488;
@@ -748,8 +750,15 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
       <!-- STUDENTS -->
       <div class="admin-section" id="tab-students">
-        <div class="student-add-form">
-          <h4 style="color:var(--g1);margin-bottom:18px;font-size:16px">শিক্ষার্থী যোগ / সম্পাদনা</h4>
+<div class="student-add-form">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+            <h4 style="color:var(--g1);font-size:16px;margin:0">শিক্ষার্থী যোগ / সম্পাদনা</h4>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
+              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#e2e8f0; color:#1e293b" onclick="document.getElementById('bulkExcelInput').click()">📥 Excel থেকে আপলোড</button>
+              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dbeafe; color:#1e3a8a" onclick="downloadExcelTemplate()">📄 ডেমো ফাইল ডাউনলোড</button>
+            </div>
+          </div>
           <input type="hidden" id="s-edit-idx" value="">
           <div class="fr3">
             <div class="fg"><label>নাম</label><input id="s-name" type="text" placeholder="শিক্ষার্থীর নাম"></div>
@@ -3194,7 +3203,113 @@ function clearStudentForm(){
   const fdp=document.getElementById('feeDuePreview');if(fdp)fdp.style.display='none';
 }
 
+// ===================================================
+// BULK UPLOAD FROM EXCEL
+// ===================================================
+function downloadExcelTemplate() {
+  const ws_data = [
+    ["Name", "Registration No", "Phone", "Father Name", "Mother Name", "Gender", "Session", "Year", "Address", "Course", "Result", "Fee Total", "Fee Paid", "Fee Status"],
+    ["Abdur Rahman", "500101", "01700000000", "Karim", "Rahima", "Male", "January - June", "2024", "Natore", "BTEB", "A+", "3000", "3000", "Paid"],
+    ["Fatema Begum", "500102", "01800000000", "Rahim", "Salma", "Female", "January - June", "2024", "Rajshahi", "FOUNDATION", "", "2500", "1000", "Partial"]
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Students");
+  XLSX.writeFile(wb, "Student_Upload_Template.xlsx");
+}
 
+function handleBulkUpload(event) {
+  if(!_adm.requireAuth()) return;
+  const file = event.target.files[0];
+  if (!file) return;
+
+  showNotif('⏳ ফাইল পড়া হচ্ছে, অপেক্ষা করুন...');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+      
+      if (jsonData.length === 0) {
+        showNotif('❌ ফাইলে কোনো ডেটা নেই!');
+        return;
+      }
+
+      let addedCount = 0;
+      let duplicateCount = 0;
+
+      jsonData.forEach(row => {
+        const name = String(row["Name"] || "").trim();
+        const reg = String(row["Registration No"] || "").trim();
+        
+        if (!name || !reg) return;
+
+        const isDuplicate = DB.students.some(s => s.reg === reg);
+        if (isDuplicate) {
+          duplicateCount++;
+          return;
+        }
+
+        const feeTotal = parseInt(row["Fee Total"]) || 0;
+        const feePaid = parseInt(row["Fee Paid"]) || 0;
+        const feeDue = Math.max(0, feeTotal - feePaid);
+        
+        let feeStatus = String(row["Fee Status"] || "").trim();
+        if(!feeStatus && feeTotal > 0) {
+           feeStatus = feeDue <= 0 ? 'Paid' : (feePaid > 0 ? 'Partial' : 'Due');
+        }
+
+        const newStudent = {
+          name: name,
+          reg: reg,
+          phone: String(row["Phone"] || "").trim(),
+          fatherName: String(row["Father Name"] || "").trim(),
+          motherName: String(row["Mother Name"] || "").trim(),
+          gender: String(row["Gender"] || "").trim(),
+          session: String(row["Session"] || "").trim(),
+          year: String(row["Year"] || "").trim(),
+          address: String(row["Address"] || "").trim(),
+          course: String(row["Course"] || "").trim().toUpperCase(),
+          result: String(row["Result"] || "").trim(),
+          feeTotal: feeTotal,
+          feePaid: feePaid,
+          feeDue: feeDue,
+          feeStatus: feeStatus,
+          photo: null
+        };
+
+        DB.students.push(newStudent);
+        addedCount++;
+      });
+
+      if (addedCount > 0) {
+        saveDB('students', DB.students);
+        renderAdminStudents();
+        if(document.getElementById('achTotal')) document.getElementById('achTotal').textContent = DB.students.length + '+';
+        if(document.getElementById('statStudents')) document.getElementById('statStudents').textContent = DB.students.length + '+';
+        
+        let msg = `✅ সফলভাবে ${addedCount} জন শিক্ষার্থী যোগ করা হয়েছে!`;
+        if (duplicateCount > 0) msg += ` (${duplicateCount} টি ডুপ্লিকেট বাদ দেওয়া হয়েছে)`;
+        showNotif(msg);
+      } else if (duplicateCount > 0) {
+        showNotif(`⚠️ সব ডেটা ডুপ্লিকেট! নতুন কিছু যোগ করা হয়নি।`);
+      } else {
+        showNotif('❌ সঠিক ফরম্যাটে ডেটা পাওয়া যায়নি। ডেমো ফাইলটি দেখুন।');
+      }
+
+    } catch (error) {
+      console.error(error);
+      showNotif('❌ ফাইল পড়তে সমস্যা হয়েছে!');
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
 function changePwd(){
   if(!_adm.requireAuth()) return;
   const cur=document.getElementById('pwd-cur').value;
