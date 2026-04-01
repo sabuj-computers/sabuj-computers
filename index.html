@@ -1746,7 +1746,7 @@ function renderGeneral(){
   }
   // Logo
   const lc=document.getElementById('hdrLogo');
-  if(g.logo){lc.innerHTML=`<img src="${g.logo}" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;}
+  if(g.logo){lc.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;}
   else{lc.innerHTML=g.name?g.name[0]:'স';}
 }
 
