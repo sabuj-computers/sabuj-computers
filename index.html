@@ -756,6 +756,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
               <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#e2e8f0; color:#1e293b" onclick="document.getElementById('bulkExcelInput').click()">📥 Excel থেকে আপলোড</button>
+              <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dcfce7; color:#166534" onclick="printStudentList()">🖨️ প্রিন্ট / PDF (ছবিসহ)</button>
               <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dbeafe; color:#1e3a8a" onclick="downloadExcelTemplate()">📄 ডেমো ফাইল ডাউনলোড</button>
             </div>
           </div>
@@ -3309,6 +3310,117 @@ function handleBulkUpload(event) {
     event.target.value = '';
   };
   reader.readAsArrayBuffer(file);
+}
+// ===================================================
+// PRINT / SAVE AS PDF (OFFICIAL SHEET WITH PHOTOS)
+// ===================================================
+function printStudentList() {
+  if(!_adm.requireAuth()) return;
+  if (!DB.students || DB.students.length === 0) {
+    showNotif('❌ প্রিন্ট করার মতো কোনো ডেটা নেই!');
+    return;
+  }
+
+  showNotif('⏳ PDF/প্রিন্ট পেজ তৈরি হচ্ছে...');
+
+  // নতুন একটি উইন্ডো ওপেন করে সেখানে ডিজাইন তৈরি করা হবে
+  const w = window.open('', '_blank');
+  
+  // প্রতিষ্ঠানের লোগো থাকলে সেটা দেখাবে
+  const logoHtml = DB.general.logo ? `<img src="${DB.general.logo}" crossorigin="anonymous" style="height: 60px; margin-bottom: 5px;">` : '';
+
+  let html = `
+  <html>
+  <head>
+    <title>Student Details Report - ${DB.general.name || 'SCTC'}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
+      .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0d3d1f; padding-bottom: 10px; }
+      h2 { color: #0d3d1f; margin: 0 0 5px 0; font-size: 24px; }
+      p { margin: 0; font-size: 14px; color: #555; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { border: 1px solid #888; padding: 8px 10px; text-align: left; font-size: 13px; vertical-align: middle; }
+      th { background-color: #e8f4ee; color: #0d3d1f; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+      .photo { width: 50px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+      .no-photo { width: 50px; height: 60px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #aaa; border-radius: 4px; border: 1px dashed #ccc; text-align: center; }
+      
+      /* প্রিন্ট করার সময় ডিজাইন ঠিক রাখার কোড */
+      @media print {
+        @page { margin: 1cm; size: A4 portrait; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        thead { display: table-header-group; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      ${logoHtml}
+      <h2>${DB.general.name || 'SABUJ COMPUTER TRAINING CENTER'}</h2>
+      <p><strong>Official Student Details Report</strong></p>
+      <p>Date: ${new Date().toLocaleDateString('en-GB')} | Total Students: ${DB.students.length}</p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;">Sl</th>
+          <th style="width: 70px; text-align: center;">Photo</th>
+          <th>Name & Reg. No</th>
+          <th>Course & Session</th>
+          <th>Contact Info</th>
+          <th style="width: 80px; text-align: center;">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  // সব স্টুডেন্টের ডেটা টেবিলে বসানো
+  DB.students.forEach((s, i) => {
+    // ছবি থাকলে দেখাবে, না থাকলে No Photo দেখাবে (crossorigin="anonymous" যুক্ত করা হয়েছে)
+    const photoHtml = s.photo 
+        ? `<img src="${s.photo}" crossorigin="anonymous" class="photo">` 
+        : `<div class="no-photo">No<br>Photo</div>`;
+    
+    html += `
+        <tr>
+          <td style="text-align: center;">${i + 1}</td>
+          <td style="text-align: center;">${photoHtml}</td>
+          <td>
+            <strong style="font-size: 15px; color: #0d3d1f;">${s.name || '—'}</strong><br>
+            <span style="color:#555; font-size:12px;">Reg: <strong>${s.reg || '—'}</strong></span>
+          </td>
+          <td>
+            <strong>${s.course || '—'}</strong><br>
+            <span style="color:#555; font-size:12px;">${s.session || ''} ${s.year ? '('+s.year+')' : ''}</span>
+          </td>
+          <td>
+            ${s.phone || '—'}<br>
+            <span style="color:#555; font-size:12px;">${s.address || '—'}</span>
+          </td>
+          <td style="text-align: center;">
+            <strong style="color: ${s.result === 'F' ? 'red' : '#0d3d1f'};">${s.result || 'Pending'}</strong>
+          </td>
+        </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+    
+    <!-- পেজ লোড হওয়ার সাথে সাথে অটোমেটিক প্রিন্ট ডায়ালগ ওপেন হবে -->
+    <script>
+      window.onload = function() {
+        setTimeout(() => { window.print(); }, 800);
+      };
+    <\/script>
+  </body>
+  </html>
+  `;
+
+  w.document.write(html);
+  w.document.close();
 }
 function changePwd(){
   if(!_adm.requireAuth()) return;
