@@ -2404,19 +2404,11 @@ function buildRegCard(){
   if(wmLogoImg&&wmLogoImg.complete&&wmLogoImg.naturalWidth>0){
     try{
       c.globalAlpha=0.06;
-      const wmSz=400;
+      const wmSz=700;
       c.drawImage(wmLogoImg, W/2-wmSz/2, H/2-wmSz/2, wmSz, wmSz);
     }catch(e){}
   }
   c.restore();
-  // Text watermark
-  c.save();
-  c.globalAlpha=0.035; c.font='bold 110px Arial'; c.fillStyle='#0d3d1f';
-  c.textAlign='center'; c.textBaseline='middle';
-  c.translate(W/2,H/2); c.rotate(-0.28);
-  c.fillText((DB.general.name||'SABUJ COMPUTER TRAINING CENTER').toUpperCase(),0,-70);
-  c.fillText('REGISTRATION CARD',0,70);
-  c.restore(); c.textBaseline='alphabetic';
 
   const M=52;
 
@@ -2531,7 +2523,7 @@ function buildRegCard(){
   drawLocalQR(c, qrX2, qrY2, qrSz, verifyUrl);
 
   // ── Calculate positions for rest of card ──
-  const afterY = Math.max(ry, qrY2+qrSz+30) + 150;
+  const afterY = Math.max(ry, qrY2+qrSz+30) + 250;
   const noteH = 80;
   const sigY2 = afterY + noteH + 20;
   const ftY2 = sigY2 + 70;
