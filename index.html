@@ -419,76 +419,88 @@ footer{background:linear-gradient(135deg,#050e07,var(--g1));color:rgba(255,255,2
 .footer-bottom span{color:rgba(255,255,255,.7)}
 .footer-tagline{color:var(--gold2);font-weight:600}
 
-/* ===== PROFESSIONAL WELCOME GATE ===== */
-#welcomeGate {
-  position: fixed; inset: 0; z-index: 999999;
-  background: linear-gradient(135deg, #05140a 0%, #0d3d1f 50%, #05140a 100%);
+/* ===== PREMIUM GRAND REVEAL GATE (ROYAL STYLE) ===== */
+#premiumGate {
+  position: fixed; inset: 0; z-index: 99999999; /* সবার উপরে থাকবে */
   display: flex; align-items: center; justify-content: center;
-  transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
   overflow: hidden;
 }
-/* ব্যাকগ্রাউন্ডে সুন্দর মুভিং প্যাটার্ন */
-#welcomeGate::before {
-  content: ''; position: absolute; width: 200%; height: 200%;
-  background: radial-gradient(circle, rgba(200,168,71,0.05) 10%, transparent 20%), 
-              radial-gradient(circle, rgba(46,158,82,0.05) 10%, transparent 20%);
-  background-size: 60px 60px; animation: bgMove 20s linear infinite;
-}
-@keyframes bgMove { 0% { transform: translate(0, 0); } 100% { transform: translate(-60px, -60px); } }
 
-/* বাটন ক্লিক করলে স্ক্রিনটি উপরে উঠে যাবে */
-#welcomeGate.open {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
+/* দুই দিকের রাজকীয় পর্দা (Doors) */
+.gate-door {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background: linear-gradient(145deg, #05140a 0%, #0d3d1f 100%);
+  transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+  z-index: 1;
+}
+.gate-door.left { left: 0; border-right: 2px solid var(--gold); }
+.gate-door.right { right: 0; border-left: 2px solid var(--gold); }
+
+/* পর্দার গায়ে সুন্দর জলছাপ (Pattern) */
+.gate-door::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(200,168,71,0.15) 1px, transparent 1px);
+  background-size: 25px 25px; opacity: 0.6;
 }
 
-/* গ্লাস-ইফেক্ট কার্ড */
-.gate-content {
-  position: relative; z-index: 1; text-align: center;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 50px 40px; border-radius: 24px;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(200,168,71,0.2);
-  max-width: 90%; width: 540px;
-  transform: translateY(30px); opacity: 0;
-  animation: gatePopUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
-}
-@keyframes gatePopUp { to { transform: translateY(0); opacity: 1; } }
+/* বাটন ক্লিক করলে পর্দা দুই দিকে সরে যাবে */
+#premiumGate.open .gate-door.left { transform: translateX(-100%); }
+#premiumGate.open .gate-door.right { transform: translateX(100%); }
+#premiumGate.open { pointer-events: none; }
 
-/* ভাসমান লোগো/আইকন */
-.gate-logo {
+/* মাঝখানের গ্লাস কার্ড */
+.gate-card {
+  position: relative; z-index: 2;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(200, 168, 71, 0.3);
+  padding: 50px 40px; border-radius: 20px;
+  text-align: center; width: 90%; max-width: 500px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(200,168,71,0.1);
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: cardDrop 1s ease-out forwards;
+}
+@keyframes cardDrop {
+  0% { transform: translateY(-50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+/* ক্লিক করার পর কার্ডটি জুম হয়ে মিলিয়ে যাবে */
+#premiumGate.open .gate-card { transform: scale(1.2); opacity: 0; }
+
+/* কার্ডের ভেতরের কন্টেন্ট */
+.gate-icon {
   width: 80px; height: 80px; margin: 0 auto 20px;
   background: linear-gradient(135deg, var(--gold), #e8b820);
-  border-radius: 20px; display: flex; align-items: center; justify-content: center;
-  font-size: 40px; color: #1a1a1a; box-shadow: 0 10px 25px rgba(200,168,71,0.4);
-  animation: floatLogo 3s ease-in-out infinite;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; box-shadow: 0 0 30px rgba(200,168,71,0.5);
+  animation: pulseGlow 2s infinite;
 }
-@keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(200,168,71,0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 50px rgba(200,168,71,0.8); transform: scale(1.05); }
+}
+.gate-title { font-family: 'Noto Serif Bengali', serif; font-size: 32px; color: #fff; margin-bottom: 5px; font-weight: 700;}
+.gate-subtitle { font-family: 'Hind Siliguri', sans-serif; font-size: 18px; color: var(--gold2); margin-bottom: 30px; letter-spacing: 1px;}
 
-.gate-title { font-family: 'Noto Serif Bengali', serif; font-size: 28px; color: #fff; font-weight: 700; line-height: 1.4; margin-bottom: 10px; }
-.gate-subtitle { font-family: 'Hind Siliguri', sans-serif; font-size: 18px; color: var(--gold2); font-weight: 600; margin-bottom: 15px; letter-spacing: 0.5px; }
-.gate-welcome { font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 35px; }
-
-/* চকচকে অ্যানিমেটেড বাটন */
-.btn-gate {
-  background: linear-gradient(135deg, var(--gold), #e8b820);
-  color: #2a1800; border: none; padding: 16px 40px; border-radius: 14px;
+/* প্রিমিয়াম বাটন */
+.btn-premium {
+  background: transparent; color: var(--gold2);
+  border: 2px solid var(--gold); padding: 14px 40px; border-radius: 30px;
   font-family: 'Hind Siliguri', sans-serif; font-size: 18px; font-weight: 700;
-  cursor: pointer; box-shadow: 0 8px 24px rgba(200,168,71,0.4);
-  transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px;
-  position: relative; overflow: hidden;
+  cursor: pointer; transition: all 0.4s; position: relative; overflow: hidden;
+  text-transform: uppercase; letter-spacing: 1px;
 }
-.btn-gate::after {
-  content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shine 3s infinite;
+.btn-premium::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg, var(--gold), #e8b820);
+  z-index: -1; transform: scaleX(0); transform-origin: right;
+  transition: transform 0.4s ease;
 }
-@keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
-.btn-gate:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(200,168,71,0.6); }
-.btn-gate svg { width: 20px; height: 20px; transition: transform 0.3s; }
-.btn-gate:hover svg { transform: translateX(5px); }
+.btn-premium:hover::before { transform: scaleX(1); transform-origin: left; }
+.btn-premium:hover { color: #1a1a1a; box-shadow: 0 10px 30px rgba(200,168,71,0.5); border-color: transparent;}
+
+/* বোরিং গোল লোডারটি (Spinner) গায়েব করার ম্যাজিক কোড */
+body.gate-active #globalLoader { display: none !important; }
 
 /* ===== SMART GLASSMORPHISM NAVBAR ===== */
 header{
@@ -682,18 +694,20 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 </head>
 <body>
 
-<!-- ==================== PROFESSIONAL WELCOME GATE ==================== -->
-<div id="welcomeGate">
-  <div class="gate-content">
-    <div class="gate-logo">💻</div>
+<!-- ==================== PREMIUM GRAND REVEAL GATE ==================== -->
+<div id="premiumGate">
+  <!-- দুই দিকের পর্দা -->
+  <div class="gate-door left"></div>
+  <div class="gate-door right"></div>
+  
+  <!-- মাঝখানের কার্ড -->
+  <div class="gate-card">
+    <div class="gate-icon">✨</div>
     <h1 class="gate-title">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1>
     <h2 class="gate-subtitle">বুক ক্যাম্পাস এন্ড ফটোষ্ট্যাট</h2>
-    <p class="gate-welcome">আপনাকে আমাদের ডিজিটাল প্ল্যাটফর্মে স্বাগতম!</p>
+    <p style="color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 35px;">আমাদের ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম</p>
     
-    <button class="btn-gate" onclick="enterWebsite()">
-      এগিয়ে যান
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-    </button>
+    <button class="btn-premium" onclick="openPremiumGate()">প্রবেশ করুন</button>
   </div>
 </div>
 
@@ -1357,31 +1371,38 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 </footer>
 
 <script>
-// ===== WELCOME GATE LOGIC =====
-function enterWebsite() {
-  const gate = document.getElementById('welcomeGate');
+// ===== PREMIUM GATE LOGIC =====
+// শুরুতে বডি-তে একটি ক্লাস যুক্ত করছি, যা আপনার আগের বোরিং স্পিনারটিকে লুকিয়ে রাখবে
+document.body.classList.add('gate-active'); 
+
+function openPremiumGate() {
+  const gate = document.getElementById('premiumGate');
   if(gate) {
-    // গেট খোলার অ্যানিমেশন (পর্দা উপরে উঠে যাবে)
+    // গেট খোলার অ্যানিমেশন চালু (পর্দা দুই দিকে সরে যাবে)
     gate.classList.add('open');
     
-    // ওয়েবসাইটের ভেতরের অ্যানিমেশনগুলো ট্রিগার করা
-    setTimeout(function(){
+    // ১.২ সেকেন্ড পর (পর্দা পুরোপুরি সরে যাওয়ার পর) গেটটি রিমুভ করে দেব
+    setTimeout(() => {
+      document.body.classList.remove('gate-active'); // স্পিনার হাইড করার ক্লাসটি সরিয়ে দিলাম
       gate.style.display = 'none';
+      
+      // ওয়েবসাইটের ভেতরের টেক্সটগুলোর অ্যানিমেশন চালু করা
       document.querySelectorAll('.hero .reveal').forEach(function(el){
         el.classList.add('visible');
       });
-    }, 800); // 0.8s CSS transition এর সাথে মিল রেখে
+    }, 1200); 
 
-    // সেশন স্টোরেজে সেভ করা, যাতে রিলোড দিলে বারবার না আসে (ইউজার বিরক্ত হবে না)
-    sessionStorage.setItem('sctc_welcomed', 'true');
+    // সেশন স্টোরেজে সেভ করা, যাতে রিলোড দিলে বারবার না আসে
+    sessionStorage.setItem('sctc_premium_welcomed', 'true');
   }
 }
 
 window.addEventListener('DOMContentLoaded', function() {
   // যদি ইউজার আগেই গেট পার হয়ে থাকে, তবে আর দেখাবে না
-  if(sessionStorage.getItem('sctc_welcomed') === 'true') {
-    const gate = document.getElementById('welcomeGate');
+  if(sessionStorage.getItem('sctc_premium_welcomed') === 'true') {
+    const gate = document.getElementById('premiumGate');
     if(gate) gate.style.display = 'none';
+    document.body.classList.remove('gate-active');
     
     setTimeout(function() {
       document.querySelectorAll('.hero .reveal').forEach(function(el){
