@@ -648,6 +648,25 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
   <div class="loader-dots"><span></span><span></span><span></span></div>
 </div>
 
+<!-- ANNOUNCEMENT MODAL -->
+<div id="announceModal" style="position:fixed;inset:0;background:rgba(5,20,10,.85);z-index:99999;backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;opacity:0;transition:opacity 0.4s ease;">
+    <div style="background:#fff;border-radius:24px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.5);transform:translateY(40px) scale(0.95);transition:all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);" id="announceCard">
+        <div style="background:linear-gradient(135deg,#0d3d1f,#1a6b35);padding:30px 24px 24px;text-align:center;position:relative;border-bottom:4px solid var(--gold);">
+            <button onclick="closeAnnouncement()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">✕</button>
+            <div style="font-size:48px;margin-bottom:12px;animation:waPulse 2s infinite;">📢</div>
+            <h3 id="annTitle" style="color:#fff;font-family:'Noto Serif Bengali';font-size:24px;margin:0;font-weight:700;line-height:1.3;">শিরোনাম</h3>
+            <p id="annDate" style="color:rgba(255,255,255,.8);font-size:13px;margin-top:8px;font-weight:500;">তারিখ</p>
+        </div>
+        <div style="padding:32px 28px;">
+            <p id="annDesc" style="color:#4a6040;font-size:16px;line-height:1.7;margin-bottom:28px;white-space:pre-wrap;text-align:center;"></p>
+            <div id="annPdfBox" style="display:none;text-align:center;margin-bottom:24px;">
+                <a id="annPdfBtn" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#f0f8f4;color:#1a6b35;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:bold;border:2px solid #b8dfc4;transition:all 0.2s;" onmouseover="this.style.background='#e2f5ea';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#f0f8f4';this.style.transform='translateY(0)'">📄 বিস্তারিত নোটিশ দেখুন (PDF)</a>
+            </div>
+            <button onclick="closeAnnouncement()" style="width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#e8b820);color:#2a1800;border:none;border-radius:14px;font-family:'Hind Siliguri';font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 6px 20px rgba(200,168,71,.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">ঠিক আছে, বুঝতে পেরেছি</button>
+        </div>
+    </div>
+</div>
+  
 <!-- PASSWORD MODAL -->
 <div class="pwd-overlay" id="pwdOverlay">
   <div class="pwd-card">
@@ -902,6 +921,16 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
             <input type="checkbox" id="n-new" checked style="width:16px;height:16px;cursor:pointer">
             <label for="n-new" style="font-size:13px;cursor:pointer;margin:0">🟢 "নতুন" badge দেখাবে</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:15px;margin-top:12px;background:#fff7ed;padding:12px;border-radius:10px;border:1px solid #fed7aa;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <input type="checkbox" id="n-announce" style="width:16px;height:16px;cursor:pointer" onchange="document.getElementById('n-until-box').style.display=this.checked?'block':'none'">
+                <label for="n-announce" style="font-size:13px;cursor:pointer;margin:0;color:#9a3412;font-weight:bold;">🔔 পপ-আপ অ্যানাউন্সমেন্ট (ওয়েবসাইটে ঢুকলেই দেখাবে)</label>
+            </div>
+            <div id="n-until-box" style="display:none;flex:1;min-width:200px;">
+                <label style="font-size:11px;color:#9a3412;display:block;margin-bottom:4px;">কত তারিখ পর্যন্ত দেখাবে? (খালি রাখলে সবসময়)</label>
+                <input type="date" id="n-announce-until" style="padding:6px 10px;border:1px solid #fdba74;border-radius:6px;font-size:12px;width:100%;outline:none;">
+            </div>
           </div>
           <button class="btn-save" style="margin-top:14px" onclick="saveNotice()">📢 নোটিশ প্রকাশ করুন</button>
         </div>
@@ -1664,8 +1693,9 @@ document.addEventListener('visibilitychange', function(){
 // ===================================================
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('ftrYear').textContent=new Date().getFullYear();
-  loadDB(() => {
+loadDB(() => {
     renderAll();
+    checkAnnouncements(); // Check and show announcement popup
     // Check if URL has ?verify=REGNO — auto verify
     const urlParams = new URLSearchParams(window.location.search);
     const verifyReg = urlParams.get('verify');
@@ -3761,7 +3791,7 @@ function renderNoticeAdmin(){
   el.innerHTML='<h4 style="color:var(--g1);margin-bottom:12px;font-size:14px">প্রকাশিত নোটিশ ('+notices.length+'টি)</h4>'
   +notices.map((n,i)=>
     '<div style="background:#f7faf8;border:1px solid #e4ece7;border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px">'
-    +'<div style="flex:1"><div style="font-weight:700;color:var(--g1);font-size:14px">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">নতুন</span>':'')+'</div>'
+    +'<div style="flex:1"><div style="font-weight:700;color:var(--g1);font-size:14px">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">নতুন</span>':'')+(n.isAnnouncement?'<span style="background:#fef08a;color:#854d0e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🔔 পপ-আপ</span>':'')+'</div>'
     +'<div style="font-size:12px;color:var(--muted);margin-top:3px">📅 '+(n.date||'তারিখ নেই')+(n.pdf?' | 📄 PDF':' | 📝 টেক্সট')+'</div>'
     +(n.desc?'<div style="font-size:12px;color:#4a6040;margin-top:4px">'+_en(n.desc)+'</div>':'')
     +'</div><div style="display:flex;gap:6px;flex-shrink:0">'
@@ -3779,11 +3809,13 @@ function saveNotice(){
   if(DB.notices.length>=50){showNotif('❌ সর্বোচ্চ ৫০টি নোটিশ রাখা যায়। আগের নোটিশ মুছুন।');return;}
   const pf=document.getElementById('n-pdf').files[0];
   const doSave=function(pdfData){
-    var notice={
+var notice={
       title:title,
       date:document.getElementById('n-date').value||new Date().toLocaleDateString('bn-BD'),
       desc:document.getElementById('n-desc').value.trim(),
       isNew:document.getElementById('n-new').checked,
+      isAnnouncement:document.getElementById('n-announce').checked,
+      announceUntil:document.getElementById('n-announce-until').value||null,
       pdf:pdfData||null,
       ts:Date.now()
     };
@@ -3795,7 +3827,10 @@ function saveNotice(){
     document.getElementById('n-title').value='';
     document.getElementById('n-desc').value='';
     document.getElementById('n-pdf').value='';
-    document.getElementById('n-new').checked=true;
+document.getElementById('n-new').checked=true;
+    document.getElementById('n-announce').checked=false;
+    document.getElementById('n-announce-until').value='';
+    document.getElementById('n-until-box').style.display='none';
     showNotif('✅ নোটিশ প্রকাশিত হয়েছে!');
   };
  if(pf){
@@ -3863,6 +3898,71 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
 });
+
+// ==========================================
+// ANNOUNCEMENT POPUP LOGIC
+// ==========================================
+function checkAnnouncements() {
+    if(!DB.notices || DB.notices.length === 0) return;
+    
+    const activeAnnouncements = DB.notices.filter(n => {
+        if(!n.isAnnouncement) return false;
+        if(n.announceUntil) {
+            const untilDate = new Date(n.announceUntil);
+            untilDate.setHours(23, 59, 59, 999); // End of the day
+            if(new Date() > untilDate) return false; // Expired
+        }
+        return true;
+    });
+
+    if(activeAnnouncements.length === 0) return;
+    
+    // Get the latest announcement
+    const latestAnn = activeAnnouncements.sort((a,b) => b.ts - a.ts)[0];
+
+    // Check if user already closed it
+    const closedId = localStorage.getItem('closed_announcement');
+    if(closedId === String(latestAnn.ts)) return;
+
+    // Populate Modal
+    document.getElementById('annTitle').textContent = latestAnn.title;
+    document.getElementById('annDate').textContent = 'প্রকাশের তারিখ: ' + (latestAnn.date || '');
+    document.getElementById('annDesc').textContent = latestAnn.desc || '';
+    
+    const pdfBox = document.getElementById('annPdfBox');
+    const pdfBtn = document.getElementById('annPdfBtn');
+    if(latestAnn.pdf) {
+        pdfBox.style.display = 'block';
+        pdfBtn.href = latestAnn.pdf;
+    } else {
+        pdfBox.style.display = 'none';
+    }
+
+    const modal = document.getElementById('announceModal');
+    const card = document.getElementById('announceCard');
+    modal.style.display = 'flex';
+    modal.dataset.currentTs = latestAnn.ts;
+    
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        card.style.transform = 'translateY(0) scale(1)';
+    }, 50);
+}
+
+function closeAnnouncement() {
+    const modal = document.getElementById('announceModal');
+    const card = document.getElementById('announceCard');
+    
+    if(modal.dataset.currentTs) {
+        localStorage.setItem('closed_announcement', modal.dataset.currentTs);
+    }
+
+    modal.style.opacity = '0';
+    card.style.transform = 'translateY(40px) scale(0.95)';
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 400);
+}
 </script>
 
 <!-- WhatsApp Float -->
