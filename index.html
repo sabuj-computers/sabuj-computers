@@ -6,15 +6,18 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0d3d1f">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<!-- Cache Control Meta Tags -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <script>
+  // Service Worker Unregister (ক্যাশ ক্লিয়ার করার জন্য)
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-          console.log('SCTC PWA Success!');
-        }, function(err) {
-          console.log('SCTC PWA Failed: ', err);
-        });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister();
+      }
     });
   }
 </script>
@@ -419,87 +422,95 @@ footer{background:linear-gradient(135deg,#050e07,var(--g1));color:rgba(255,255,2
 .footer-bottom span{color:rgba(255,255,255,.7)}
 .footer-tagline{color:var(--gold2);font-weight:600}
 
-/* ===== PREMIUM GRAND REVEAL GATE (ROYAL STYLE) ===== */
+/* ===== CINEMATIC WELCOME GATE ===== */
 #premiumGate {
-  position: fixed; inset: 0; z-index: 99999999; /* সবার উপরে থাকবে */
+  position: fixed; inset: 0; z-index: 99999999; 
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  background: #05140a; /* প্রিমিয়াম ডার্ক ব্যাকগ্রাউন্ড */
+  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s, transform 1s;
 }
-
-/* দুই দিকের রাজকীয় পর্দা (Doors) */
-.gate-door {
-  position: absolute; top: 0; bottom: 0; width: 50%;
-  background: linear-gradient(145deg, #05140a 0%, #0d3d1f 100%);
-  transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-  z-index: 1;
+.gate-content {
+  text-align: center; z-index: 2;
+  display: flex; flex-direction: column; align-items: center;
 }
-.gate-door.left { left: 0; border-right: 2px solid var(--gold); }
-.gate-door.right { right: 0; border-left: 2px solid var(--gold); }
-
-/* পর্দার গায়ে সুন্দর জলছাপ (Pattern) */
-.gate-door::before {
-  content: ''; position: absolute; inset: 0;
-  background-image: radial-gradient(rgba(200,168,71,0.15) 1px, transparent 1px);
-  background-size: 25px 25px; opacity: 0.6;
-}
-
-/* বাটন ক্লিক করলে পর্দা দুই দিকে সরে যাবে */
-#premiumGate.open .gate-door.left { transform: translateX(-100%); }
-#premiumGate.open .gate-door.right { transform: translateX(100%); }
-#premiumGate.open { pointer-events: none; }
-
-/* মাঝখানের গ্লাস কার্ড */
-.gate-card {
-  position: relative; z-index: 2;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(200, 168, 71, 0.3);
-  padding: 50px 40px; border-radius: 20px;
-  text-align: center; width: 90%; max-width: 500px;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(200,168,71,0.1);
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-  animation: cardDrop 1s ease-out forwards;
-}
-@keyframes cardDrop {
-  0% { transform: translateY(-50px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-/* ক্লিক করার পর কার্ডটি জুম হয়ে মিলিয়ে যাবে */
-#premiumGate.open .gate-card { transform: scale(1.2); opacity: 0; }
-
-/* কার্ডের ভেতরের কন্টেন্ট */
-.gate-icon {
-  width: 80px; height: 80px; margin: 0 auto 20px;
+.gate-logo {
+  width: 95px; height: 95px; margin-bottom: 20px;
   background: linear-gradient(135deg, var(--gold), #e8b820);
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 36px; box-shadow: 0 0 30px rgba(200,168,71,0.5);
-  animation: pulseGlow 2s infinite;
+  font-size: 48px; color: #fff; font-weight: bold;
+  box-shadow: 0 0 30px rgba(200,168,71,0.4);
+  animation: logoEntrance 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, pulseGlow 2.5s infinite alternate;
+  opacity: 0; transform: scale(0.5);
 }
+.gate-title { 
+  font-family: 'Noto Serif Bengali', serif; font-size: 38px; color: #fff; 
+  margin-bottom: 8px; font-weight: 700;
+  opacity: 0; transform: translateY(20px);
+  animation: textReveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards;
+}
+.gate-subtitle { 
+  font-family: 'Hind Siliguri', sans-serif; font-size: 18px; color: var(--gold2); 
+  letter-spacing: 4px; text-transform: uppercase;
+  opacity: 0; transform: translateY(20px);
+  animation: textReveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s forwards;
+}
+.gate-line {
+  width: 0px; height: 2px; 
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin-top: 35px;
+  animation: lineExpand 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+}
+
+@keyframes logoEntrance { to { opacity: 1; transform: scale(1); } }
+@keyframes textReveal { to { opacity: 1; transform: translateY(0); } }
+@keyframes lineExpand { to { width: 250px; opacity: 0.6; } }
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(200,168,71,0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 50px rgba(200,168,71,0.8); transform: scale(1.05); }
+  from { box-shadow: 0 0 20px rgba(200,168,71,0.3); }
+  to { box-shadow: 0 0 50px rgba(200,168,71,0.8); }
 }
-.gate-title { font-family: 'Noto Serif Bengali', serif; font-size: 32px; color: #fff; margin-bottom: 5px; font-weight: 700;}
-.gate-subtitle { font-family: 'Hind Siliguri', sans-serif; font-size: 18px; color: var(--gold2); margin-bottom: 30px; letter-spacing: 1px;}
 
-/* প্রিমিয়াম বাটন */
-.btn-premium {
-  background: transparent; color: var(--gold2);
-  border: 2px solid var(--gold); padding: 14px 40px; border-radius: 30px;
-  font-family: 'Hind Siliguri', sans-serif; font-size: 18px; font-weight: 700;
-  cursor: pointer; transition: all 0.4s; position: relative; overflow: hidden;
-  text-transform: uppercase; letter-spacing: 1px;
+#premiumGate.hide { 
+  opacity: 0; visibility: hidden; pointer-events: none; 
+  transform: scale(1.05); 
 }
-.btn-premium::before {
-  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(135deg, var(--gold), #e8b820);
-  z-index: -1; transform: scaleX(0); transform-origin: right;
-  transition: transform 0.4s ease;
-}
-.btn-premium:hover::before { transform: scaleX(1); transform-origin: left; }
-.btn-premium:hover { color: #1a1a1a; box-shadow: 0 10px 30px rgba(200,168,71,0.5); border-color: transparent;}
 
-/* বোরিং গোল লোডারটি (Spinner) গায়েব করার ম্যাজিক কোড */
+/* ===== PREMIUM ANNOUNCEMENT MODAL ===== */
+.ann-overlay {
+  position: fixed; inset: 0; background: rgba(5,20,10,0.85); z-index: 9999999;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: none; justify-content: center; align-items: center; padding: 20px;
+  opacity: 0; transition: opacity 0.4s ease;
+}
+.ann-overlay.show { display: flex; opacity: 1; }
+.ann-card {
+  background: #fff; border-radius: 24px; width: 100%; max-width: 500px;
+  overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  transform: translateY(40px) scale(0.95); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ann-overlay.show .ann-card { transform: translateY(0) scale(1); }
+.ann-header {
+  background: linear-gradient(135deg, #0d3d1f, #1a6b35); padding: 35px 25px 25px;
+  text-align: center; position: relative; border-bottom: 4px solid var(--gold);
+}
+.ann-close {
+  position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.15);
+  border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+}
+.ann-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
+.ann-icon { font-size: 50px; margin-bottom: 10px; animation: pulseGlow 2s infinite; }
+.ann-title { color: #fff; font-family: 'Noto Serif Bengali'; font-size: 26px; font-weight: 700; margin: 0; line-height: 1.3;}
+.ann-date { color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 8px; }
+.ann-body { padding: 35px 30px; text-align: center; }
+.ann-desc { color: #4a6040; font-size: 16px; line-height: 1.7; margin-bottom: 30px; white-space: pre-wrap; }
+.ann-btn {
+  width: 100%; padding: 16px; background: linear-gradient(135deg, var(--gold), #e8b820);
+  color: #2a1800; border: none; border-radius: 14px; font-family: 'Hind Siliguri';
+  font-size: 17px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(200,168,71,0.4);
+  transition: 0.3s;
+}
+.ann-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(200,168,71,0.6); }
+
 body.gate-active #globalLoader { display: none !important; }
 
 /* ===== SMART GLASSMORPHISM NAVBAR ===== */
@@ -694,38 +705,31 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 </head>
 <body>
 
-<!-- ==================== PREMIUM GRAND REVEAL GATE ==================== -->
+<!-- ==================== CINEMATIC WELCOME GATE ==================== -->
 <div id="premiumGate">
-  <!-- দুই দিকের পর্দা -->
-  <div class="gate-door left"></div>
-  <div class="gate-door right"></div>
-  
-  <!-- মাঝখানের কার্ড -->
-  <div class="gate-card">
-    <div class="gate-icon">✨</div>
+  <div class="gate-content">
+    <div class="gate-logo">স</div>
     <h1 class="gate-title">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1>
-    <h2 class="gate-subtitle">বুক ক্যাম্পাস এন্ড ফটোষ্ট্যাট</h2>
-    <p style="color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 35px;">আমাদের ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম</p>
-    
-    <button class="btn-premium" onclick="openPremiumGate()">প্রবেশ করুন</button>
+    <h2 class="gate-subtitle">আমাদের ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম</h2>
+    <div class="gate-line"></div>
   </div>
 </div>
 
-<!-- ANNOUNCEMENT MODAL -->
-<div id="announceModal" style="position:fixed;inset:0;background:rgba(5,20,10,.85);z-index:99999;backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;opacity:0;transition:opacity 0.4s ease;">
-    <div style="background:#fff;border-radius:24px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.5);transform:translateY(40px) scale(0.95);transition:all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);" id="announceCard">
-        <div style="background:linear-gradient(135deg,#0d3d1f,#1a6b35);padding:30px 24px 24px;text-align:center;position:relative;border-bottom:4px solid var(--gold);">
-            <button onclick="closeAnnouncement()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">✕</button>
-            <div style="font-size:48px;margin-bottom:12px;animation:waPulse 2s infinite;">📢</div>
-            <h3 id="annTitle" style="color:#fff;font-family:'Noto Serif Bengali';font-size:24px;margin:0;font-weight:700;line-height:1.3;">শিরোনাম</h3>
-            <p id="annDate" style="color:rgba(255,255,255,.8);font-size:13px;margin-top:8px;font-weight:500;">তারিখ</p>
+<!-- ==================== PREMIUM ANNOUNCEMENT MODAL ==================== -->
+<div id="announceModal" class="ann-overlay">
+    <div class="ann-card" id="announceCard">
+        <div class="ann-header">
+            <button onclick="closeAnnouncement()" class="ann-close">✕</button>
+            <div class="ann-icon">📢</div>
+            <h3 id="annTitle" class="ann-title">শিরোনাম</h3>
+            <p id="annDate" class="ann-date">তারিখ</p>
         </div>
-        <div style="padding:32px 28px;">
-            <p id="annDesc" style="color:#4a6040;font-size:16px;line-height:1.7;margin-bottom:28px;white-space:pre-wrap;text-align:center;"></p>
-            <div id="annPdfBox" style="display:none;text-align:center;margin-bottom:24px;">
-                <a id="annPdfBtn" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#f0f8f4;color:#1a6b35;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:bold;border:2px solid #b8dfc4;transition:all 0.2s;" onmouseover="this.style.background='#e2f5ea';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#f0f8f4';this.style.transform='translateY(0)'">📄 বিস্তারিত নোটিশ দেখুন (PDF)</a>
+        <div class="ann-body">
+            <p id="annDesc" class="ann-desc"></p>
+            <div id="annPdfBox" style="display:none; margin-bottom:24px;">
+                <a id="annPdfBtn" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#f0f8f4;color:#1a6b35;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:bold;border:2px solid #b8dfc4;transition:all 0.2s;">📄 বিস্তারিত নোটিশ দেখুন (PDF)</a>
             </div>
-            <button onclick="closeAnnouncement()" style="width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#e8b820);color:#2a1800;border:none;border-radius:14px;font-family:'Hind Siliguri';font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 6px 20px rgba(200,168,71,.4);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">ঠিক আছে, বুঝতে পেরেছি</button>
+            <button onclick="closeAnnouncement()" class="ann-btn">ঠিক আছে, বুঝতে পেরেছি</button>
         </div>
     </div>
 </div>
@@ -1371,46 +1375,32 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 </footer>
 
 <script>
-// ===== PREMIUM GATE LOGIC =====
-// শুরুতে বডি-তে একটি ক্লাস যুক্ত করছি, যা আপনার আগের বোরিং স্পিনারটিকে লুকিয়ে রাখবে
+// ===== CINEMATIC WELCOME GATE LOGIC =====
 document.body.classList.add('gate-active'); 
+const gateStartTime = Date.now();
+const MIN_GATE_TIME = 2500; // অ্যানিমেশনটি অন্তত ২.৫ সেকেন্ড চলবে
 
-function openPremiumGate() {
+function closePremiumGate() {
   const gate = document.getElementById('premiumGate');
-  if(gate) {
-    // গেট খোলার অ্যানিমেশন চালু (পর্দা দুই দিকে সরে যাবে)
-    gate.classList.add('open');
-    
-    // ১.২ সেকেন্ড পর (পর্দা পুরোপুরি সরে যাওয়ার পর) গেটটি রিমুভ করে দেব
-    setTimeout(() => {
-      document.body.classList.remove('gate-active'); // স্পিনার হাইড করার ক্লাসটি সরিয়ে দিলাম
-      gate.style.display = 'none';
-      
-      // ওয়েবসাইটের ভেতরের টেক্সটগুলোর অ্যানিমেশন চালু করা
-      document.querySelectorAll('.hero .reveal').forEach(function(el){
-        el.classList.add('visible');
-      });
-    }, 1200); 
+  if(!gate) return;
 
-    // সেশন স্টোরেজে সেভ করা, যাতে রিলোড দিলে বারবার না আসে
-    sessionStorage.setItem('sctc_premium_welcomed', 'true');
-  }
-}
+  const elapsedTime = Date.now() - gateStartTime;
+  const remainingTime = Math.max(0, MIN_GATE_TIME - elapsedTime);
 
-window.addEventListener('DOMContentLoaded', function() {
-  // যদি ইউজার আগেই গেট পার হয়ে থাকে, তবে আর দেখাবে না
-  if(sessionStorage.getItem('sctc_premium_welcomed') === 'true') {
-    const gate = document.getElementById('premiumGate');
-    if(gate) gate.style.display = 'none';
+  setTimeout(() => {
+    gate.classList.add('hide');
     document.body.classList.remove('gate-active');
     
-    setTimeout(function() {
-      document.querySelectorAll('.hero .reveal').forEach(function(el){
-        el.classList.add('visible');
-      });
-    }, 100);
-  }
-});
+    document.querySelectorAll('.hero .reveal').forEach(function(el){
+      el.classList.add('visible');
+    });
+
+    setTimeout(() => {
+      checkAnnouncements();
+    }, 1200); 
+
+  }, remainingTime);
+}
 // ===== SMART GLASSMORPHISM NAVBAR =====
 (function(){
   var header = document.querySelector('header');
@@ -1779,9 +1769,12 @@ document.addEventListener('visibilitychange', function(){
 // ===================================================
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('ftrYear').textContent=new Date().getFullYear();
-loadDB(() => {
+  loadDB(() => {
     renderAll();
-    checkAnnouncements(); // Check and show announcement popup
+    
+    // ডেটা লোড হয়ে গেলে ওয়েলকাম গেট অটোমেটিক বন্ধ হবে
+    closePremiumGate(); 
+    
     // Check if URL has ?verify=REGNO — auto verify
     const urlParams = new URLSearchParams(window.location.search);
     const verifyReg = urlParams.get('verify');
@@ -3986,7 +3979,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // ==========================================
-// ANNOUNCEMENT POPUP LOGIC
+// ANNOUNCEMENT POPUP LOGIC (Updated)
 // ==========================================
 function checkAnnouncements() {
     if(!DB.notices || DB.notices.length === 0) return;
@@ -3995,22 +3988,19 @@ function checkAnnouncements() {
         if(!n.isAnnouncement) return false;
         if(n.announceUntil) {
             const untilDate = new Date(n.announceUntil);
-            untilDate.setHours(23, 59, 59, 999); // End of the day
-            if(new Date() > untilDate) return false; // Expired
+            untilDate.setHours(23, 59, 59, 999); 
+            if(new Date() > untilDate) return false; 
         }
         return true;
     });
 
     if(activeAnnouncements.length === 0) return;
     
-    // Get the latest announcement
     const latestAnn = activeAnnouncements.sort((a,b) => b.ts - a.ts)[0];
 
-    // Check if user already closed it
     const closedId = localStorage.getItem('closed_announcement');
     if(closedId === String(latestAnn.ts)) return;
 
-    // Populate Modal
     document.getElementById('annTitle').textContent = latestAnn.title;
     document.getElementById('annDate').textContent = 'প্রকাশের তারিখ: ' + (latestAnn.date || '');
     document.getElementById('annDesc').textContent = latestAnn.desc || '';
@@ -4025,29 +4015,16 @@ function checkAnnouncements() {
     }
 
     const modal = document.getElementById('announceModal');
-    const card = document.getElementById('announceCard');
-    modal.style.display = 'flex';
     modal.dataset.currentTs = latestAnn.ts;
-    
-    setTimeout(() => {
-        modal.style.opacity = '1';
-        card.style.transform = 'translateY(0) scale(1)';
-    }, 50);
+    modal.classList.add('show');
 }
 
 function closeAnnouncement() {
     const modal = document.getElementById('announceModal');
-    const card = document.getElementById('announceCard');
-    
     if(modal.dataset.currentTs) {
         localStorage.setItem('closed_announcement', modal.dataset.currentTs);
     }
-
-    modal.style.opacity = '0';
-    card.style.transform = 'translateY(40px) scale(0.95)';
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 400);
+    modal.classList.remove('show');
 }
 </script>
 
