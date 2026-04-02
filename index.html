@@ -714,7 +714,19 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
     <div class="gate-line"></div>
   </div>
 </div>
-
+<!-- Instant Logo Loader Script -->
+<script>
+  (function(){
+    var cachedLogo = localStorage.getItem('sctc_logo');
+    var cachedName = localStorage.getItem('sctc_name');
+    if(cachedLogo) {
+      document.getElementById('gateLogo').innerHTML = '<img src="'+cachedLogo+'" crossorigin="anonymous" style="width:100%;height:100%;border-radius:50%;object-fit:contain;background:#fff;padding:4px">';
+    }
+    if(cachedName) {
+      document.getElementById('gateTitle').textContent = cachedName;
+    }
+  })();
+</script>
 <!-- ==================== PREMIUM ANNOUNCEMENT MODAL ==================== -->
 <div id="announceModal" class="ann-overlay">
     <div class="ann-card" id="announceCard">
@@ -1894,11 +1906,16 @@ function renderGeneral(){
   if(g.logo){
     lc.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;
     if(gl) gl.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:100%;height:100%;border-radius:50%;object-fit:contain;background:#fff;padding:4px">`;
+    localStorage.setItem('sctc_logo', g.logo); // লোগো ব্রাউজারে সেভ করে রাখলাম
   } else {
     lc.innerHTML=g.name?g.name[0]:'স';
     if(gl) gl.innerHTML=g.name?g.name[0]:'স';
+    localStorage.removeItem('sctc_logo');
   }
-  if(gt && g.name) gt.textContent=g.name;
+  if(gt && g.name) {
+    gt.textContent=g.name;
+    localStorage.setItem('sctc_name', g.name); // নাম ব্রাউজারে সেভ করে রাখলাম
+  }
 }
 
 function renderServices(){
