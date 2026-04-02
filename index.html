@@ -708,8 +708,8 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 <!-- ==================== CINEMATIC WELCOME GATE ==================== -->
 <div id="premiumGate">
   <div class="gate-content">
-    <div class="gate-logo">স</div>
-    <h1 class="gate-title">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1>
+    <div class="gate-logo" id="gateLogo">স</div>
+    <h1 class="gate-title" id="gateTitle">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1>
     <h2 class="gate-subtitle">আমাদের ডিজিটাল প্ল্যাটফর্মে আপনাকে স্বাগতম</h2>
     <div class="gate-line"></div>
   </div>
@@ -1886,10 +1886,19 @@ function renderGeneral(){
     const waMsg=encodeURIComponent('আসসালামু আলাইকুম, সবুজ কম্পিউটার্স সম্পর্কে জানতে চাই');
     waBtn.href=`https://wa.me/8801724084350?text=${waMsg}`;
   }
-  // Logo
+// Logo
   const lc=document.getElementById('hdrLogo');
-  if(g.logo){lc.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;}
-  else{lc.innerHTML=g.name?g.name[0]:'স';}
+  const gl=document.getElementById('gateLogo');
+  const gt=document.getElementById('gateTitle');
+  
+  if(g.logo){
+    lc.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:58px;height:58px;border-radius:14px;object-fit:contain;background:#fff;padding:4px">`;
+    if(gl) gl.innerHTML=`<img src="${g.logo}" crossorigin="anonymous" alt="logo" style="width:100%;height:100%;border-radius:50%;object-fit:contain;background:#fff;padding:4px">`;
+  } else {
+    lc.innerHTML=g.name?g.name[0]:'স';
+    if(gl) gl.innerHTML=g.name?g.name[0]:'স';
+  }
+  if(gt && g.name) gt.textContent=g.name;
 }
 
 function renderServices(){
@@ -3979,7 +3988,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 // ==========================================
-// ANNOUNCEMENT POPUP LOGIC (Updated)
+// ANNOUNCEMENT POPUP LOGIC (Professional - Show Once per Notice)
 // ==========================================
 function checkAnnouncements() {
     if(!DB.notices || DB.notices.length === 0) return;
@@ -3998,6 +4007,7 @@ function checkAnnouncements() {
     
     const latestAnn = activeAnnouncements.sort((a,b) => b.ts - a.ts)[0];
 
+    // ব্রাউজার চেক করবে এই নির্দিষ্ট নোটিশটি আগে কাটা হয়েছে কিনা
     const closedId = localStorage.getItem('closed_announcement');
     if(closedId === String(latestAnn.ts)) return;
 
@@ -4021,6 +4031,7 @@ function checkAnnouncements() {
 
 function closeAnnouncement() {
     const modal = document.getElementById('announceModal');
+    // পপ-আপ কাটার সময় ব্রাউজার এই নোটিশের ID সেভ করে রাখবে
     if(modal.dataset.currentTs) {
         localStorage.setItem('closed_announcement', modal.dataset.currentTs);
     }
