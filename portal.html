@@ -12,50 +12,190 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
-    :root { --g1: #0d3d1f; --g2: #1a6b35; --gold: #c8a847; --bg: #f2f8f4; --card: #ffffff; --text: #1e3028; --muted: #6b8c76; }
-    body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: linear-gradient(160deg, var(--g1) 0%, #0f4a20 100%); padding: 15px 6%; display: flex; justify-content: space-between; align-items: center; color: white; }
-    .logo-area { display: flex; align-items: center; gap: 15px; }
-    .logo-circle { width: 40px; height: 40px; background: var(--g2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
-    .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
-    .auth-card { background: var(--card); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(13,61,31,0.1); width: 100%; max-width: 400px; text-align: center; }
-    
-    /* Login Tabs */
-    .role-tabs { display: flex; background: #e4ece7; border-radius: 10px; margin-bottom: 25px; overflow: hidden; }
-    .role-tab { flex: 1; padding: 10px; border: none; background: none; font-family: inherit; font-weight: bold; color: var(--muted); cursor: pointer; transition: 0.3s; }
-    .role-tab.active { background: var(--g2); color: white; }
+    :root {
+      --g1: #0a2e17; --g2: #1a6b35; --g3: #22884a; --gold: #d4af37;
+      --bg: #f0f5f2; --card: #ffffff; --text: #1a2e22; --muted: #6b8c76;
+      --glass: rgba(255,255,255,0.08); --shadow: 0 20px 60px rgba(10,46,23,0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Hind Siliguri', sans-serif; min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); }
 
-    .input-group { text-align: left; margin-bottom: 18px; }
-    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--g1); margin-bottom: 6px; }
-    .input-group input { width: 100%; padding: 12px 15px; border: 2px solid #dde8e0; border-radius: 10px; font-family: inherit; font-size: 15px; box-sizing: border-box; background: #fafcfb; }
-    .input-group input:focus { outline: none; border-color: var(--g2); background: #fff; }
-    
-    /* Password Strength */
-    .strength-meter { height: 4px; background: #e4ece7; border-radius: 2px; margin-top: 8px; overflow: hidden; }
-    .strength-bar { height: 100%; width: 0%; transition: 0.3s; }
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--g1) 0%, #0c3a1c 50%, var(--g2) 100%);
+      padding: 14px 5%; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative; z-index: 10;
+    }
+    header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--gold), transparent, var(--gold)); }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-area img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold); padding: 2px; background: white; }
+    .logo-area h2 { margin: 0; font-size: 17px; font-family: 'Noto Serif Bengali', serif; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .back-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+    .back-link:hover { color: var(--gold); }
+
+    /* Main */
+    .main-container {
+      flex: 1; display: flex; justify-content: center; align-items: center;
+      padding: 30px 16px; position: relative;
+      background: linear-gradient(170deg, #e8f5ec 0%, var(--bg) 40%, #f5f0e8 100%);
+    }
+    .main-container::before {
+      content:''; position:absolute; top:-50%; left:-20%; width:60%; height:120%;
+      background: radial-gradient(ellipse, rgba(26,107,53,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Auth Card */
+    .auth-card {
+      background: var(--card); padding: 36px 32px; border-radius: 24px;
+      box-shadow: var(--shadow); width: 100%; max-width: 420px;
+      position: relative; overflow: hidden; animation: slideUp 0.5s ease;
+    }
+    .auth-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:4px;
+      background: linear-gradient(90deg, var(--g2), var(--gold), var(--g2));
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    .auth-card h2 {
+      color: var(--g1); font-size: 22px; font-weight: 700; margin: 8px 0 6px;
+      font-family: 'Noto Serif Bengali', serif;
+    }
+    .auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    /* Role Tabs */
+    .role-tabs {
+      display: flex; background: #eef4f0; border-radius: 14px; padding: 4px;
+      margin-bottom: 24px; gap: 4px;
+    }
+    .role-tab {
+      flex: 1; padding: 11px 0; border: none; background: none; font-family: inherit;
+      font-weight: 600; font-size: 14px; color: var(--muted); cursor: pointer;
+      border-radius: 11px; transition: all 0.3s ease; display: flex; align-items: center;
+      justify-content: center; gap: 6px;
+    }
+    .role-tab.active {
+      background: linear-gradient(135deg, var(--g1), var(--g2)); color: white;
+      box-shadow: 0 4px 12px rgba(26,107,53,0.25);
+    }
+    .role-tab:not(.active):hover { background: rgba(26,107,53,0.08); }
+
+    /* Input */
+    .input-group { text-align: left; margin-bottom: 18px; position: relative; }
+    .input-group label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--g1);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .input-wrap {
+      position: relative; display: flex; align-items: center;
+    }
+    .input-icon {
+      position: absolute; left: 14px; color: var(--muted); font-size: 16px;
+      pointer-events: none; transition: 0.2s;
+    }
+    .input-group input {
+      width: 100%; padding: 13px 14px 13px 42px; border: 2px solid #e0e8e3;
+      border-radius: 12px; font-family: inherit; font-size: 15px;
+      background: #fafcfb; transition: all 0.25s ease; color: var(--text);
+    }
+    .input-group input:focus {
+      outline: none; border-color: var(--g2); background: #fff;
+      box-shadow: 0 0 0 4px rgba(26,107,53,0.08);
+    }
+    .input-group input:focus ~ .input-icon,
+    .input-group input:focus + .input-icon { color: var(--g2); }
+    .toggle-pass {
+      position: absolute; right: 12px; background: none; border: none;
+      color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px;
+    }
+
+    /* Strength */
+    .strength-meter { height: 4px; background: #e4ece7; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+    .strength-bar { height: 100%; width: 0%; transition: 0.4s ease; border-radius: 3px; }
     .strength-text { font-size: 11px; color: var(--muted); margin-top: 4px; text-align: right; }
 
-    .options-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 20px; }
-    .options-row a { color: var(--g2); text-decoration: none; font-weight: bold; cursor: pointer; }
-    
-    .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
-    .toggle-link { margin-top: 20px; font-size: 14px; color: var(--muted); }
-    .toggle-link a { color: var(--g2); font-weight: 700; cursor: pointer; }
-    .error-msg { color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; }
+    /* Options Row */
+    .options-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; margin-bottom: 22px;
+    }
+    .remember-label {
+      display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); font-weight: 500;
+    }
+    .remember-label input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: var(--g2); cursor: pointer; border-radius: 4px;
+    }
+    .forgot-link {
+      color: var(--g2); text-decoration: none; font-weight: 600; cursor: pointer;
+      transition: 0.2s; font-size: 13px;
+    }
+    .forgot-link:hover { color: var(--gold); text-decoration: underline; }
+
+    /* Button */
+    .btn-primary {
+      width: 100%; padding: 14px; border: none; border-radius: 14px;
+      font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+      background: linear-gradient(135deg, var(--g1), var(--g2), var(--g3));
+      background-size: 200% 200%; color: white; position: relative; overflow: hidden;
+      transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(26,107,53,0.25);
+    }
+    .btn-primary:hover { background-position: 100% 0; box-shadow: 0 8px 28px rgba(26,107,53,0.35); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-primary .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 12px; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:#e0e8e3; }
+
+    /* Toggle */
+    .toggle-link { margin-top: 22px; font-size: 14px; color: var(--muted); text-align: center; }
+    .toggle-link a { color: var(--g2); font-weight: 700; cursor: pointer; text-decoration: none; transition: 0.2s; }
+    .toggle-link a:hover { color: var(--gold); text-decoration: underline; }
+
+    /* Error/Success */
+    .error-msg {
+      color: #dc2626; background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px;
+      display: none; border-left: 4px solid #dc2626; animation: shake 0.4s ease;
+    }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-4px)} 40%,80%{transform:translateX(4px)} }
+    .success-msg {
+      color: #15803d; background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px;
+      display: none; border-left: 4px solid #15803d;
+    }
+
+    /* Footer Badge */
+    .footer-badge {
+      text-align: center; padding: 16px; font-size: 12px; color: var(--muted);
+    }
+    .footer-badge a { color: var(--g2); text-decoration: none; font-weight: 600; }
+
+    /* Responsive */
+    @media(max-width: 480px) {
+      .auth-card { padding: 28px 22px; border-radius: 20px; margin: 0 4px; }
+      header { padding: 12px 4%; }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo-area"><img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" style="width:40px;height:40px;border-radius:50%;background:white;padding:3px;"><h2 style="margin:0; font-size:18px; font-family:'Noto Serif Bengali', serif;">সবুজ কম্পিউটার্স</h2></div>
-    <a href="index.html" style="color:white; text-decoration:none; font-size:14px;">← হোম</a>
+    <div class="logo-area">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" alt="Logo">
+      <h2>সবুজ কম্পিউটার্স</h2>
+    </div>
+    <a href="index.html" class="back-link">← হোম</a>
   </header>
 
   <div class="main-container">
     
     <!-- LOGIN SECTION -->
     <div class="auth-card" id="loginSection">
-      <h2 style="color:var(--g1); margin-top:0;">লগইন করুন</h2>
+      <h2>স্বাগতম! 👋</h2>
+      <p class="auth-subtitle">আপনার একাউন্টে লগইন করুন</p>
       
       <div class="role-tabs">
         <button class="role-tab active" id="tabStudent" onclick="setRole('student')">👨‍🎓 শিক্ষার্থী</button>
@@ -63,42 +203,101 @@
       </div>
 
       <div class="error-msg" id="loginError"></div>
-      <form id="loginForm">
-        <div class="input-group"><label>ইমেইল এড্রেস</label><input type="email" id="loginEmail" required></div>
-        <div class="input-group"><label>পাসওয়ার্ড</label><input type="password" id="loginPassword" required></div>
+      <div class="success-msg" id="loginSuccess"></div>
+
+      <!-- Real form with name+action for Chrome password save -->
+      <form id="loginForm" method="post" action="#">
+        <div class="input-group">
+          <label for="loginEmail">ইমেইল এড্রেস</label>
+          <div class="input-wrap">
+            <input type="email" id="loginEmail" name="email" autocomplete="email" placeholder="example@email.com" required>
+            <span class="input-icon">📧</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="loginPassword">পাসওয়ার্ড</label>
+          <div class="input-wrap">
+            <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="••••••••" required>
+            <span class="input-icon">🔒</span>
+            <button type="button" class="toggle-pass" onclick="togglePassword('loginPassword', this)">👁️</button>
+          </div>
+        </div>
         
         <div class="options-row">
-          <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-            <input type="checkbox" id="rememberMe" checked> Remember Me
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe" checked> মনে রাখুন
           </label>
-          <a onclick="resetPassword()">Forgot Password?</a>
+          <a class="forgot-link" onclick="resetPassword()">পাসওয়ার্ড ভুলে গেছেন?</a>
         </div>
 
-        <button type="submit" class="btn-primary" id="loginBtn">লগইন</button>
+        <button type="submit" class="btn-primary" id="loginBtn">
+          <span class="btn-text">লগইন করুন</span>
+          <div class="spinner"></div>
+        </button>
       </form>
-      <div class="toggle-link" id="signupPrompt">নতুন শিক্ষার্থী? <a onclick="toggleAuth('signup')">একাউন্ট তৈরি করুন</a></div>
+
+      <div class="toggle-link" id="signupPrompt">নতুন শিক্ষার্থী? <a onclick="toggleAuth('signup')">একাউন্ট তৈরি করুন →</a></div>
     </div>
 
     <!-- SIGNUP SECTION -->
     <div class="auth-card" id="signupSection" style="display: none;">
-      <h2 style="color:var(--g1); margin-top:0;">নতুন একাউন্ট</h2>
+      <h2>নতুন একাউন্ট ✨</h2>
+      <p class="auth-subtitle">আপনার তথ্য দিয়ে রেজিস্ট্রেশন করুন</p>
+
       <div class="error-msg" id="signupError"></div>
-      <form id="signupForm">
-        <div class="input-group"><label>পুরো নাম *</label><input type="text" id="regName" required></div>
-        <div class="input-group"><label>মোবাইল নম্বর *</label><input type="tel" id="regPhone" required></div>
-        <div class="input-group"><label>ইমেইল এড্রেস *</label><input type="email" id="regEmail" required></div>
+      <div class="success-msg" id="signupSuccess"></div>
+
+      <form id="signupForm" method="post" action="#">
         <div class="input-group">
-          <label>পাসওয়ার্ড *</label>
-          <input type="password" id="regPassword" required minlength="6">
-          <div class="strength-meter"><div class="strength-bar" id="strengthBar"></div></div>
-          <div class="strength-text" id="strengthText">পাসওয়ার্ডের শক্তি</div>
+          <label for="regName">পুরো নাম</label>
+          <div class="input-wrap">
+            <input type="text" id="regName" name="name" autocomplete="name" placeholder="আপনার পূর্ণ নাম" required>
+            <span class="input-icon">👤</span>
+          </div>
         </div>
-        <div class="input-group"><label>পাসওয়ার্ড নিশ্চিত করুন *</label><input type="password" id="regConfirm" required></div>
-        <button type="submit" class="btn-primary" id="signupBtn">একাউন্ট তৈরি করুন</button>
+        <div class="input-group">
+          <label for="regPhone">মোবাইল নম্বর</label>
+          <div class="input-wrap">
+            <input type="tel" id="regPhone" name="phone" autocomplete="tel" placeholder="01XXXXXXXXX" required>
+            <span class="input-icon">📱</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="regEmail">ইমেইল এড্রেস</label>
+          <div class="input-wrap">
+            <input type="email" id="regEmail" name="email" autocomplete="email" placeholder="example@email.com" required>
+            <span class="input-icon">📧</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="regPassword">পাসওয়ার্ড</label>
+          <div class="input-wrap">
+            <input type="password" id="regPassword" name="new-password" autocomplete="new-password" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6">
+            <span class="input-icon">🔒</span>
+            <button type="button" class="toggle-pass" onclick="togglePassword('regPassword', this)">👁️</button>
+          </div>
+          <div class="strength-meter"><div class="strength-bar" id="strengthBar"></div></div>
+          <div class="strength-text" id="strengthText"></div>
+        </div>
+        <div class="input-group">
+          <label for="regConfirm">পাসওয়ার্ড নিশ্চিত করুন</label>
+          <div class="input-wrap">
+            <input type="password" id="regConfirm" name="confirm-password" autocomplete="new-password" placeholder="আবার পাসওয়ার্ড দিন" required>
+            <span class="input-icon">🔐</span>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" id="signupBtn">
+          <span class="btn-text">একাউন্ট তৈরি করুন</span>
+          <div class="spinner"></div>
+        </button>
       </form>
-      <div class="toggle-link">একাউন্ট আছে? <a onclick="toggleAuth('login')">লগইন করুন</a></div>
+      <div class="toggle-link">একাউন্ট আছে? <a onclick="toggleAuth('login')">← লগইন করুন</a></div>
     </div>
 
+  </div>
+
+  <div class="footer-badge">
+    &copy; 2025 <a href="https://sabujcomputers.pro.bd" target="_blank">সবুজ কম্পিউটার্স ট্রেনিং সেন্টার</a> — সকল অধিকার সংরক্ষিত
   </div>
 
   <script>
@@ -122,6 +321,34 @@
       if(snap.val()) document.getElementById('headerLogo').src = snap.val();
     });
 
+    // Toggle Password Visibility
+    function togglePassword(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      if(inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁️'; }
+    }
+
+    // Set loading state
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      const text = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner');
+      btn.disabled = loading;
+      text.style.display = loading ? 'none' : 'inline';
+      spinner.style.display = loading ? 'block' : 'none';
+    }
+
+    // Show messages
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = '❌ ' + msg; el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 6000);
+    }
+    function showSuccess(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = '✅ ' + msg; el.style.display = 'block';
+    }
+
     function setRole(role) {
       currentRole = role;
       document.getElementById('tabStudent').classList.toggle('active', role === 'student');
@@ -130,11 +357,13 @@
     }
 
     function toggleAuth(type) {
-      document.getElementById('loginSection').style.display = type === 'signup' ? 'none' : 'block';
-      document.getElementById('signupSection').style.display = type === 'signup' ? 'block' : 'none';
+      const login = document.getElementById('loginSection');
+      const signup = document.getElementById('signupSection');
+      if(type === 'signup') { login.style.display = 'none'; signup.style.display = 'block'; signup.style.animation = 'slideUp 0.4s ease'; }
+      else { signup.style.display = 'none'; login.style.display = 'block'; login.style.animation = 'slideUp 0.4s ease'; }
     }
 
-    // Password Strength Checker
+    // Password Strength
     document.getElementById('regPassword').addEventListener('input', function(e) {
       const val = e.target.value;
       const bar = document.getElementById('strengthBar');
@@ -146,71 +375,115 @@
       if(val.match(/[^a-zA-Z0-9]/)) strength++;
 
       if(val.length === 0) { bar.style.width = '0%'; text.textContent = ''; }
-      else if(strength <= 1) { bar.style.width = '33%'; bar.style.background = '#ef4444'; text.textContent = 'দুর্বল'; text.style.color = '#ef4444'; }
-      else if(strength === 2) { bar.style.width = '66%'; bar.style.background = '#f59e0b'; text.textContent = 'মোটামুটি'; text.style.color = '#f59e0b'; }
-      else { bar.style.width = '100%'; bar.style.background = '#22c55e'; text.textContent = 'শক্তিশালী'; text.style.color = '#22c55e'; }
+      else if(strength <= 1) { bar.style.width = '33%'; bar.style.background = '#ef4444'; text.textContent = '🔴 দুর্বল'; text.style.color = '#ef4444'; }
+      else if(strength === 2) { bar.style.width = '66%'; bar.style.background = '#f59e0b'; text.textContent = '🟡 মোটামুটি'; text.style.color = '#f59e0b'; }
+      else { bar.style.width = '100%'; bar.style.background = '#22c55e'; text.textContent = '🟢 শক্তিশালী'; text.style.color = '#22c55e'; }
     });
 
     // Forgot Password
     function resetPassword() {
-      const email = prompt("আপনার ইমেইল এড্রেস দিন:");
-      if(email) {
-        auth.sendPasswordResetEmail(email).then(() => alert("✅ পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে!"))
-        .catch(e => alert("❌ এরর: " + e.message));
-      }
+      const email = document.getElementById('loginEmail').value;
+      if(!email) { showError('loginError', 'প্রথমে ইমেইল ফিল্ডে আপনার ইমেইল লিখুন, তারপর Forgot Password চাপুন।'); return; }
+      auth.sendPasswordResetEmail(email).then(() => {
+        showSuccess('loginSuccess', 'পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে!');
+      }).catch(e => showError('loginError', 'ইমেইল খুঁজে পাওয়া যায়নি।'));
     }
 
-    // Login
+    // Login — uses proper form submission pattern for Chrome password save
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
+      const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
       const remember = document.getElementById('rememberMe').checked;
       
+      setLoading('loginBtn', true);
+      document.getElementById('loginError').style.display = 'none';
+
       const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
       
       auth.setPersistence(persistence).then(() => {
         return auth.signInWithEmailAndPassword(email, password);
       }).then((userCredential) => {
         const uid = userCredential.user.uid;
+
+        // Save credentials hint for browser
+        if(window.PasswordCredential && remember) {
+          try {
+            const cred = new PasswordCredential({ id: email, password: password, name: email });
+            navigator.credentials.store(cred);
+          } catch(ex) {}
+        }
+
         if(currentRole === 'admin') {
-          // Check if admin by UID
           if(uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') {
-            window.location.href = 'admin-dashboard.html';
+            showSuccess('loginSuccess', 'অ্যাডমিন লগইন সফল! রিডাইরেক্ট হচ্ছে...');
+            setTimeout(() => window.location.href = 'admin-dashboard.html', 800);
           } else {
-            auth.signOut(); alert('❌ আপনার অ্যাডমিন অ্যাক্সেস নেই!');
+            auth.signOut();
+            setLoading('loginBtn', false);
+            showError('loginError', 'আপনার অ্যাডমিন অ্যাক্সেস নেই!');
           }
         } else {
-          // Student login
           db.ref('sabuj/students_auth/' + uid).once('value').then(snap => {
             const data = snap.val();
-            if(data && data.status === 'active') window.location.href = 'student-dashboard.html';
-            else window.location.href = 'admission-form.html';
+            showSuccess('loginSuccess', 'লগইন সফল! রিডাইরেক্ট হচ্ছে...');
+            setTimeout(() => {
+              if(data && data.status === 'active') window.location.href = 'student-dashboard.html';
+              else window.location.href = 'admission-form.html';
+            }, 800);
           });
         }
       }).catch(e => {
-        document.getElementById('loginError').textContent = '❌ ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।';
-        document.getElementById('loginError').style.display = 'block';
+        setLoading('loginBtn', false);
+        showError('loginError', 'ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।');
       });
     });
 
     // Signup
     document.getElementById('signupForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
       const pass = document.getElementById('regPassword').value;
-      if(pass !== document.getElementById('regConfirm').value) {
-        alert('❌ পাসওয়ার্ড দুটি মিলছে না!'); return;
-      }
-      const email = document.getElementById('regEmail').value;
+      const confirm = document.getElementById('regConfirm').value;
+
+      if(pass !== confirm) { showError('signupError', 'পাসওয়ার্ড দুটি মিলছে না!'); return; }
+      if(pass.length < 6) { showError('signupError', 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!'); return; }
+
+      setLoading('signupBtn', true);
+      document.getElementById('signupError').style.display = 'none';
+
       auth.createUserWithEmailAndPassword(email, pass).then((cred) => {
+        // Store for Chrome password save
+        if(window.PasswordCredential) {
+          try { navigator.credentials.store(new PasswordCredential({ id: email, password: pass, name: name })); } catch(ex) {}
+        }
         return db.ref('sabuj/students_auth/' + cred.user.uid).set({
-          uid: cred.user.uid, name: document.getElementById('regName').value,
-          phone: document.getElementById('regPhone').value, email: email, status: 'pending_admission'
+          uid: cred.user.uid, name: name, phone: phone, email: email, status: 'pending_admission'
         });
       }).then(() => {
-        alert('✅ একাউন্ট তৈরি সফল! ভর্তির ফর্ম পূরণ করুন।');
-        window.location.href = 'admission-form.html';
-      }).catch(e => alert('❌ এরর: ' + e.message));
+        showSuccess('signupSuccess', 'একাউন্ট তৈরি সফল! ভর্তির ফর্ম পূরণ করুন...');
+        setTimeout(() => window.location.href = 'admission-form.html', 1200);
+      }).catch(e => {
+        setLoading('signupBtn', false);
+        let msg = 'কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।';
+        if(e.code === 'auth/email-already-in-use') msg = 'এই ইমেইলে ইতিমধ্যে একটি একাউন্ট আছে।';
+        if(e.code === 'auth/weak-password') msg = 'পাসওয়ার্ড খুব দুর্বল।';
+        if(e.code === 'auth/invalid-email') msg = 'ইমেইল এড্রেস সঠিক নয়।';
+        showError('signupError', msg);
+      });
+    });
+
+    // Auto-check if already logged in
+    auth.onAuthStateChanged(user => {
+      if(user) {
+        if(user.uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') return; // admin on portal page, don't redirect
+        db.ref('sabuj/students_auth/' + user.uid).once('value').then(snap => {
+          const data = snap.val();
+          if(data && data.status === 'active') window.location.href = 'student-dashboard.html';
+        });
+      }
     });
   </script>
 </body>

@@ -551,8 +551,8 @@
     function viewAppDetails(app) {
       const content = document.getElementById('appDetailsContent');
       
-      let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;">` : 'ছবি নেই';
-      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a>`) : 'ডকুমেন্ট নেই';
+      let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;"><br><a href="${app.personal.photo}" download="Photo_${app.applicationId}.jpg" target="_blank" style="display:inline-block;margin-top:6px;background:#dcfce7;color:#166534;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ছবি ডাউনলোড</a>` : 'ছবি নেই';
+      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a> <a href="${app.personal.nidDoc}" download="NID_${app.applicationId}.pdf" target="_blank" style="display:inline-block;margin-left:8px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ডাউনলোড</a>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a><br><a href="${app.personal.nidDoc}" download="NID_${app.applicationId}.jpg" target="_blank" style="display:inline-block;margin-top:6px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ডকুমেন্ট ডাউনলোড</a>`) : 'ডকুমেন্ট নেই';
 
       content.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
@@ -597,7 +597,7 @@
         </table>
 
         <h4 style="color:var(--g2); margin:10px 0 5px;">আপলোডকৃত ডকুমেন্ট</h4>
-        <div style="margin-bottom:15px;">
+        <div style="margin-bottom:15px; background:#f7faf8; padding:15px; border-radius:10px; border:1px solid #e4ece7;">
           <p><strong>ছবি:</strong></p>${photoHtml}
           <p style="margin-top:10px;"><strong>NID/Birth Certificate:</strong></p>${nidHtml}
         </div>
