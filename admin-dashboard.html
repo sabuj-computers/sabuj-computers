@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"><\/script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -111,19 +111,32 @@
         <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;">
           <div class="card" style="border-left:4px solid #3b82f6;"><h3>মোট শিক্ষার্থী</h3><h2 style="margin:0;" id="overviewTotal">০</h2></div>
           <div class="card" style="border-left:4px solid #ef4444;"><h3>পেন্ডিং আবেদন</h3><h2 style="margin:0;" id="overviewPending">০</h2></div>
-          <div class="card" style="border-left:4px solid #10b981;"><h3>আজকের উপস্থিতি</h3><h2 style="margin:0;">০%</h2></div>
-          <div class="card" style="border-left:4px solid #f59e0b;"><h3>মোট আয়</h3><h2 style="margin:0;">৳০</h2></div>
+          <div class="card" style="border-left:4px solid #10b981;"><h3>সক্রিয় শিক্ষার্থী</h3><h2 style="margin:0;" id="overviewActive">০</h2></div>
+          <div class="card" style="border-left:4px solid #f59e0b;"><h3>মোট আয়</h3><h2 style="margin:0;" id="overviewRevenue">৳০</h2></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <div class="card"><h3 style="margin-top:0;">কোর্সভিত্তিক তথ্য</h3><div id="courseStats">লোড হচ্ছে...</div></div>
+          <div class="card"><h3 style="margin-top:0;">পেমেন্ট সারসংক্ষেপ</h3><div id="paymentStats">লোড হচ্ছে...</div></div>
         </div>
       </div>
 
       <!-- 2. Applications -->
       <div class="tab-content" id="tab-applications">
         <div class="card">
-          <h3 style="margin-top:0;">নতুন ভর্তির আবেদন</h3>
+          <h3 style="margin-top:0;">নতুন ভর্তির আবেদন (Pending)</h3>
           <div style="overflow-x:auto;">
             <table>
               <thead><tr><th>তারিখ</th><th>নাম</th><th>মোবাইল</th><th>কোর্স</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
               <tbody id="appTbody"><tr><td colspan="6" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">✅ অনুমোদিত শিক্ষার্থী (Approved)</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>তারিখ</th><th>নাম</th><th>মোবাইল</th><th>কোর্স</th><th>সেশন</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="approvedTbody"><tr><td colspan="6" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -163,7 +176,7 @@
             </div>
           </div>
           <div class="fr3">
-            <div class="fg"><label>সেশন</label><input id="s-session" type="text" placeholder="January - June"></div>
+            <div class="fg"><label>সেশন</label><select id="s-session"><option value="">— সেশন বাছুন —</option><option value="January - June">January - June</option><option value="July - December">July - December</option></select></div>
             <div class="fg"><label>বছর</label><input id="s-year" type="text" placeholder="2024"></div>
             <div class="fg"><label>ঠিকানা</label><input id="s-addr" type="text" placeholder="ঠিকানা"></div>
           </div>
@@ -470,12 +483,14 @@
       db.ref('sabuj/applications').on('value', snap => {
         const data = snap.val();
         const tbody = document.getElementById('appTbody');
+        const approvedTbody = document.getElementById('approvedTbody');
         const badge = document.getElementById('appBadge');
         const overviewPending = document.getElementById('overviewPending');
         const overviewTotal = document.getElementById('overviewTotal');
         
         if(!data) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো আবেদন নেই</td></tr>';
+          approvedTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো অনুমোদিত শিক্ষার্থী নেই</td></tr>';
           badge.textContent = '0'; overviewPending.textContent = '০'; overviewTotal.textContent = '০'; return;
         }
 
@@ -487,6 +502,7 @@
         overviewPending.textContent = pendingApps.length;
         overviewTotal.textContent = approvedApps.length;
 
+        // Pending Applications
         if(pendingApps.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো নতুন আবেদন নেই</td></tr>';
         } else {
@@ -499,8 +515,32 @@
               <td><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;">Pending</span></td>
               <td>
                 <button class="btn-sm btn-save" onclick='viewAppDetails(${JSON.stringify(app).replace(/'/g, "&#39;")})'>👁️ View</button>
+                <select id="session_${app.applicationId}" style="padding:4px; border:1px solid #ccc; border-radius:4px; font-size:11px; margin:2px 0;">
+                  <option value="January - June">January - June</option>
+                  <option value="July - December">July - December</option>
+                </select>
                 <button class="btn-sm btn-approve" onclick="approveApp('${app.applicationId}', '${app.uid}')">✅ Approve</button>
                 <button class="btn-sm btn-reject" onclick="rejectApp('${app.applicationId}', '${app.uid}')">❌ Reject</button>
+              </td>
+            </tr>
+          `).join('');
+        }
+
+        // Approved Applications
+        if(approvedApps.length === 0) {
+          approvedTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো অনুমোদিত শিক্ষার্থী নেই</td></tr>';
+        } else {
+          approvedTbody.innerHTML = approvedApps.map(app => `
+            <tr>
+              <td>${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</td>
+              <td>${app.personal?.photo ? '<img src="'+app.personal.photo+'" style="width:30px;height:30px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle;">' : ''}${app.personal?.nameBn || 'অজানা'}</td>
+              <td>${app.personal?.phone || 'অজানা'}</td>
+              <td>${app.enrollment?.courseId || 'অজানা'}</td>
+              <td>${app.enrollment?.session || '—'}</td>
+              <td>
+                <button class="btn-sm btn-save" onclick='viewAppDetails(${JSON.stringify(app).replace(/'/g, "&#39;")})'>👁️ বিস্তারিত</button>
+                <button class="btn-sm btn-approve" onclick='editAppDetails("${app.applicationId}")'>✏️ এডিট</button>
+                <button class="btn-sm btn-reject" onclick="removeApprovedStudent('${app.applicationId}', '${app.uid}')">🗑️ সরান</button>
               </td>
             </tr>
           `).join('');
@@ -519,19 +559,27 @@
           <div>
             <p style="margin:0;"><strong>Application ID:</strong> ${app.applicationId}</p>
             <p style="margin:0;"><strong>Date:</strong> ${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</p>
+            <p style="margin:0;"><strong>Status:</strong> <span style="background:${app.status==='approved'?'#dcfce7':'#fef9c3'};color:${app.status==='approved'?'#166534':'#854d0e'};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700;">${app.status}</span></p>
           </div>
           <div>${photoHtml}</div>
         </div>
         
         <h4 style="color:var(--g2); margin:10px 0 5px;">ব্যক্তিগত তথ্য</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (বাংলায়):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameBn || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (বাংলায়):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameBn || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (ইংরেজিতে):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameEn || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">পিতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.fatherName || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">মাতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.motherName || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">মোবাইল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.phone || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">লিঙ্গ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.gender || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">NID/জন্ম নিবন্ধন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nid || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">রক্তের গ্রুপ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.bloodGroup || ''}</td></tr>
+        </table>
+
+        <h4 style="color:var(--g2); margin:10px 0 5px;">ঠিকানা</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">বর্তমান ঠিকানা:</td><td style="padding:5px; border:1px solid #e4ece7;">${(app.address?.present?.village||'') + ', ' + (app.address?.present?.upazila||'') + ', ' + (app.address?.present?.district||'')}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">স্থায়ী ঠিকানা:</td><td style="padding:5px; border:1px solid #e4ece7;">${(app.address?.permanent?.village||'') + ', ' + (app.address?.permanent?.upazila||'') + ', ' + (app.address?.permanent?.district||'')}</td></tr>
         </table>
 
         <h4 style="color:var(--g2); margin:10px 0 5px;">শিক্ষাগত যোগ্যতা</h4>
@@ -544,11 +592,15 @@
         <h4 style="color:var(--g2); margin:10px 0 5px;">কোর্স তথ্য</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
           <tr><td style="padding:5px; border:1px solid #e4ece7;">কোর্স:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.courseId || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">সেশন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.session || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">ভর্তির কারণ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.reason || ''}</td></tr>
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">আপলোডকৃত ডকুমেন্ট (NID/Birth Cert)</h4>
-        <div style="margin-bottom:15px;">${nidHtml}</div>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">আপলোডকৃত ডকুমেন্ট</h4>
+        <div style="margin-bottom:15px;">
+          <p><strong>ছবি:</strong></p>${photoHtml}
+          <p style="margin-top:10px;"><strong>NID/Birth Certificate:</strong></p>${nidHtml}
+        </div>
       `;
       
       document.getElementById('appDetailsModal').style.display = 'flex';
@@ -556,6 +608,131 @@
 
     function closeAppDetailsModal() {
       document.getElementById('appDetailsModal').style.display = 'none';
+    }
+
+    // Edit Application Details (Full Edit Modal)
+    function editAppDetails(appId) {
+      db.ref('sabuj/applications/' + appId).once('value').then(snap => {
+        const app = snap.val();
+        if(!app) return alert('আবেদন খুঁজে পাওয়া যায়নি!');
+        
+        const content = document.getElementById('appDetailsContent');
+        content.innerHTML = `
+          <h4 style="color:var(--g2); margin:0 0 15px;">✏️ আবেদনের তথ্য সম্পাদনা - ${appId}</h4>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group"><label>নাম (বাংলায়)</label><input type="text" id="editAppNameBn" value="${app.personal?.nameBn||''}"></div>
+            <div class="form-group"><label>নাম (ইংরেজিতে)</label><input type="text" id="editAppNameEn" value="${app.personal?.nameEn||''}"></div>
+            <div class="form-group"><label>পিতার নাম</label><input type="text" id="editAppFather" value="${app.personal?.fatherName||''}"></div>
+            <div class="form-group"><label>মাতার নাম</label><input type="text" id="editAppMother" value="${app.personal?.motherName||''}"></div>
+            <div class="form-group"><label>মোবাইল</label><input type="text" id="editAppPhone" value="${app.personal?.phone||''}"></div>
+            <div class="form-group"><label>লিঙ্গ</label>
+              <select id="editAppGender"><option value="">—</option><option value="Male" ${app.personal?.gender==='Male'?'selected':''}>Male</option><option value="Female" ${app.personal?.gender==='Female'?'selected':''}>Female</option><option value="Other" ${app.personal?.gender==='Other'?'selected':''}>Other</option></select>
+            </div>
+            <div class="form-group"><label>NID/জন্ম নিবন্ধন</label><input type="text" id="editAppNid" value="${app.personal?.nid||''}"></div>
+            <div class="form-group"><label>রক্তের গ্রুপ</label><input type="text" id="editAppBlood" value="${app.personal?.bloodGroup||''}"></div>
+            <div class="form-group"><label>কোর্স</label>
+              <select id="editAppCourse"><option value="BTEB" ${app.enrollment?.courseId==='BTEB'?'selected':''}>BTEB</option><option value="FOUNDATION" ${app.enrollment?.courseId==='FOUNDATION'?'selected':''}>Foundation</option></select>
+            </div>
+            <div class="form-group"><label>সেশন</label>
+              <select id="editAppSession"><option value="January - June" ${app.enrollment?.session==='January - June'?'selected':''}>January - June</option><option value="July - December" ${app.enrollment?.session==='July - December'?'selected':''}>July - December</option></select>
+            </div>
+          </div>
+          <div class="form-group"><label>ঠিকানা (গ্রাম/পাড়া)</label><input type="text" id="editAppVillage" value="${app.address?.present?.village||''}"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group"><label>উপজেলা</label><input type="text" id="editAppUpazila" value="${app.address?.present?.upazila||''}"></div>
+            <div class="form-group"><label>জেলা</label><input type="text" id="editAppDistrict" value="${app.address?.present?.district||''}"></div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group"><label>ছবি পরিবর্তন (Cloudinary)</label><input type="file" id="editAppPhoto" accept="image/*"></div>
+            <div class="form-group"><label>NID/Birth Cert পরিবর্তন</label><input type="file" id="editAppNidDoc" accept="image/*,.pdf"></div>
+          </div>
+          ${app.personal?.photo ? '<p>বর্তমান ছবি: <img src="'+app.personal.photo+'" style="width:60px;height:60px;border-radius:8px;object-fit:cover;vertical-align:middle;"></p>' : ''}
+          ${app.personal?.nidDoc ? '<p>বর্তমান NID: <a href="'+app.personal.nidDoc+'" target="_blank" style="color:var(--g2);">📄 দেখুন</a></p>' : ''}
+          <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-sm btn-save" style="padding:10px 20px; font-size:14px;" onclick="saveAppEdit('${appId}')">💾 সেভ করুন</button>
+            <button class="btn-sm" style="padding:10px 20px; font-size:14px; background:#e4ece7;" onclick="closeAppDetailsModal()">বাতিল</button>
+          </div>
+        `;
+        document.getElementById('appDetailsModal').style.display = 'flex';
+      });
+    }
+
+    async function saveAppEdit(appId) {
+      const updates = {
+        'personal/nameBn': document.getElementById('editAppNameBn').value,
+        'personal/nameEn': document.getElementById('editAppNameEn').value,
+        'personal/fatherName': document.getElementById('editAppFather').value,
+        'personal/motherName': document.getElementById('editAppMother').value,
+        'personal/phone': document.getElementById('editAppPhone').value,
+        'personal/gender': document.getElementById('editAppGender').value,
+        'personal/nid': document.getElementById('editAppNid').value,
+        'personal/bloodGroup': document.getElementById('editAppBlood').value,
+        'enrollment/courseId': document.getElementById('editAppCourse').value,
+        'enrollment/session': document.getElementById('editAppSession').value,
+        'address/present/village': document.getElementById('editAppVillage').value,
+        'address/present/upazila': document.getElementById('editAppUpazila').value,
+        'address/present/district': document.getElementById('editAppDistrict').value
+      };
+
+      // Upload new photo if selected
+      const photoFile = document.getElementById('editAppPhoto').files[0];
+      if(photoFile) {
+        try {
+          const url = await uploadToCloudinary(photoFile);
+          updates['personal/photo'] = url;
+        } catch(e) { alert('ছবি আপলোডে সমস্যা!'); }
+      }
+
+      // Upload new NID doc if selected
+      const nidFile = document.getElementById('editAppNidDoc').files[0];
+      if(nidFile) {
+        try {
+          const url = await uploadToCloudinary(nidFile);
+          updates['personal/nidDoc'] = url;
+        } catch(e) { alert('ডকুমেন্ট আপলোডে সমস্যা!'); }
+      }
+
+      db.ref('sabuj/applications/' + appId).update(updates).then(() => {
+        // Also sync to students list
+        const idx = DB.students.findIndex(s => s.reg === appId);
+        if(idx >= 0) {
+          DB.students[idx].name = updates['personal/nameBn'];
+          DB.students[idx].phone = updates['personal/phone'];
+          DB.students[idx].fatherName = updates['personal/fatherName'];
+          DB.students[idx].motherName = updates['personal/motherName'];
+          DB.students[idx].gender = updates['personal/gender'];
+          DB.students[idx].course = updates['enrollment/courseId'];
+          DB.students[idx].session = updates['enrollment/session'];
+          if(updates['personal/photo']) DB.students[idx].photo = updates['personal/photo'];
+          saveDB('students', DB.students);
+          renderAdminStudents();
+        }
+        alert('✅ তথ্য সফলভাবে আপডেট হয়েছে!');
+        closeAppDetailsModal();
+      });
+    }
+
+    // Remove approved student
+    function removeApprovedStudent(appId, uid) {
+      if(!confirm('⚠️ এই শিক্ষার্থীকে সরাতে চান?\n\nতার অ্যাপ্রুভাল বাতিল হবে এবং Students লিস্ট থেকেও সরানো হবে।')) return;
+      
+      // Reset application status
+      db.ref('sabuj/applications/' + appId).update({ status: 'removed' });
+      
+      // Reset students_auth status
+      if(uid) db.ref('sabuj/students_auth/' + uid).update({ status: 'removed' });
+      
+      // Remove from students list
+      const idx = DB.students.findIndex(s => s.reg === appId);
+      if(idx >= 0) {
+        const safeKey = String(appId).replace(/[^a-zA-Z0-9]/g, '_');
+        db.ref('sabuj/photos/' + safeKey).remove().catch(() => {});
+        DB.students.splice(idx, 1);
+        saveDB('students', DB.students);
+        renderAdminStudents();
+      }
+      
+      alert('✅ শিক্ষার্থী সফলভাবে সরানো হয়েছে!');
     }
 
     let DB = { students: [], general: {} };
@@ -593,11 +770,13 @@
     }
 
     function approveApp(appId, uid) {
-      if(confirm('আবেদনটি অনুমোদন করতে চান?')) {
+      var sessionEl = document.getElementById('session_' + appId);
+      var selectedSession = sessionEl ? sessionEl.value : 'January - June';
+      if(confirm('সেশন: ' + selectedSession + '\nআবেদনটি অনুমোদন করতে চান?')) {
         db.ref('sabuj/applications/' + appId).once('value').then(snap => {
           const app = snap.val();
           if(app) {
-            db.ref('sabuj/applications/' + appId).update({ status: 'approved' });
+            db.ref('sabuj/applications/' + appId).update({ status: 'approved', 'enrollment/session': selectedSession });
             db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
             
             // Sync to main website's students list
@@ -614,7 +793,7 @@
                   fatherName: app.personal?.fatherName || '',
                   motherName: app.personal?.motherName || '',
                   gender: app.personal?.gender || '',
-                  session: '',
+                  session: selectedSession,
                   year: new Date().getFullYear().toString(),
                   address: '',
                   course: app.enrollment?.courseId || '',
@@ -944,6 +1123,14 @@
       if(s&&s.reg){
         const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
         db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
+        // Also update application status if it's an app ID
+        if(s.reg.startsWith('SCTC-APP-')) {
+          db.ref('sabuj/applications/' + s.reg).update({ status: 'removed' }).catch(()=>{});
+          // Find uid from applications and update students_auth
+          db.ref('sabuj/applications/' + s.reg + '/uid').once('value').then(snap => {
+            if(snap.val()) db.ref('sabuj/students_auth/' + snap.val()).update({ status: 'removed' }).catch(()=>{});
+          });
+        }
       }
       DB.students.splice(i,1);saveDB('students',DB.students);renderAdminStudents();
     }
