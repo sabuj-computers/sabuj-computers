@@ -16,49 +16,78 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
-    :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --gold: #c8a847; }
+    :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --gold: #c8a847; --muted: #6b8c76; }
+    * { box-sizing: border-box; }
     body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); margin: 0; }
-    .header { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header { background: linear-gradient(135deg, var(--g1), #0f4a25, var(--g2)); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(13,61,31,0.3); position: sticky; top: 0; z-index: 100; }
     .header-left { display: flex; align-items: center; gap: 15px; }
-    .header-left img { width: 40px; height: 40px; border-radius: 50%; background: white; padding: 3px; }
-    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .header-left img { width: 40px; height: 40px; border-radius: 50%; background: white; padding: 3px; transition: 0.3s; }
+    .header-left img:hover { transform: scale(1.1); }
+    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; animation: slideUp 0.5s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
-    /* Profile Card */
-    .profile-card { background: #fff; border-radius: 16px; padding: 24px; display: flex; gap: 20px; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 30px; position: relative; }
-    .profile-img-container { position: relative; width: 100px; height: 100px; }
-    .profile-img { width: 100%; height: 100%; border-radius: 50%; background: #e4ece7; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 4px solid var(--g2); overflow: hidden; }
-    .edit-photo-btn { position: absolute; bottom: 0; right: 0; background: var(--g1); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-    .profile-info h2 { margin: 0 0 5px 0; color: var(--g1); }
-    .profile-info p { margin: 0; color: #6b8c76; font-size: 15px; }
-    .badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 10px; }
-    .badge-pending { background: #fef9c3; color: #854d0e; }
+    /* Profile Card - Premium */
+    .profile-card { background: linear-gradient(135deg, #ffffff 0%, #f7fdf9 100%); border-radius: 20px; padding: 28px; display: flex; gap: 20px; align-items: center; box-shadow: 0 8px 30px rgba(0,0,0,0.08); margin-bottom: 30px; position: relative; border: 1px solid rgba(26,107,53,0.1); transition: 0.3s; }
+    .profile-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+    .profile-img-container { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+    .profile-img { width: 100%; height: 100%; border-radius: 50%; background: #e4ece7; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 4px solid var(--g2); overflow: hidden; box-shadow: 0 4px 15px rgba(26,107,53,0.2); }
+    .edit-photo-btn { position: absolute; bottom: 0; right: 0; background: var(--gold); color: var(--g1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: 0.2s; }
+    .edit-photo-btn:hover { transform: scale(1.1); }
+    .profile-info h2 { margin: 0 0 5px 0; color: var(--g1); font-size: 22px; }
+    .profile-info p { margin: 0; color: var(--muted); font-size: 15px; }
+    .badge { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 10px; box-shadow: 0 2px 6px rgba(22,101,52,0.15); }
+    .badge-pending { background: linear-gradient(135deg, #fef9c3, #fde68a); color: #854d0e; }
 
-    /* Tabs */
-    .tabs-container { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    .tabs-nav { display: flex; overflow-x: auto; background: #f7faf8; border-bottom: 2px solid #e4ece7; scrollbar-width: none; }
+    /* Tabs - Premium */
+    .tabs-container { background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.04); }
+    .tabs-nav { display: flex; overflow-x: auto; background: linear-gradient(180deg, #f7faf8, #f0f5f2); border-bottom: 2px solid #e4ece7; scrollbar-width: none; padding: 5px 5px 0; }
     .tabs-nav::-webkit-scrollbar { display: none; }
-    .tab-btn { padding: 16px 20px; border: none; background: none; font-family: 'Hind Siliguri', sans-serif; font-size: 15px; font-weight: 600; color: #6b8c76; cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; transition: 0.3s; }
-    .tab-btn:hover { color: var(--g2); background: rgba(46,158,82,0.08); }
-    .tab-btn.active { color: var(--g1); border-bottom-color: var(--g2); background: #fff; }
+    .tab-btn { padding: 14px 18px; border: none; background: none; font-family: 'Hind Siliguri', sans-serif; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; transition: all 0.3s; border-radius: 8px 8px 0 0; }
+    .tab-btn:hover { color: var(--g2); background: rgba(46,158,82,0.06); }
+    .tab-btn.active { color: var(--g1); border-bottom-color: var(--gold); background: #fff; }
     
-    .tab-content { padding: 30px; display: none; animation: fadeIn 0.3s; }
+    .tab-content { padding: 30px; display: none; animation: fadeIn 0.4s ease-out; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Action Buttons */
-    .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-    .action-btn { background: #fff; border: 1px solid #dde8e0; padding: 20px; border-radius: 16px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--g1); }
-    .action-btn:hover { border-color: var(--g2); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(13,61,31,0.1); }
-    .action-icon { font-size: 28px; background: #f0f8f4; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    /* Action Buttons - Premium */
+    .action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .action-btn { background: linear-gradient(135deg, #fff, #fafcfb); border: 1.5px solid #dde8e0; padding: 20px; border-radius: 16px; text-align: left; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 15px; text-decoration: none; color: var(--g1); }
+    .action-btn:hover { border-color: var(--g2); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(13,61,31,0.12); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); }
+    .action-icon { font-size: 26px; background: linear-gradient(135deg, #f0f8f4, #dcfce7); width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     
-    .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; }
+    .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.3s; backdrop-filter: blur(4px); }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
 
-    /* ID Card */
-    .id-card { width: 300px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e4ece7; text-align: center; position: relative; }
-    .id-header { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; padding: 20px 20px 60px 20px; }
-    .id-photo { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #fff; margin: -50px auto 10px; background: #e4ece7; overflow: hidden; position: relative; z-index: 2; }
+    /* Mobile Responsive */
+    @media (max-width: 600px) {
+      .profile-card { flex-direction: column; text-align: center; padding: 20px; }
+      .profile-info { text-align: center; }
+      .action-grid { grid-template-columns: 1fr; }
+      .tab-btn { padding: 12px 14px; font-size: 13px; }
+      #libraryList { grid-template-columns: 1fr !important; }
+    }
+
+    /* ID Card - Premium Design */
+    .id-card { width: 340px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.18); border: 2px solid var(--gold); text-align: center; position: relative; }
+    .id-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), #e8b820, var(--gold)); }
+    .id-header { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; padding: 15px 20px 55px 20px; position: relative; }
+    .id-header-logo { width: 35px; height: 35px; border-radius: 50%; background: white; padding: 2px; vertical-align: middle; margin-right: 8px; }
+    .id-header-title { display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+    .id-header-badge { display: inline-block; background: var(--gold); color: var(--g1); font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-top: 5px; letter-spacing: 1px; }
+    .id-photo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #fff; margin: -50px auto 8px; background: #e4ece7; overflow: hidden; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
     .id-body { padding: 0 20px 20px; }
-    .id-qr { margin: 15px auto; width: 100px; height: 100px; padding: 5px; background: #fff; border: 2px solid #e4ece7; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
+    .id-info-table { width: 100%; text-align: left; font-size: 12px; margin: 10px 0; border-collapse: collapse; }
+    .id-info-table td { padding: 4px 6px; }
+    .id-info-table td:first-child { color: var(--muted); font-weight: 600; width: 80px; }
+    .id-info-table td:last-child { color: var(--g1); font-weight: 700; }
+    .id-qr { margin: 12px auto; width: 90px; height: 90px; padding: 5px; background: #fff; border: 2px solid #e4ece7; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
+    .id-footer { background: linear-gradient(135deg, var(--g1), var(--g2)); color: white; padding: 8px; font-size: 10px; margin-top: 10px; }
+    .id-card-back { width: 340px; margin: 20px auto 0; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.18); border: 2px solid var(--gold); text-align: center; position: relative; padding: 20px; }
+    .id-card-back::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), #e8b820, var(--gold)); }
+    .id-back-title { color: var(--g1); font-weight: 700; font-size: 14px; margin: 0 0 10px; border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
+    .id-back-info { text-align: left; font-size: 12px; line-height: 1.8; color: #4a6040; }
+    .id-back-info strong { color: var(--g1); }
 
     /* Print Styles */
     @media print {
@@ -119,7 +148,13 @@
         <button class="tab-btn" onclick="switchTab('payments')">পেমেন্ট</button>
         <button class="tab-btn" onclick="switchTab('certificate')">সার্টিফিকেট</button>
         <button class="tab-btn" onclick="switchTab('reports')">রিপোর্টস</button>
-        <button class="tab-btn" onclick="switchTab('notices')">নোটিশ <span id="noticeBadge" style="background:red;color:white;border-radius:50%;padding:2px 6px;font-size:10px;display:      <div class="tab-content active" id="tab-dashboard">
+        <button class="tab-btn" onclick="switchTab('notices')">নোটিশ <span id="noticeBadge" style="background:red;color:white;border-radius:50%;padding:2px 6px;font-size:10px;display:none;">0</span></button>
+        <button class="tab-btn" onclick="switchTab('library')">লাইব্রেরি</button>
+        <button class="tab-btn" onclick="switchTab('idcard')">আইডি কার্ড</button>
+        <button class="tab-btn" onclick="switchTab('settings')">সেটিংস</button>
+      </div>
+
+      <div class="tab-content active" id="tab-dashboard">
         <h3 style="color: var(--g1); margin-top: 0;">আপনার সেবাসমূহ</h3>
         <div class="action-grid">
           <a href="#" class="action-btn" onclick="printDocument('applicant_copy')">
@@ -204,18 +239,6 @@
         </div>
       </div>
 
-      <div class="tab-content" id="tab-certificate">
-        <h3 style="color: var(--g1); margin-top: 0;">সার্টিফিকেট যাচাই</h3>
-        <div style="background:#f7faf8; border:1px solid #e4ece7; padding:20px; border-radius:12px;">
-          <h4 style="color:var(--g1); margin:0 0 10px 0;">✅ Digital Verification</h4>
-          <p style="color:#4a6040; margin:0 0 15px 0; font-size:14px;">আপনার সনদ নম্বর নিচে দেওয়া হলো। এটি দিয়ে অনলাইনে যাচাই করা যাবে।</p>
-          <div id="certDetails" style="font-size:18px; font-weight:bold; color:var(--g2); margin-bottom:15px;">সার্টিফিকেট ইস্যু হয়নি</div>
-          <a href="verify.html" style="display:inline-block; background:var(--g1); color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-size:14px;">যাচাই করুন</a>
-        </div>
-      </div>��০</h3>
-          </div>
-        </div>
-      </div>
 
       <div class="tab-content" id="tab-certificate">
         <h3 style="color: var(--g1); margin-top: 0;">সার্টিফিকেট</h3>
@@ -245,36 +268,68 @@
       </div>
 
       <div class="tab-content" id="tab-library">
-        <h3 style="color: var(--g1); margin-top: 0;">ডিজিটাল লাইব্রেরি</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-          <div style="background:#fff; border:1px solid #e4ece7; padding:15px; border-radius:10px; display:flex; align-items:center; gap:15px;">
-            <div style="font-size:30px;">📚</div>
-            <div><h4 style="margin:0 0 5px;">MS Word Tutorial</h4><p style="margin:0;font-size:12px;color:var(--muted);">PDF • 2.5 MB</p></div>
-            <button style="margin-left:auto; background:var(--g2); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">ডাউনলোড</button>
-          </div>
+        <h3 style="color: var(--g1); margin-top: 0;">📚 ডিজিটাল লাইব্রেরি</h3>
+        <div id="libraryList" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+          <p style="color:var(--muted); grid-column:1/-1; text-align:center; padding:30px;">লোড হচ্ছে...</p>
         </div>
       </div>
 
       <div class="tab-content" id="tab-idcard">
         <h3 style="color: var(--g1); margin-top: 0; text-align:center;">ডিজিটাল ID Card</h3>
-        <div id="printAreaIdCard">
+        <p style="text-align:center; color:var(--muted); font-size:13px; margin-bottom:20px;">সামনের দিক ও পেছনের দিক</p>
+        <div id="printAreaIdCard" class="print-section">
+          <!-- FRONT SIDE -->
           <div class="id-card">
             <div class="id-header">
-              <h3 style="margin:0; font-size:16px;">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h3>
-              <p style="margin:0; font-size:11px; opacity:0.8;">বাগাতিপাড়া, নাটোর</p>
+              <div class="id-header-title">
+                <img class="id-header-logo" id="idLogo" src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo">
+                <h3 style="margin:0; font-size:14px; line-height:1.3;">সবুজ কম্পিউটার<br>ট্রেনিং সেন্টার</h3>
+              </div>
+              <p style="margin:2px 0 0; font-size:10px; opacity:0.8;">বাগাতিপাড়া, নাটোর</p>
+              <div class="id-header-badge">STUDENT ID CARD</div>
             </div>
             <div class="id-photo" id="idPhoto">👤</div>
             <div class="id-body">
-              <h3 style="margin:10px 0 5px; color:var(--g1);" id="idName">নাম</h3>
-              <p style="margin:0; font-size:12px; color:var(--muted);" id="idCourse">কোর্স</p>
-              <p style="margin:5px 0 0; font-size:13px; font-weight:bold; color:var(--g2);" id="idReg">ID: SCTC-XXXX</p>
+              <h3 style="margin:5px 0 3px; color:var(--g1); font-size:16px;" id="idName">নাম</h3>
+              <table class="id-info-table">
+                <tr><td>পিতা:</td><td id="idFather">—</td></tr>
+                <tr><td>কোর্স:</td><td id="idCourse">—</td></tr>
+                <tr><td>মোবাইল:</td><td id="idPhone">—</td></tr>
+                <tr><td>ID:</td><td id="idReg" style="color:var(--g2);">SCTC-XXXX</td></tr>
+                <tr><td>সেশন:</td><td id="idSession">—</td></tr>
+              </table>
               <div class="id-qr" id="qrcode"></div>
-              <p style="margin:0; font-size:10px; color:var(--muted);">Scan to Verify</p>
+              <p style="margin:0; font-size:9px; color:var(--muted);">🔍 Scan QR to Verify Online</p>
+            </div>
+            <div class="id-footer">
+              <p style="margin:0;">www.sabujcomputers.com | ☎ ০১XXXXXXXXX</p>
+            </div>
+          </div>
+
+          <!-- BACK SIDE -->
+          <div class="id-card-back">
+            <h4 class="id-back-title">📋 শর্তাবলী ও তথ্য</h4>
+            <div class="id-back-info">
+              <p style="margin:0 0 5px;"><strong>ঠিকানা:</strong> <span id="idAddress">—</span></p>
+              <p style="margin:0 0 5px;"><strong>রক্তের গ্রুপ:</strong> <span id="idBlood">—</span></p>
+              <p style="margin:0 0 5px;"><strong>জরুরি যোগাযোগ:</strong> <span id="idGuardianPhone">—</span></p>
+              <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+              <ol style="padding-left:18px; margin:0; font-size:11px; line-height:1.6; color:#555;">
+                <li>এই কার্ড শুধুমাত্র প্রতিষ্ঠানের শিক্ষার্থীদের জন্য প্রযোজ্য।</li>
+                <li>কার্ডটি হস্তান্তরযোগ্য নয়।</li>
+                <li>হারিয়ে গেলে কর্তৃপক্ষকে জানান।</li>
+                <li>কোর্স শেষে কার্ড জমা দিতে হবে।</li>
+              </ol>
+            </div>
+            <div style="margin-top:15px; padding-top:10px; border-top:2px solid var(--gold);">
+              <p style="margin:0; font-size:11px; color:var(--g1); font-weight:700;">অনুমোদিত স্বাক্ষর</p>
+              <p style="margin:3px 0 0; font-size:10px; color:var(--muted);">পরিচালক, সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
             </div>
           </div>
         </div>
-        <div style="text-align:center; margin-top:20px;">
-          <button style="background:var(--g1); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="printDiv('printAreaIdCard')">🖨️ প্রিন্ট করুন</button>
+        <div style="text-align:center; margin-top:25px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button style="background:var(--g1); color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:bold; cursor:pointer; font-family:inherit; font-size:14px;" onclick="printDiv('printAreaIdCard')">🖨️ প্রিন্ট করুন</button>
+          <button style="background:var(--gold); color:var(--g1); border:none; padding:12px 24px; border-radius:10px; font-weight:bold; cursor:pointer; font-family:inherit; font-size:14px;" onclick="downloadIdCard()">📥 ডাউনলোড</button>
         </div>
       </div>
 
@@ -326,8 +381,8 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dwyxep1kq/upload';
-    const CLOUDINARY_UPLOAD_PRESET = 'sctc_unsigned';
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
     let currentAppData = null;
     let currentAppId = null;
@@ -454,22 +509,34 @@
                   // Reports Tab
                   document.getElementById('reportText').textContent = appData.report?.text || 'কোনো রিপোর্ট পাওয়া যায়নি।';
 
-                  // ID Card
-                  document.getElementById('idName').textContent = appData.personal?.nameBn;
-                  document.getElementById('idCourse').textContent = appData.enrollment?.courseId;
-                  document.getElementById('idReg').textContent = 'ID: ' + authData.applicationId;
+                  // ID Card - Premium Data Population
+                  document.getElementById('idName').textContent = appData.personal?.nameBn || 'নাম';
+                  document.getElementById('idFather').textContent = appData.personal?.fatherName || '—';
+                  const idCourseName = appData.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
+                  document.getElementById('idCourse').textContent = idCourseName;
+                  document.getElementById('idPhone').textContent = appData.personal?.phone || '—';
+                  document.getElementById('idReg').textContent = authData.applicationId;
+                  document.getElementById('idSession').textContent = appData.enrollment?.session || new Date(appData.submittedAt).getFullYear();
+                  document.getElementById('idAddress').textContent = (appData.address?.present?.village || '') + ', ' + (appData.address?.present?.upazila || '') + ', ' + (appData.address?.present?.district || '');
+                  document.getElementById('idBlood').textContent = appData.personal?.bloodGroup || '—';
+                  document.getElementById('idGuardianPhone').textContent = appData.personal?.guardianPhone || '—';
                   
                   if(appData.personal?.photo) {
                     document.getElementById('profileImg').innerHTML = `<img src="${appData.personal.photo}" style="width:100%;height:100%;object-fit:cover;">`;
                     document.getElementById('idPhoto').innerHTML = `<img src="${appData.personal.photo}" style="width:100%;height:100%;object-fit:cover;">`;
                   }
                   
+                  // Load dynamic logo for ID card
+                  db.ref('sabuj/general/logo').once('value', snap => {
+                    if(snap.val()) document.getElementById('idLogo').src = snap.val();
+                  });
+                  
                   // Generate QR (only once)
                   const qrContainer = document.getElementById("qrcode");
                   if(qrContainer.innerHTML === '') {
                     new QRCode(qrContainer, {
                       text: window.location.origin + "/verify.html?cert=" + authData.applicationId,
-                      width: 100, height: 100
+                      width: 90, height: 90
                     });
                   }
                 }
@@ -657,6 +724,31 @@
       
       window.print();
       printArea.style.display = 'none';
+    // Dynamic Library Loading
+    db.ref('sabuj/library').on('value', snap => {
+      const data = snap.val();
+      const list = document.getElementById('libraryList');
+      if(data) {
+        const items = Object.values(data);
+        list.innerHTML = items.map(item => `
+          <div style="background:#fff; border:1px solid #e4ece7; padding:15px; border-radius:12px; display:flex; align-items:center; gap:12px; transition:0.2s;" onmouseover="this.style.borderColor='var(--g2)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#e4ece7';this.style.transform='none'">
+            <div style="font-size:28px; background:#f0f8f4; width:45px; height:45px; border-radius:10px; display:flex; align-items:center; justify-content:center;">${item.type === 'pdf' ? '📄' : item.type === 'video' ? '🎥' : '📚'}</div>
+            <div style="flex:1; min-width:0;">
+              <h4 style="margin:0 0 3px; font-size:13px; color:var(--g1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
+              <p style="margin:0; font-size:11px; color:var(--muted);">${item.type?.toUpperCase() || 'FILE'} ${item.size ? '• ' + item.size : ''}</p>
+            </div>
+            <a href="${item.url}" target="_blank" style="background:var(--g2); color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; text-decoration:none; font-size:12px; font-weight:bold; white-space:nowrap;">📥</a>
+          </div>
+        `).join('');
+      } else {
+        list.innerHTML = '<p style="color:var(--muted); grid-column:1/-1; text-align:center; padding:40px;">এখনো কোনো স্টাডি ম্যাটেরিয়াল আপলোড করা হয়নি।</p>';
+      }
+    });
+
+    function downloadIdCard() {
+      const el = document.querySelector('.id-card');
+      alert('ID Card প্রিন্ট মোডে ওপেন হচ্ছে। প্রিন্ট ডায়ালগ থেকে "Save as PDF" সিলেক্ট করে ডাউনলোড করুন।');
+      printDiv('printAreaIdCard');
     }
   </script>
 </body>

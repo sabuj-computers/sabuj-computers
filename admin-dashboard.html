@@ -92,6 +92,7 @@
       <li class="nav-item" onclick="switchTab('certificates')">🎓 Certificates</li>
       <li class="nav-item" onclick="switchTab('reports')">📈 Reports</li>
       <li class="nav-item" onclick="switchTab('notices')">📢 Notices & Announce</li>
+      <li class="nav-item" onclick="switchTab('library')">📚 Library</li>
       <li class="nav-item" onclick="switchTab('settings')">⚙️ Settings</li>
     </ul>
   </div>
@@ -336,6 +337,31 @@
         </div>
       </div>
 
+
+      <!-- Library Management -->
+      <div class="tab-content" id="tab-library">
+        <div class="card">
+          <h3 style="margin-top:0;">📚 লাইব্রেরি ম্যানেজমেন্ট</h3>
+          <p style="color:#6b8c76; font-size:13px;">শিক্ষার্থীদের জন্য স্টাডি ম্যাটেরিয়াল আপলোড করুন।</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div class="form-group"><label>শিরোনাম *</label><input type="text" id="libTitle" placeholder="যেমন: MS Word Tutorial"></div>
+            <div class="form-group"><label>ধরণ</label>
+              <select id="libType"><option value="pdf">PDF</option><option value="video">Video Link</option><option value="link">External Link</option><option value="doc">Document</option></select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+            <div class="form-group"><label>সাইজ (ঐচ্ছিক)</label><input type="text" id="libSize" placeholder="যেমন: 2.5 MB"></div>
+            <div class="form-group"><label>ফাইল আপলোড বা URL</label><input type="text" id="libUrl" placeholder="URL দিন অথবা নিচে ফাইল আপলোড করুন"></div>
+          </div>
+          <div class="form-group"><label>ফাইল আপলোড (Cloudinary)</label><input type="file" id="libFile" accept=".pdf,.doc,.docx,.ppt,.pptx"></div>
+          <button class="btn-sm btn-save" style="padding:10px 20px; font-size:14px;" onclick="saveLibraryItem()">📤 লাইব্রেরিতে যোগ করুন</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">আপলোডকৃত ম্যাটেরিয়াল</h3>
+          <div id="adminLibList" style="font-size:14px;">লোড হচ্ছে...</div>
+        </div>
+      </div>
+
       <!-- 10. Settings -->
       <div class="tab-content" id="tab-settings">
         <div class="card">
@@ -408,8 +434,8 @@
     const db = firebase.database();
 
     // Cloudinary Config
-    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dwyxep1kq/upload';
-    const CLOUDINARY_UPLOAD_PRESET = 'sctc_unsigned';
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
     // Check Admin Auth
     auth.onAuthStateChanged(user => {
@@ -871,8 +897,8 @@
             const base64Image = cv.toDataURL('image/jpeg', 0.95);
             let formData = new FormData();
             formData.append("file", base64Image);
-            formData.append("upload_preset", "eopkol2t");
-            fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", { method: "POST", body: formData })
+            formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+            fetch(CLOUDINARY_URL, { method: "POST", body: formData })
             .then(response => response.json())
             .then(result => {
               if(result.secure_url) doSave(result.secure_url);
@@ -1208,6 +1234,72 @@
       });
       db.ref('sabuj/formSettings').set(settings).then(() => alert('✅ ফর্ম সেটিংস সেভ হয়েছে!'));
     }
+
+    // ========== LIBRARY MANAGEMENT ==========
+    async function saveLibraryItem() {
+      const title = document.getElementById('libTitle').value;
+      if(!title) return alert('শিরোনাম দিন!');
+      let url = document.getElementById('libUrl').value;
+      const fileInput = document.getElementById('libFile');
+      if(fileInput.files[0] && !url) {
+        alert('ফাইল আপলোড হচ্ছে...');
+        url = await uploadToCloudinary(fileInput.files[0]);
+      }
+      if(!url) return alert('URL দিন অথবা ফাইল আপলোড করুন!');
+      const item = {
+        title, type: document.getElementById('libType').value,
+        size: document.getElementById('libSize').value, url,
+        addedAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      db.ref('sabuj/library').push(item).then(() => {
+        alert('✅ লাইব্রেরিতে যোগ হয়েছে!');
+        document.getElementById('libTitle').value = '';
+        document.getElementById('libUrl').value = '';
+        document.getElementById('libSize').value = '';
+        document.getElementById('libFile').value = '';
+      });
+    }
+    db.ref('sabuj/library').on('value', snap => {
+      const data = snap.val();
+      const list = document.getElementById('adminLibList');
+      if(!list) return;
+      if(data) {
+        let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>শিরোনাম</th><th>ধরণ</th><th>সাইজ</th><th>অ্যাকশন</th></tr></thead><tbody>';
+        Object.entries(data).forEach(([key, item]) => {
+          html += '<tr><td>'+item.title+'</td><td>'+(item.type||'').toUpperCase()+'</td><td>'+(item.size||'—')+'</td><td><a href="'+item.url+'" target="_blank" class="btn-sm btn-save" style="text-decoration:none;">👁️</a> <button class="btn-sm btn-reject" onclick="deleteLibItem(\''+key+'\');">🗑️</button></td></tr>';
+        });
+        html += '</tbody></table>';
+        list.innerHTML = html;
+      } else { list.innerHTML = '<p style="color:#6b8c76;">কোনো ম্যাটেরিয়াল নেই।</p>'; }
+    });
+    function deleteLibItem(key) {
+      if(confirm('এই ম্যাটেরিয়াল মুছে ফেলবেন?')) {
+        db.ref('sabuj/library/' + key).remove().then(() => alert('✅ মুছে ফেলা হয়েছে!'));
+      }
+    }
+    // ========== OVERVIEW ANALYTICS ==========
+    function loadOverviewAnalytics() {
+      db.ref('sabuj/applications').once('value', snap => {
+        const data = snap.val(); if(!data) return;
+        const apps = Object.values(data);
+        const bteb = apps.filter(a => a.enrollment?.courseId === 'BTEB' && (a.status==='approved'||a.status==='active')).length;
+        const foundation = apps.filter(a => a.enrollment?.courseId === 'FOUNDATION' && (a.status==='approved'||a.status==='active')).length;
+        const active = bteb + foundation;
+        const el = document.getElementById('overviewActive'); if(el) el.textContent = active;
+        const cs = document.getElementById('courseStats');
+        if(cs) cs.innerHTML = '<div style="display:flex;gap:15px;"><div style="background:#eff6ff;padding:12px 20px;border-radius:10px;flex:1;text-align:center;"><p style="margin:0;font-size:12px;color:#3b82f6;">BTEB</p><h3 style="margin:5px 0 0;color:#1e3a8a;">'+bteb+'</h3></div><div style="background:#f0fdf4;padding:12px 20px;border-radius:10px;flex:1;text-align:center;"><p style="margin:0;font-size:12px;color:#10b981;">Foundation</p><h3 style="margin:5px 0 0;color:#065f46;">'+foundation+'</h3></div></div>';
+      });
+      db.ref('sabuj/students').once('value', snap => {
+        const data = snap.val(); if(!data) return;
+        const students = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+        let totalFee=0, totalPaid=0;
+        students.forEach(s => { totalFee+=parseInt(s.feeTotal||0); totalPaid+=parseInt(s.feePaid||0); });
+        const rev = document.getElementById('overviewRevenue'); if(rev) rev.textContent = '৳'+totalPaid;
+        const ps = document.getElementById('paymentStats');
+        if(ps) ps.innerHTML = '<div style="display:flex;gap:15px;"><div style="background:#dcfce7;padding:12px 20px;border-radius:10px;flex:1;text-align:center;"><p style="margin:0;font-size:12px;color:#166534;">আদায়কৃত</p><h3 style="margin:5px 0 0;color:#166534;">৳'+totalPaid+'</h3></div><div style="background:#fee2e2;padding:12px 20px;border-radius:10px;flex:1;text-align:center;"><p style="margin:0;font-size:12px;color:#991b1b;">বকেয়া</p><h3 style="margin:5px 0 0;color:#991b1b;">৳'+(totalFee-totalPaid)+'</h3></div></div>';
+      });
+    }
+    setTimeout(loadOverviewAnalytics, 1000);
   </script>
 </body>
 </html>

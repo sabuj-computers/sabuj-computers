@@ -1063,7 +1063,6 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
     <a href="#notice">নোটিশ</a>
     <a href="#search">ফলাফল</a>
     <a href="#contact">যোগাযোগ</a>
-    <a href="portal.html" style="color: #f0d060; font-weight: bold; border: 1px solid #f0d060; border-radius: 8px; padding: 8px 16px; margin-left: 10px;">🔐 স্টুডেন্ট পোর্টাল</a>
   </nav>
 </header>
 
@@ -1376,7 +1375,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
       <h4>যোগাযোগ</h4>
       <ul>
         <li><a id="ftrPhone" href="tel:01724084350">📞 ০১৭২৪ ০৮৪৩৫০</a></li>
-        <li><a id="ftrEmail" href="/cdn-cgi/l/email-protection#fc8f8f8f9d9e8996cccccbbc9b919d9590d29f9391">✉️ <span class="__cf_email__" data-cfemail="82f1f1f1e3e0f7e8b2b2b5c2e5efe3ebeeace1edef">[email&#160;protected]</span></a></li>
+        <li><a id="ftrEmail" href="mailto:sssabuj007@gmail.com">✉️ sssabuj007@gmail.com</a></li>
         <li><a href="https://maps.app.goo.gl/bF3Dkx8kkxrz6KrU8?g_st=aw" target="_blank" rel="noopener">বাগাতিপাড়া, নাটোর</a></li>
       </ul>
     </div>
@@ -1463,7 +1462,7 @@ function closePremiumGate() {
 })();
 </script>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ===================================================
 // ===================================================
 // FIREBASE INIT
@@ -2961,7 +2960,7 @@ function uploadToCloudinary(file, callback) {
 
       let formData = new FormData();
       formData.append("file", base64Image);
-      formData.append("upload_preset", "eopkol2t"); // Cloudinary Preset
+      formData.append("upload_preset", "eopkol2t");
 
       fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", {
         method: "POST",
@@ -3278,7 +3277,7 @@ function saveStudent(){
         // এবার এই প্রসেস করা হাই-কোয়ালিটি ছবিটা Cloudinary তে পাঠাবো
         let formData = new FormData();
         formData.append("file", base64Image); // Cloudinary সরাসরি Base64 সাপোর্ট করে
-        formData.append("upload_preset", "eopkol2t"); // আপনার Preset Name
+        formData.append("upload_preset", "eopkol2t");
 
         fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", { // আপনার Cloud Name
           method: "POST",
@@ -3947,7 +3946,7 @@ document.getElementById('n-new').checked=true;
 
     let formData = new FormData();
     formData.append("file", pf);
-    formData.append("upload_preset", "eopkol2t"); // আপনার Cloudinary Preset
+    formData.append("upload_preset", "eopkol2t");
 
     // PDF এর জন্য 'auto' বা 'raw' ব্যবহার করতে হয়
     fetch("https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload", { 
