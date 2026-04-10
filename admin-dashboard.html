@@ -102,7 +102,7 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-header" onclick="this.parentElement.classList.toggle('open')">
-      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="adminLogo">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="adminLogo" crossorigin="anonymous">
       <h2>🛡️ অ্যাডমিন প্যানেল</h2>
     </div>
     <ul class="nav-list">
@@ -775,7 +775,7 @@
     function saveDB(path, value) {
       if (path === 'students') {
         const photoSavePromises = [];
-        const studentsNoPhoto = (value||[]).map(s => {
+        const studentsClean = (value||[]).map(s => {
           const {photo, ...rest} = s;
           if (photo && photo.startsWith('data:')) {
             const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
@@ -785,11 +785,14 @@
               );
             }
             return {...rest, hasPhoto: !!safeKey};
+          } else if (photo && (photo.startsWith('http://') || photo.startsWith('https://'))) {
+            // Keep Cloudinary/URL photos in the student object
+            return {...rest, photo: photo};
           }
           return {...rest, hasPhoto: false};
         });
         Promise.all(photoSavePromises).then(() => {
-          return db.ref('sabuj/students').set(studentsNoPhoto);
+          return db.ref('sabuj/students').set(studentsClean);
         });
       }
     }
@@ -804,38 +807,35 @@
             db.ref('sabuj/applications/' + appId).update({ status: 'approved', 'enrollment/session': selectedSession });
             db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
             
-            // Sync to main website's students list
-            db.ref('sabuj/students').once('value').then(sSnap => {
-              let students = sSnap.val() || [];
-              if (!Array.isArray(students)) students = Object.values(students);
-              
-              const exists = students.some(s => s.phone === app.personal?.phone);
-              if(!exists) {
-                const newStudent = {
-                  name: app.personal?.nameBn || app.personal?.nameEn || '',
-                  reg: app.applicationId,
-                  phone: app.personal?.phone || '',
-                  fatherName: app.personal?.fatherName || '',
-                  motherName: app.personal?.motherName || '',
-                  gender: app.personal?.gender || '',
-                  session: selectedSession,
-                  year: new Date().getFullYear().toString(),
-                  address: '',
-                  course: app.enrollment?.courseId || '',
-                  result: '',
-                  feeTotal: 0,
-                  feePaid: 0,
-                  feeDue: 0,
-                  feeStatus: 'Due',
-                  photo: app.personal?.photo || null
-                };
-                students.push(newStudent);
-                db.ref('sabuj/students').set(students);
-                alert('✅ আবেদন অনুমোদিত এবং মূল ওয়েবসাইটে সিঙ্ক করা হয়েছে!');
-              } else {
-                alert('✅ আবেদন অনুমোদিত হয়েছে!');
-              }
-            });
+            // Sync to main website's students list via DB object
+            const exists = DB.students.some(s => s.phone === app.personal?.phone || s.reg === app.applicationId);
+            if(!exists) {
+              const newStudent = {
+                name: app.personal?.nameBn || app.personal?.nameEn || '',
+                reg: app.applicationId,
+                phone: app.personal?.phone || '',
+                fatherName: app.personal?.fatherName || '',
+                motherName: app.personal?.motherName || '',
+                gender: app.personal?.gender || '',
+                session: selectedSession,
+                year: new Date().getFullYear().toString(),
+                address: '',
+                course: app.enrollment?.courseId || '',
+                result: '',
+                feeTotal: 0,
+                feePaid: 0,
+                feeDue: 0,
+                feeStatus: 'Due',
+                photo: app.personal?.photo || null
+              };
+              DB.students.push(newStudent);
+              saveDB('students', DB.students);
+              renderAdminStudents();
+              alert('✅ আবেদন অনুমোদিত এবং Students সেকশনে সিঙ্ক হয়েছে!');
+            } else {
+              alert('✅ আবেদন অনুমোদিত হয়েছে! (Students সেকশনে আগে থেকেই আছে)');
+            }
+
           }
         });
       }
@@ -1381,9 +1381,9 @@
         const data = snap.val();
         if(!data) return alert('কোনো ডাটা নেই!');
         const students = Object.values(data);
-        let csv = 'Application ID,Name (BN),Name (EN),Phone,Course,Total Fee,Paid,Due\\n';
+        let csv = 'Application ID,Name (BN),Name (EN),Phone,Course,Total Fee,Paid,Due\n';
         students.forEach(s => {
-          csv += `"${s.applicationId}","${s.personal?.nameBn || ''}","${s.personal?.nameEn || ''}","${s.personal?.phone || ''}","${s.enrollment?.courseId || ''}","${s.payment?.total || 0}","${s.payment?.paid || 0}","${s.payment?.due || 0}"\\n`;
+          csv += `"${s.applicationId}","${s.personal?.nameBn || ''}","${s.personal?.nameEn || ''}","${s.personal?.phone || ''}","${s.enrollment?.courseId || ''}","${s.payment?.total || 0}","${s.payment?.paid || 0}","${s.payment?.due || 0}"\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
