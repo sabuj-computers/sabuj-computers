@@ -473,6 +473,28 @@
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
+    // Cross-origin file download helper
+    async function downloadCrossOriginFile(url, filename) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      } catch (error) {
+        window.open(url, '_blank');
+      }
+    }
+
+    // Store app data for modal viewing (avoids JSON.stringify in onclick)
+    let _appDataMap = {};
+
     // Check Admin Auth
     auth.onAuthStateChanged(user => {
       if(user) {
@@ -527,6 +549,9 @@
         overviewPending.textContent = pendingApps.length;
         overviewTotal.textContent = approvedApps.length;
 
+        // Store app data for safe access
+        apps.forEach(app => { _appDataMap[app.applicationId] = app; });
+
         // Pending Applications
         if(pendingApps.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো নতুন আবেদন নেই</td></tr>';
@@ -539,7 +564,7 @@
               <td>${app.enrollment?.courseId || 'অজানা'}</td>
               <td><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;">Pending</span></td>
               <td>
-                <button class="btn-sm btn-save" onclick='viewAppDetails(${JSON.stringify(app).replace(/'/g, "&#39;")})'>👁️ View</button>
+                <button class="btn-sm btn-save" onclick="viewAppDetails(_appDataMap['${app.applicationId}'])">👁️ View</button>
                 <select id="session_${app.applicationId}" style="padding:4px; border:1px solid #ccc; border-radius:4px; font-size:11px; margin:2px 0;">
                   <option value="January - June">January - June</option>
                   <option value="July - December">July - December</option>
@@ -563,7 +588,7 @@
               <td>${app.enrollment?.courseId || 'অজানা'}</td>
               <td>${app.enrollment?.session || '—'}</td>
               <td>
-                <button class="btn-sm btn-save" onclick='viewAppDetails(${JSON.stringify(app).replace(/'/g, "&#39;")})'>👁️ বিস্তারিত</button>
+                <button class="btn-sm btn-save" onclick="viewAppDetails(_appDataMap['${app.applicationId}'])">👁️ বিস্তারিত</button>
                 <button class="btn-sm btn-approve" onclick='editAppDetails("${app.applicationId}")'>✏️ এডিট</button>
                 <button class="btn-sm btn-reject" onclick="removeApprovedStudent('${app.applicationId}', '${app.uid}')">🗑️ সরান</button>
               </td>
@@ -576,8 +601,8 @@
     function viewAppDetails(app) {
       const content = document.getElementById('appDetailsContent');
       
-      let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;"><br><a href="${app.personal.photo}" download="Photo_${app.applicationId}.jpg" target="_blank" style="display:inline-block;margin-top:6px;background:#dcfce7;color:#166534;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ছবি ডাউনলোড</a>` : 'ছবি নেই';
-      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a> <a href="${app.personal.nidDoc}" download="NID_${app.applicationId}.pdf" target="_blank" style="display:inline-block;margin-left:8px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ডাউনলোড</a>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a><br><a href="${app.personal.nidDoc}" download="NID_${app.applicationId}.jpg" target="_blank" style="display:inline-block;margin-top:6px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;text-decoration:none;">📥 ডকুমেন্ট ডাউনলোড</a>`) : 'ডকুমেন্ট নেই';
+      let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;"><br><button onclick="downloadCrossOriginFile('${app.personal.photo}','Photo_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#dcfce7;color:#166534;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ছবি ডাউনলোড</button>` : 'ছবি নেই';
+      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a> <button onclick="downloadCrossOriginFile('${app.personal.nidDoc}','NID_${app.applicationId}.pdf')" style="display:inline-block;margin-left:8px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a><br><button onclick="downloadCrossOriginFile('${app.personal.nidDoc}','NID_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডকুমেন্ট ডাউনলোড</button>`) : 'ডকুমেন্ট নেই';
 
       content.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">

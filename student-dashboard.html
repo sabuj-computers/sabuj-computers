@@ -387,9 +387,20 @@
     let currentAppData = null;
     let currentAppId = null;
 
+    // Preload logo for canvas (avoids tainted canvas)
+    let canvasLogoImg = null;
+    function preloadLogoForCanvas(url) {
+      canvasLogoImg = new Image();
+      canvasLogoImg.crossOrigin = 'Anonymous';
+      canvasLogoImg.src = url + (url.includes('?') ? '&' : '?') + '_cv=1';
+    }
+
     // Load Logo
     db.ref('sabuj/general/logo').on('value', snap => {
-      if(snap.val()) document.getElementById('headerLogo').src = snap.val();
+      if(snap.val()) {
+        document.getElementById('headerLogo').src = snap.val();
+        preloadLogoForCanvas(snap.val());
+      }
     });
 
     function switchTab(tabId) {
@@ -523,8 +534,8 @@
                   document.getElementById('idGuardianPhone').textContent = appData.personal?.guardianPhone || '—';
                   
                   if(appData.personal?.photo) {
-                    document.getElementById('profileImg').innerHTML = `<img src="${appData.personal.photo}" style="width:100%;height:100%;object-fit:cover;">`;
-                    document.getElementById('idPhoto').innerHTML = `<img src="${appData.personal.photo}" style="width:100%;height:100%;object-fit:cover;">`;
+                    document.getElementById('profileImg').innerHTML = `<img src="${appData.personal.photo}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;">`;
+                    document.getElementById('idPhoto').innerHTML = `<img src="${appData.personal.photo}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;">`;
                   }
                   
                   // Load dynamic logo for ID card
@@ -725,7 +736,7 @@
       c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
 
       // Logo
-      const logoImg=document.getElementById('headerLogo');
+      const logoImg=canvasLogoImg;
       const lSz=152, lX=M, lY=19;
       c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.clip();
       if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#166534');}}
@@ -919,7 +930,7 @@
       c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
 
       // Logo
-      const logoImg=document.getElementById('headerLogo');
+      const logoImg=canvasLogoImg;
       const lSz=152, lX=M, lY=19;
       c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.clip();
       if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#5521b5');}}
@@ -1044,7 +1055,7 @@
         const pi=new Image();pi.crossOrigin='Anonymous';
         pi.onload=()=>{c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);_dlCanvas(cv,s,'ResultCard');};
         pi.onerror=()=>_dlCanvas(cv,s,'ResultCard');
-        pi.src=s.photo;
+        pi.src=s.photo+(s.photo.includes('?')?'&':'?')+'_cv=1';
       } else _dlCanvas(cv,s,'ResultCard');
     }
 
@@ -1076,7 +1087,7 @@
       });
 
       // ── Logo watermark ──
-      const logoImg=document.getElementById('headerLogo');
+      const logoImg=canvasLogoImg;
       c.save();
       if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
         try{c.globalAlpha=0.06;c.drawImage(logoImg,W/2-350,H/2-350,700,700);}catch(e){}
@@ -1222,7 +1233,7 @@
           _dlCanvas(cv,s,'RegCard');
         };
         img.onerror=()=>{_drawPhotoFB(c,phX,phY,phW,phH,s.name);_dlCanvas(cv,s,'RegCard');};
-        img.src=s.photo;
+        img.src=s.photo+(s.photo.includes('?')?'&':'?')+'_cv=1';
       } else {
         _drawPhotoFB(c,phX,phY,phW,phH,s.name);
         _dlCanvas(cv,s,'RegCard');
@@ -1238,6 +1249,14 @@
       c.fillStyle='#e8f5ec';c.fillRect(x+2,y+2,w-4,h-4);
       c.font='bold 70px Arial';c.fillStyle='#1a6b35';
       c.textAlign='center';c.textBaseline='middle';c.fillText((name||'?')[0].toUpperCase(),x+w/2,y+h/2);c.textBaseline='alphabetic';
+    }
+
+    function _dlCanvas(cv,s,prefix){
+      const lnk=document.createElement('a');
+      lnk.download=(prefix||'Card')+'_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
+      lnk.href=cv.toDataURL('image/png',1.0);
+      lnk.click();
+      alert('✅ '+(prefix==='ResultCard'?'ফলাফল কার্ড':prefix==='RegCard'?'রেজিস্ট্রেশন কার্ড':'কার্ড')+' ডাউনলোড হয়েছে!');
     }
 
     // Dynamic Library Loading
