@@ -496,8 +496,9 @@
             `;
             document.getElementById('progressFill').style.width = '100%';
             document.getElementById('step6-circle').classList.add('completed');
-          }).catch(() => {
-            alert('❌ সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+          }).catch((err) => {
+            console.error('Form submit error:', err);
+            alert('❌ সমস্যা হয়েছে: ' + (err.message || err.code || 'অজানা ত্রুটি') + '\nআবার চেষ্টা করুন।');
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitText').style.display = 'block';
             document.getElementById('submitLoader').style.display = 'none';
