@@ -29,11 +29,29 @@
     .nav-item.active { background: var(--g2); border-left-color: #c8a847; }
     
     /* Main Content */
-    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
     .topbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .logout-btn { background: #fee2e2; color: #991b1b; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     
-    .content-area { flex: 1; padding: 30px; overflow-y: auto; }
+    .content-area { flex: 1; padding: 30px; overflow-y: auto; overflow-x: hidden; }
+    @media (max-width: 768px) {
+      body { flex-direction: column; height: auto; overflow: auto; }
+      .sidebar { width: 100%; max-height: 55px; overflow: hidden; flex-direction: row; flex-wrap: wrap; transition: max-height 0.3s ease; }
+      .sidebar.open { max-height: 100vh; flex-direction: column; overflow-y: auto; }
+      .sidebar-header { padding: 10px 15px; flex-direction: row; border-bottom: none; cursor: pointer; }
+      .sidebar-header img { width: 35px; height: 35px; }
+      .sidebar-header h2 { font-size: 14px; }
+      .sidebar ul { display: none; width: 100%; }
+      .sidebar.open ul { display: block; }
+      .main-content { overflow: auto; }
+      .content-area { padding: 12px; }
+      .topbar { padding: 10px 15px; }
+      .topbar h1 { font-size: 16px; }
+      .fr3 { grid-template-columns: 1fr !important; }
+      .student-add-form { padding: 12px; }
+      table { font-size: 11px; }
+      .card { padding: 12px; }
+    }
     .tab-content { display: none; animation: fadeIn 0.3s; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -72,13 +90,18 @@
     .fg { margin-bottom:16px; }
     .fg label { display:block; font-weight:700; font-size:12px; color:#0d3d1f; margin-bottom:5px; }
     .fg input, .fg select { width:100%; padding:10px 14px; border:1.5px solid #dde8e0; border-radius:10px; font-family:'Hind Siliguri'; font-size:14px; }
+
+    /* Modal Overlay & Content */
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal-content { background:#fff; padding:25px; border-radius:16px; width:90%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sidebar-header">
+    <div class="sidebar-header" onclick="this.parentElement.classList.toggle('open')">
       <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="adminLogo">
       <h2>🛡️ অ্যাডমিন প্যানেল</h2>
     </div>
@@ -146,7 +169,7 @@
       <div class="tab-content" id="tab-students">
         <div class="student-add-form">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
-            <h4 style="color:var(--g1);font-size:16px;margin:0">শিক্ষার্থী যোগ / সম্পাদনা (মূল ওয়েবসাইটের সাথে সিঙ্কড)</h4>
+            <h4 style="color:var(--g1);font-size:16px;margin:0">শিক্ষার্থী যোগ / সম্পাদনা (মূল ওয়েবসাইটের সাথে সিঙ্কড)</h4>
             <div style="display:flex; flex-direction:column; gap:10px; width: 100%;">
               <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content: flex-end;">
                 <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
@@ -155,7 +178,7 @@
               </div>
               <div style="display:flex; gap:10px; flex-wrap:wrap; align-items: flex-end; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; justify-content: flex-end;">
                   <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
-                      <label style="font-size:12px; font-weight:bold; color:#334155;">সিরিয়াল নম্বর (যেমন: 1-5, 8, All)</label>
+                      <label style="font-size:12px; font-weight:bold; color:#334155;">সিরিয়াল নম্বর (যেমন: 1-5, 8, All)</label>
                       <input type="text" id="studentSelection" value="All" placeholder="All বা 1-10, 15" style="padding:8px 12px; border:2px solid #dde8e0; border-radius:8px; font-size:13px; width: 180px; outline:none;">
                   </div>
                   <button class="btn-secondary" style="margin:0; padding:10px 16px; font-size:13px; background:#dcfce7; color:#166534; font-weight:bold; width: auto; border:none; border-radius:8px; cursor:pointer;" onclick="printStudentList()">🖨️ প্রিন্ট লিস্ট</button>
@@ -476,6 +499,8 @@
       document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
       document.getElementById('topbarTitle').textContent = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+      // Close sidebar on mobile
+      document.querySelector('.sidebar').classList.remove('open');
     }
 
     // Load Applications
@@ -1046,15 +1071,12 @@
         if(idx!=='')DB.students[+idx]=obj;
         else DB.students.push(obj);
         saveDB('students',DB.students);
-        
-        // Sync to student portal if it's an application ID
         if(obj.reg && obj.reg.startsWith('SCTC-APP-')) {
           db.ref('sabuj/applications/' + obj.reg + '/exam').update({ result: obj.result });
           db.ref('sabuj/applications/' + obj.reg + '/payment').update({ total: obj.feeTotal, paid: obj.feePaid, due: obj.feeDue, status: obj.feeStatus });
           db.ref('sabuj/applications/' + obj.reg + '/personal').update({ nameBn: obj.name, phone: obj.phone });
           db.ref('sabuj/applications/' + obj.reg + '/enrollment').update({ courseId: obj.course });
         }
-        
         renderAdminStudents();
         clearStudentForm();alert(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
       };
@@ -1081,7 +1103,7 @@
             .then(response => response.json())
             .then(result => {
               if(result.secure_url) doSave(result.secure_url);
-              else { alert('❌ ছবি আপলোডে সমস্যা হয়েছে'); doSave(null); }
+              else { alert('❌ ছবি আপলোডে সমস্যা হয়েছে'); doSave(null); }
             }).catch(err => { alert('❌ ইন্টারনেট সমস্যা'); doSave(null); });
           };
           img.src = e.target.result;
@@ -1123,10 +1145,8 @@
       if(s&&s.reg){
         const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
         db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
-        // Also update application status if it's an app ID
         if(s.reg.startsWith('SCTC-APP-')) {
           db.ref('sabuj/applications/' + s.reg).update({ status: 'removed' }).catch(()=>{});
-          // Find uid from applications and update students_auth
           db.ref('sabuj/applications/' + s.reg + '/uid').once('value').then(snap => {
             if(snap.val()) db.ref('sabuj/students_auth/' + snap.val()).update({ status: 'removed' }).catch(()=>{});
           });
@@ -1276,15 +1296,50 @@
     }
 
     function openEditStudentModal(student) {
-      // Replaced by editStudent(i)
+      // Not used - editStudent handles this now
     }
 
     function closeEditStudentModal() {
-      // Replaced by clearStudentForm()
+      document.getElementById('editStudentModal').style.display='none';
     }
 
     function saveStudentEdit() {
-      // Replaced by saveStudent()
+      const appIdRaw = document.getElementById('editStudentAppId').value;
+      const newName = document.getElementById('editNameBn').value.trim();
+      const newPhone = document.getElementById('editPhone').value.trim();
+      const newCourse = document.getElementById('editCourse').value;
+      
+      if(appIdRaw.startsWith('__students__')) {
+        // Edit from Students tab list
+        const idx = parseInt(appIdRaw.replace('__students__',''));
+        if(DB.students[idx]) {
+          DB.students[idx].name = newName;
+          DB.students[idx].phone = newPhone;
+          DB.students[idx].course = newCourse;
+          saveDB('students', DB.students);
+          renderAdminStudents();
+          // Sync to Firebase if app ID
+          const reg = DB.students[idx].reg;
+          if(reg && reg.startsWith('SCTC-APP-')) {
+            db.ref('sabuj/applications/' + reg + '/personal').update({ nameBn: newName, phone: newPhone });
+            db.ref('sabuj/applications/' + reg + '/enrollment').update({ courseId: newCourse });
+          }
+        }
+      } else {
+        // Edit from Applications tab
+        db.ref('sabuj/applications/' + appIdRaw + '/personal').update({ nameBn: newName, phone: newPhone });
+        db.ref('sabuj/applications/' + appIdRaw + '/enrollment').update({ courseId: newCourse });
+        const idx = DB.students.findIndex(s => s.reg === appIdRaw);
+        if(idx >= 0) {
+          DB.students[idx].name = newName;
+          DB.students[idx].phone = newPhone;
+          DB.students[idx].course = newCourse;
+          saveDB('students', DB.students);
+          renderAdminStudents();
+        }
+      }
+      closeEditStudentModal();
+      alert('✅ তথ্য আপডেট হয়েছে!');
     }
 
     function saveData(appId, type) {
