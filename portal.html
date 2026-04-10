@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>লগইন ও রেজিস্ট্রেশন - SCTC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root { --g1: #0d3d1f; --g2: #1a6b35; --gold: #c8a847; --bg: #f2f8f4; --card: #ffffff; --text: #1e3028; --muted: #6b8c76; }
+    body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: linear-gradient(160deg, var(--g1) 0%, #0f4a20 100%); padding: 15px 6%; display: flex; justify-content: space-between; align-items: center; color: white; }
+    .logo-area { display: flex; align-items: center; gap: 15px; }
+    .logo-circle { width: 40px; height: 40px; background: var(--g2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
+    .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+    .auth-card { background: var(--card); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(13,61,31,0.1); width: 100%; max-width: 400px; text-align: center; }
+    
+    /* Login Tabs */
+    .role-tabs { display: flex; background: #e4ece7; border-radius: 10px; margin-bottom: 25px; overflow: hidden; }
+    .role-tab { flex: 1; padding: 10px; border: none; background: none; font-family: inherit; font-weight: bold; color: var(--muted); cursor: pointer; transition: 0.3s; }
+    .role-tab.active { background: var(--g2); color: white; }
+
+    .input-group { text-align: left; margin-bottom: 18px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--g1); margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px 15px; border: 2px solid #dde8e0; border-radius: 10px; font-family: inherit; font-size: 15px; box-sizing: border-box; background: #fafcfb; }
+    .input-group input:focus { outline: none; border-color: var(--g2); background: #fff; }
+    
+    /* Password Strength */
+    .strength-meter { height: 4px; background: #e4ece7; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .strength-bar { height: 100%; width: 0%; transition: 0.3s; }
+    .strength-text { font-size: 11px; color: var(--muted); margin-top: 4px; text-align: right; }
+
+    .options-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 20px; }
+    .options-row a { color: var(--g2); text-decoration: none; font-weight: bold; cursor: pointer; }
+    
+    .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .toggle-link { margin-top: 20px; font-size: 14px; color: var(--muted); }
+    .toggle-link a { color: var(--g2); font-weight: 700; cursor: pointer; }
+    .error-msg { color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area"><div class="logo-circle">স</div><h2 style="margin:0; font-size:18px; font-family:'Noto Serif Bengali', serif;">সবুজ কম্পিউটার্স</h2></div>
+    <a href="index.html" style="color:white; text-decoration:none; font-size:14px;">← হোম</a>
+  </header>
+
+  <div class="main-container">
+    
+    <!-- LOGIN SECTION -->
+    <div class="auth-card" id="loginSection">
+      <h2 style="color:var(--g1); margin-top:0;">লগইন করুন</h2>
+      
+      <div class="role-tabs">
+        <button class="role-tab active" id="tabStudent" onclick="setRole('student')">👨‍🎓 শিক্ষার্থী</button>
+        <button class="role-tab" id="tabAdmin" onclick="setRole('admin')">🛡️ অ্যাডমিন</button>
+      </div>
+
+      <div class="error-msg" id="loginError"></div>
+      <form id="loginForm">
+        <div class="input-group"><label>ইমেইল এড্রেস</label><input type="email" id="loginEmail" required></div>
+        <div class="input-group"><label>পাসওয়ার্ড</label><input type="password" id="loginPassword" required></div>
+        
+        <div class="options-row">
+          <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+            <input type="checkbox" id="rememberMe" checked> Remember Me
+          </label>
+          <a onclick="resetPassword()">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary" id="loginBtn">লগইন</button>
+      </form>
+      <div class="toggle-link" id="signupPrompt">নতুন শিক্ষার্থী? <a onclick="toggleAuth('signup')">একাউন্ট তৈরি করুন</a></div>
+    </div>
+
+    <!-- SIGNUP SECTION -->
+    <div class="auth-card" id="signupSection" style="display: none;">
+      <h2 style="color:var(--g1); margin-top:0;">নতুন একাউন্ট</h2>
+      <div class="error-msg" id="signupError"></div>
+      <form id="signupForm">
+        <div class="input-group"><label>পুরো নাম *</label><input type="text" id="regName" required></div>
+        <div class="input-group"><label>মোবাইল নম্বর *</label><input type="tel" id="regPhone" required></div>
+        <div class="input-group"><label>ইমেইল এড্রেস *</label><input type="email" id="regEmail" required></div>
+        <div class="input-group">
+          <label>পাসওয়ার্ড *</label>
+          <input type="password" id="regPassword" required minlength="6">
+          <div class="strength-meter"><div class="strength-bar" id="strengthBar"></div></div>
+          <div class="strength-text" id="strengthText">পাসওয়ার্ডের শক্তি</div>
+        </div>
+        <div class="input-group"><label>পাসওয়ার্ড নিশ্চিত করুন *</label><input type="password" id="regConfirm" required></div>
+        <button type="submit" class="btn-primary" id="signupBtn">একাউন্ট তৈরি করুন</button>
+      </form>
+      <div class="toggle-link">একাউন্ট আছে? <a onclick="toggleAuth('login')">লগইন করুন</a></div>
+    </div>
+
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTCLqLGCzBt9EpgMpEBWent8fa4M-C0Xk",
+      authDomain: "sabuj-computers.firebaseapp.com",
+      databaseURL: "https://sabuj-computers-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sabuj-computers",
+      storageBucket: "sabuj-computers.firebasestorage.app",
+      messagingSenderId: "781121353789",
+      appId: "1:781121353789:web:38b0f78af57b66ddf05254"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let currentRole = 'student';
+
+    function setRole(role) {
+      currentRole = role;
+      document.getElementById('tabStudent').classList.toggle('active', role === 'student');
+      document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+      document.getElementById('signupPrompt').style.display = role === 'admin' ? 'none' : 'block';
+    }
+
+    function toggleAuth(type) {
+      document.getElementById('loginSection').style.display = type === 'signup' ? 'none' : 'block';
+      document.getElementById('signupSection').style.display = type === 'signup' ? 'block' : 'none';
+    }
+
+    // Password Strength Checker
+    document.getElementById('regPassword').addEventListener('input', function(e) {
+      const val = e.target.value;
+      const bar = document.getElementById('strengthBar');
+      const text = document.getElementById('strengthText');
+      let strength = 0;
+      if(val.length >= 6) strength++;
+      if(val.match(/[A-Z]/)) strength++;
+      if(val.match(/[0-9]/)) strength++;
+      if(val.match(/[^a-zA-Z0-9]/)) strength++;
+
+      if(val.length === 0) { bar.style.width = '0%'; text.textContent = ''; }
+      else if(strength <= 1) { bar.style.width = '33%'; bar.style.background = '#ef4444'; text.textContent = 'দুর্বল'; text.style.color = '#ef4444'; }
+      else if(strength === 2) { bar.style.width = '66%'; bar.style.background = '#f59e0b'; text.textContent = 'মোটামুটি'; text.style.color = '#f59e0b'; }
+      else { bar.style.width = '100%'; bar.style.background = '#22c55e'; text.textContent = 'শক্তিশালী'; text.style.color = '#22c55e'; }
+    });
+
+    // Forgot Password
+    function resetPassword() {
+      const email = prompt("আপনার ইমেইল এড্রেস দিন:");
+      if(email) {
+        auth.sendPasswordResetEmail(email).then(() => alert("✅ পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে!"))
+        .catch(e => alert("❌ এরর: " + e.message));
+      }
+    }
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const remember = document.getElementById('rememberMe').checked;
+      
+      const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+      
+      auth.setPersistence(persistence).then(() => {
+        return auth.signInWithEmailAndPassword(email, password);
+      }).then((userCredential) => {
+        const uid = userCredential.user.uid;
+        if(currentRole === 'admin') {
+          // Check if admin by UID
+          if(uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') {
+            window.location.href = 'admin-dashboard.html';
+          } else {
+            auth.signOut(); alert('❌ আপনার অ্যাডমিন অ্যাক্সেস নেই!');
+          }
+        } else {
+          // Student login
+          db.ref('sabuj/students_auth/' + uid).once('value').then(snap => {
+            const data = snap.val();
+            if(data && data.status === 'active') window.location.href = 'student-dashboard.html';
+            else window.location.href = 'admission-form.html';
+          });
+        }
+      }).catch(e => {
+        document.getElementById('loginError').textContent = '❌ ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।';
+        document.getElementById('loginError').style.display = 'block';
+      });
+    });
+
+    // Signup
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('regPassword').value;
+      if(pass !== document.getElementById('regConfirm').value) {
+        alert('❌ পাসওয়ার্ড দুটি মিলছে না!'); return;
+      }
+      const email = document.getElementById('regEmail').value;
+      auth.createUserWithEmailAndPassword(email, pass).then((cred) => {
+        return db.ref('sabuj/students_auth/' + cred.user.uid).set({
+          uid: cred.user.uid, name: document.getElementById('regName').value,
+          phone: document.getElementById('regPhone').value, email: email, status: 'pending_admission'
+        });
+      }).then(() => {
+        alert('✅ একাউন্ট তৈরি সফল! ভর্তির ফর্ম পূরণ করুন।');
+        window.location.href = 'admission-form.html';
+      }).catch(e => alert('❌ এরর: ' + e.message));
+    });
+  </script>
+</body>
+</html>
