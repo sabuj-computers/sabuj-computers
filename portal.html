@@ -167,6 +167,16 @@
       display: none; border-left: 4px solid #15803d;
     }
 
+    /* Toast Notification */
+    .toast-notify {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      background: linear-gradient(135deg, var(--g1), var(--g2)); color: white;
+      padding: 14px 22px; border-radius: 14px; font-size: 14px; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2); transform: translateX(120%);
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1); max-width: 340px;
+    }
+    .toast-notify.show { transform: translateX(0); }
+
     /* Footer Badge */
     .footer-badge {
       text-align: center; padding: 16px; font-size: 12px; color: var(--muted);
@@ -296,6 +306,9 @@
 
   </div>
 
+  <!-- Toast Notification -->
+  <div class="toast-notify" id="toastNotify"></div>
+
   <div class="footer-badge">
     &copy; 2025 <a href="https://sabujcomputers.pro.bd" target="_blank">সবুজ কম্পিউটার্স ট্রেনিং সেন্টার</a> — সকল অধিকার সংরক্ষিত
   </div>
@@ -315,6 +328,23 @@
     const db = firebase.database();
 
     let currentRole = 'student';
+
+    // Toast notification
+    function showToast(msg, duration = 3500) {
+      const t = document.getElementById('toastNotify');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    // Auto-fill saved email on page load
+    (function() {
+      const saved = localStorage.getItem('sctc_saved_email');
+      if(saved) {
+        document.getElementById('loginEmail').value = saved;
+        document.getElementById('rememberMe').checked = true;
+      }
+    })();
 
     // Load Logo
     db.ref('sabuj/general/logo').on('value', snap => {
@@ -405,6 +435,15 @@
         return auth.signInWithEmailAndPassword(email, password);
       }).then((userCredential) => {
         const uid = userCredential.user.uid;
+
+        // Save or clear email in localStorage
+        if(remember) {
+          localStorage.setItem('sctc_saved_email', email);
+          showToast('✅ লগইন সফল! ইমেইল মনে রাখা হয়েছে');
+        } else {
+          localStorage.removeItem('sctc_saved_email');
+          showToast('✅ লগইন সফল!');
+        }
 
         // Save credentials hint for browser
         if(window.PasswordCredential && remember) {
