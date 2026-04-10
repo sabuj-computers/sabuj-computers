@@ -719,7 +719,7 @@
 
       db.ref('sabuj/applications/' + appId).update(updates).then(() => {
         // Also sync to students list
-        const idx = DB.students.findIndex(s => s.reg === appId);
+        const idx = DB.students.findIndex(s => s.applicationId === appId || s.reg === appId);
         if(idx >= 0) {
           DB.students[idx].name = updates['personal/nameBn'];
           DB.students[idx].phone = updates['personal/phone'];
@@ -748,7 +748,7 @@
       if(uid) db.ref('sabuj/students_auth/' + uid).update({ status: 'removed' });
       
       // Remove from students list
-      const idx = DB.students.findIndex(s => s.reg === appId);
+      const idx = DB.students.findIndex(s => s.applicationId === appId || s.reg === appId);
       if(idx >= 0) {
         const safeKey = String(appId).replace(/[^a-zA-Z0-9]/g, '_');
         db.ref('sabuj/photos/' + safeKey).remove().catch(() => {});
@@ -778,7 +778,7 @@
         const studentsClean = (value||[]).map(s => {
           const {photo, ...rest} = s;
           if (photo && photo.startsWith('data:')) {
-            const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+            const safeKey = String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
             if(safeKey) {
               photoSavePromises.push(
                 db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
@@ -808,11 +808,12 @@
             db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
             
             // Sync to main website's students list via DB object
-            const exists = DB.students.some(s => s.phone === app.personal?.phone || s.reg === app.applicationId);
+            const exists = DB.students.some(s => s.phone === app.personal?.phone || s.applicationId === app.applicationId);
             if(!exists) {
               const newStudent = {
                 name: app.personal?.nameBn || app.personal?.nameEn || '',
-                reg: app.applicationId,
+                reg: '',
+                applicationId: app.applicationId,
                 phone: app.personal?.phone || '',
                 fatherName: app.personal?.fatherName || '',
                 motherName: app.personal?.motherName || '',
@@ -1002,9 +1003,10 @@
       DB.students[i].result=val;
       saveDB('students',DB.students);
       
-      // Sync to student portal if it's an application ID
-      if(DB.students[i].reg && DB.students[i].reg.startsWith('SCTC-APP-')) {
-        db.ref('sabuj/applications/' + DB.students[i].reg + '/exam').update({ result: val });
+      // Sync to student portal via applicationId
+      const appKey = DB.students[i].applicationId || (DB.students[i].reg && DB.students[i].reg.startsWith('SCTC-APP-') ? DB.students[i].reg : '');
+      if(appKey) {
+        db.ref('sabuj/applications/' + appKey + '/exam').update({ result: val });
       }
       
       renderAdminStudents();
@@ -1064,18 +1066,27 @@
           feeStatus:document.getElementById('s-fee-status').value||'',
           photo:photo||(existing?existing.photo:null)
         };
-        if(!obj.name||!obj.reg){alert('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
+        if(!obj.name){alert('❌ নাম আবশ্যক');return;}
         if(!obj.course){alert('❌ কোর্স বাছুন (FOUNDATION বা BTEB)');return;}
-        const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&(idx===''||_i!==+idx));
-        if(_dup>=0){alert('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
-        if(idx!=='')DB.students[+idx]=obj;
-        else DB.students.push(obj);
+        if(obj.reg) {
+          const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&st.reg!==''&&(idx===''||_i!==+idx));
+          if(_dup>=0){alert('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
+        }
+        // Preserve applicationId from existing student
+        if(idx!=='') {
+          obj.applicationId = DB.students[+idx].applicationId || '';
+          DB.students[+idx]=obj;
+        } else DB.students.push(obj);
         saveDB('students',DB.students);
-        if(obj.reg && obj.reg.startsWith('SCTC-APP-')) {
-          db.ref('sabuj/applications/' + obj.reg + '/exam').update({ result: obj.result });
-          db.ref('sabuj/applications/' + obj.reg + '/payment').update({ total: obj.feeTotal, paid: obj.feePaid, due: obj.feeDue, status: obj.feeStatus });
-          db.ref('sabuj/applications/' + obj.reg + '/personal').update({ nameBn: obj.name, phone: obj.phone });
-          db.ref('sabuj/applications/' + obj.reg + '/enrollment').update({ courseId: obj.course });
+        // Sync to applications if linked
+        const appKey = obj.applicationId || '';
+        if(appKey && appKey.startsWith('SCTC-APP-')) {
+          db.ref('sabuj/applications/' + appKey + '/exam').update({ result: obj.result });
+          db.ref('sabuj/applications/' + appKey + '/payment').update({ total: obj.feeTotal, paid: obj.feePaid, due: obj.feeDue, status: obj.feeStatus });
+          db.ref('sabuj/applications/' + appKey + '/personal').update({ nameBn: obj.name, phone: obj.phone });
+          db.ref('sabuj/applications/' + appKey + '/enrollment').update({ courseId: obj.course });
+          // Sync reg number back to application
+          db.ref('sabuj/applications/' + appKey + '/regNo').set(obj.reg || '');
         }
         renderAdminStudents();
         clearStudentForm();alert(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
@@ -1142,12 +1153,13 @@
     function deleteStudent(i){
       if(!confirm('এই শিক্ষার্থীকে মুছে ফেলবেন?'))return;
       const s=DB.students[i];
-      if(s&&s.reg){
-        const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
-        db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
-        if(s.reg.startsWith('SCTC-APP-')) {
-          db.ref('sabuj/applications/' + s.reg).update({ status: 'removed' }).catch(()=>{});
-          db.ref('sabuj/applications/' + s.reg + '/uid').once('value').then(snap => {
+      if(s){
+        const keyForPhoto=String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
+        if(keyForPhoto) db.ref('sabuj/photos/'+keyForPhoto).remove().catch(()=>{});
+        const appKey = s.applicationId || (s.reg && s.reg.startsWith('SCTC-APP-') ? s.reg : '');
+        if(appKey) {
+          db.ref('sabuj/applications/' + appKey).update({ status: 'removed' }).catch(()=>{});
+          db.ref('sabuj/applications/' + appKey + '/uid').once('value').then(snap => {
             if(snap.val()) db.ref('sabuj/students_auth/' + snap.val()).update({ status: 'removed' }).catch(()=>{});
           });
         }

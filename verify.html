@@ -109,9 +109,10 @@
             foundApp = data[certId];
             foundAppId = certId;
           } else {
-            // Search by Certificate Number
+            // Search by Certificate Number or Registration Number
             for (const key in data) {
-              if (data[key].certificate && data[key].certificate.sonodNo === certId) {
+              if ((data[key].certificate && data[key].certificate.sonodNo === certId) || 
+                  (data[key].regNo && data[key].regNo === certId)) {
                 foundApp = data[key];
                 foundAppId = key;
                 break;
@@ -132,7 +133,7 @@
             <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 22px;">সনদটি সঠিক ও ভেরিফাইড!</h3>
             ${imgHtml}
             <h2 style="margin: 15px 0 5px; color: var(--g1); font-size: 24px;">${foundApp.personal?.nameBn || foundApp.personal?.nameEn}</h2>
-            <p style="margin: 0; color: #4a6040; font-weight: bold; font-size: 16px;">Registration ID: ${foundAppId}</p>
+            <p style="margin: 0; color: #4a6040; font-weight: bold; font-size: 16px;">${foundApp.regNo ? 'Registration No: ' + foundApp.regNo : 'Application ID: ' + foundAppId}</p>
             ${certNoHtml}
             <p style="margin: 5px 0 0; color: #6b8c76; font-size: 15px;">কোর্স: ${courseName}</p>
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #bbf7d0;">

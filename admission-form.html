@@ -314,6 +314,7 @@
       if(snap.val()) document.getElementById('headerLogo').src = snap.val();
     });
 
+    let intentionalLogout = false;
     auth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
@@ -328,11 +329,12 @@
           }
         });
       } else {
-        window.location.href = 'portal.html';
+        if(intentionalLogout) window.location.href = 'portal.html';
       }
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
+      intentionalLogout = true;
       auth.signOut().then(() => window.location.href = 'portal.html');
     });
 

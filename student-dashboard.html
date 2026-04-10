@@ -399,6 +399,7 @@
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
+    let intentionalLogout = false;
     auth.onAuthStateChanged((user) => {
       if (user) {
         db.ref('sabuj/students_auth/' + user.uid).on('value', (snapshot) => {
@@ -515,7 +516,7 @@
                   const idCourseName = appData.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
                   document.getElementById('idCourse').textContent = idCourseName;
                   document.getElementById('idPhone').textContent = appData.personal?.phone || '—';
-                  document.getElementById('idReg').textContent = authData.applicationId;
+                  document.getElementById('idReg').textContent = appData.regNo || authData.applicationId;
                   document.getElementById('idSession').textContent = appData.enrollment?.session || new Date(appData.submittedAt).getFullYear();
                   document.getElementById('idAddress').textContent = (appData.address?.present?.village || '') + ', ' + (appData.address?.present?.upazila || '') + ', ' + (appData.address?.present?.district || '');
                   document.getElementById('idBlood').textContent = appData.personal?.bloodGroup || '—';
@@ -605,11 +606,12 @@
         });
 
       } else {
-        window.location.href = 'portal.html';
+        if(intentionalLogout) window.location.href = 'portal.html';
       }
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
+      intentionalLogout = true;
       auth.signOut().then(() => window.location.href = 'portal.html');
     });
 
@@ -693,152 +695,550 @@
       w.document.close();
     }
 
-    // ═══ FEE RECEIPT — Canvas PNG (matching main website design) ═══
+    // ═══════════════════════════════════════════════════════════════
+    // COURSE FEE RECEIPT — Professional A4 PNG Generator (Portal)
+    // ═══════════════════════════════════════════════════════════════
     function buildPortalReceipt(app,courseName,tot,paid,due,sts){
-      const s={name:app.personal?.nameBn||'',reg:currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',session:app.enrollment?.session||''};
-      const W=900,M=52,HDR=192,TABLE_TOP=268,ROW_H=48,NOTE_H=86,SIG_H=72,FTR=44;
-      const H=TABLE_TOP+6*ROW_H+28+NOTE_H+SIG_H+FTR;
+      const s={name:app.personal?.nameBn||'',reg:app.regNo||currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',session:app.enrollment?.session||'',year:app.enrollment?.year||'',course:app.enrollment?.courseId||''};
+      const W=900, M=52;
       const rNo='RCP-'+new Date().getFullYear()+'-'+String(s.reg||'0').padStart(6,'0');
       const rDate=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
-      const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
-      c.fillStyle='#f7fbf9';c.fillRect(0,0,W,H);
-      // Header
-      const hg=c.createLinearGradient(0,0,W,0);hg.addColorStop(0,'#031e09');hg.addColorStop(0.45,'#155e2b');hg.addColorStop(1,'#031e09');
-      c.fillStyle=hg;c.fillRect(0,0,W,HDR);c.fillStyle='#c8a847';c.fillRect(0,0,W,5);c.fillStyle='rgba(200,168,71,0.4)';c.fillRect(0,HDR-3,W,3);
-      const logoImg=document.getElementById('headerLogo');const lSz=152,lX=M,lY=19;
-      c.save();c.beginPath();_roundClip(c,lX,lY,lSz,lSz,16);c.clip();
-      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#166534');}}else _fbLogo2(c,lX,lY,lSz,'#166534');
+
+      const HDR=192, TABLE_TOP=268, ROW_H=48, NROWS=6;
+      const FEE_H=290, DIVPAD=28, NOTE_H=86, SIG_H=72, FTR=44;
+      const contentH=Math.max(NROWS*ROW_H, FEE_H);
+      const H=TABLE_TOP+contentH+DIVPAD+NOTE_H+SIG_H+FTR;
+
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c=cv.getContext('2d');
+
+      // Background
+      c.fillStyle='#f7fbf9'; c.fillRect(0,0,W,H);
+      c.fillStyle='rgba(13,61,31,0.03)';
+      for(let gx=20;gx<W;gx+=20) for(let gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
+
+      // === HEADER ===
+      const hg=c.createLinearGradient(0,0,W,0);
+      hg.addColorStop(0,'#031e09'); hg.addColorStop(0.45,'#155e2b'); hg.addColorStop(1,'#031e09');
+      c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+      c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
+      c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
+
+      // Logo
+      const logoImg=document.getElementById('headerLogo');
+      const lSz=152, lX=M, lY=19;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.clip();
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#166534');}}
+      else _fbLogo2(c,lX,lY,lSz,'#166534');
       c.restore();
-      const iX=lX+lSz+18;c.textAlign='left';c.fillStyle='#fff';c.font='bold 36px "Hind Siliguri",sans-serif';c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার',iX,60);
-      c.font='15px "Hind Siliguri"';c.fillStyle='rgba(255,255,255,0.75)';c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর',iX,86);
-      c.font='13px Arial';c.fillStyle='rgba(255,255,255,0.6)';c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd',iX,108);
-      c.fillStyle='#f0d060';c.font='bold 21px Arial';c.fillText('COURSE FEE RECEIPT',iX,142);
-      c.fillStyle='rgba(255,255,255,0.62)';c.font='14px "Hind Siliguri"';c.fillText('কোর্স ফি রসিদ',iX,166);
-      c.textAlign='right';c.fillStyle='#f0d060';c.font='bold 16px Arial';c.fillText(rNo,W-M,63);
-      c.fillStyle='#fff';c.font='14px Arial';c.fillText(rDate,W-M,109);c.textAlign='left';
-      // Status banner
-      const stMap={Paid:{bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'FULLY PAID / সম্পূর্ণ পরিশোধিত'},Partial:{bg:'#fef9c3',brd:'#fbbf24',fg:'#92400e',tx:'PARTIALLY PAID / আংশিক'},Unpaid:{bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'PAYMENT DUE / বকেয়া'}};
-      const st=stMap[sts]||stMap.Unpaid;const banY=HDR+12;c.fillStyle=st.bg;_roundRect(c,M,banY,W-M*2,44,8);c.fill();c.strokeStyle=st.brd;c.lineWidth=2;_roundRect(c,M,banY,W-M*2,44,8);c.stroke();
-      c.fillStyle=st.fg;c.font='bold 17px "Hind Siliguri",Arial';c.textAlign='center';c.fillText(st.tx,W/2,banY+28);c.textAlign='left';
-      // Two columns
-      const col1W=Math.floor((W-M*2-22)*0.55),col2X=M+col1W+22,col2W=W-M-col2X;
-      c.fillStyle='#0d3d1f';c.fillRect(M,TABLE_TOP,col1W,2.5);c.font='bold 11px Arial';c.fillText('STUDENT INFORMATION',M,TABLE_TOP-7);
-      const rows=[['NAME',s.name,true,'#0d3d1f'],['REG NO.',s.reg,true,'#1d4ed8'],['COURSE',courseName,false,'#1f2937'],['SESSION',s.session,false,'#1f2937'],["FATHER",s.fatherName||'N/A',false,'#374151'],['MOBILE',s.phone||'N/A',false,'#374151']];
-      rows.forEach(([l,v,b,vc],i)=>{const rY=TABLE_TOP+i*ROW_H;c.fillStyle=i%2===0?'#f0faf4':'#fff';c.fillRect(M,rY,col1W,ROW_H);c.fillStyle='#9ca3af';c.font='10px Arial';c.fillText(l,M+10,rY+14);c.fillStyle=vc;c.font=(b?'bold ':'')+'14px "Hind Siliguri",Arial';c.fillText(String(v||'N/A'),M+10,rY+37);});
-      // Fee boxes
-      c.fillStyle='#1e40af';c.fillRect(col2X,TABLE_TOP,col2W,2.5);c.font='bold 11px Arial';c.fillStyle='#1e40af';c.fillText('FEE SUMMARY',col2X,TABLE_TOP-7);
+      c.strokeStyle='rgba(200,168,71,0.7)'; c.lineWidth=2.5;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.stroke(); c.restore();
+
+      // Institute name + info
+      const iX=lX+lSz+18;
+      c.textAlign='left';
+      c.fillStyle='#ffffff'; c.font='bold 36px "Hind Siliguri",sans-serif';
+      c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', iX, 60);
+      c.font='15px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+      c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 86);
+      c.font='13px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+      c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', iX, 108);
+      c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(iX,118); c.lineTo(W-M,118); c.stroke();
+      c.fillStyle='#f0d060'; c.font='bold 21px Arial';
+      c.fillText('COURSE FEE RECEIPT', iX, 142);
+      c.fillStyle='rgba(255,255,255,0.62)'; c.font='14px "Hind Siliguri",sans-serif';
+      c.fillText('কোর্স ফি রসিদ', iX, 166);
+
+      // Receipt no + date — top right
+      c.textAlign='right';
+      c.fillStyle='rgba(255,255,255,0.5)'; c.font='10px Arial';
+      c.fillText('RECEIPT NO.', W-M, 44);
+      c.fillStyle='#f0d060'; c.font='bold 16px Arial';
+      c.fillText(rNo, W-M, 63);
+      c.fillStyle='rgba(255,255,255,0.5)'; c.font='10px Arial';
+      c.fillText('DATE', W-M, 90);
+      c.fillStyle='#ffffff'; c.font='14px Arial';
+      c.fillText(rDate, W-M, 109);
+      c.textAlign='left';
+
+      // === STATUS BANNER ===
+      const stsCfg={
+        Paid:   {bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'FULLY PAID  /  সম্পূর্ণ পরিশোধিত'},
+        Partial:{bg:'#fef9c3',brd:'#fbbf24',fg:'#92400e',tx:'PARTIALLY PAID  /  আংশিক পরিশোধিত'},
+        Unpaid: {bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'PAYMENT DUE  /  বকেয়া আছে'},
+      }[sts]||{bg:'#f3f4f6',brd:'#9ca3af',fg:'#374151',tx:'FEE RECEIPT'};
+      const banY=HDR+12;
+      c.fillStyle=stsCfg.bg; _roundRect(c,M,banY,W-M*2,44,8); c.fill();
+      c.strokeStyle=stsCfg.brd; c.lineWidth=2; _roundRect(c,M,banY,W-M*2,44,8); c.stroke();
+      c.fillStyle=stsCfg.fg; c.font='bold 17px "Hind Siliguri",Arial'; c.textAlign='center';
+      c.fillText(stsCfg.tx, W/2, banY+28); c.textAlign='left';
+
+      // === TWO COLUMN LAYOUT ===
+      const col1W=Math.floor((W-M*2-22)*0.55);
+      const col2X=M+col1W+22, col2W=W-M-col2X;
+
+      c.fillStyle='#0d3d1f'; c.fillRect(M,TABLE_TOP,col1W,2.5);
+      c.font='bold 11px Arial'; c.fillStyle='#0d3d1f';
+      c.fillText('STUDENT INFORMATION', M, TABLE_TOP-7);
+
+      const infoRows=[
+        ['NAME / নাম', s.name||'N/A', true, '#0d3d1f'],
+        ['REGISTRATION NO.', s.reg||'N/A', true, '#1d4ed8'],
+        ['COURSE / কোর্স', courseName, false, '#1f2937'],
+        ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
+        ["FATHER'S NAME", s.fatherName||'N/A', false, '#374151'],
+        ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
+      ];
+      infoRows.forEach(([lbl,val,bold,vc],i)=>{
+        const rY=TABLE_TOP+i*ROW_H;
+        c.fillStyle=i%2===0?'#f0faf4':'#ffffff'; c.fillRect(M,rY,col1W,ROW_H);
+        c.strokeStyle='#d1fae5'; c.lineWidth=0.5; c.strokeRect(M,rY,col1W,ROW_H);
+        c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(lbl, M+10, rY+14);
+        c.fillStyle=vc||'#1f2937'; c.font=(bold?'bold ':'')+'14px "Hind Siliguri",Arial';
+        let v=String(val||'N/A'); while(c.measureText(v).width>col1W-22&&v.length>4) v=v.slice(0,-1)+'..';
+        c.fillText(v, M+10, rY+37);
+      });
+      const tableEnd=TABLE_TOP+infoRows.length*ROW_H;
+      c.strokeStyle='#86efac'; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(M,tableEnd); c.lineTo(M+col1W,tableEnd); c.stroke();
+
+      // RIGHT: Fee summary
+      c.fillStyle='#1e40af'; c.fillRect(col2X,TABLE_TOP,col2W,2.5);
+      c.font='bold 11px Arial'; c.fillStyle='#1e40af';
+      c.fillText('FEE SUMMARY', col2X, TABLE_TOP-7);
       let fy=TABLE_TOP;
-      c.fillStyle='#eff6ff';_roundRect(c,col2X,fy,col2W,86,10);c.fill();c.textAlign='center';c.font='bold 30px Arial';c.fillStyle='#1e3a8a';c.fillText(tot>0?'BDT '+tot:'—',col2X+col2W/2,fy+68);fy+=98;
-      c.fillStyle='#f0fdf4';_roundRect(c,col2X,fy,col2W,72,10);c.fill();c.font='bold 28px Arial';c.fillStyle='#166534';c.fillText('BDT '+paid,col2X+col2W/2,fy+55);fy+=84;
-      const dC=due>0?{bg:'#fef2f2',fg:'#991b1b'}:{bg:'#f0fdf4',fg:'#166534'};
-      c.fillStyle=dC.bg;_roundRect(c,col2X,fy,col2W,72,10);c.fill();c.font='bold 28px Arial';c.fillStyle=dC.fg;c.fillText('BDT '+due,col2X+col2W/2,fy+55);c.textAlign='left';
-      // Footer
-      const ftY=H-FTR;c.fillStyle='#031e09';c.fillRect(0,ftY,W,FTR);c.fillStyle='#c8a847';c.fillRect(0,ftY,W,3);
-      c.fillStyle='#fff';c.font='12px Arial';c.textAlign='center';c.fillText(rNo+' | Reg: '+s.reg+' | '+sts,W/2,ftY+27);c.textAlign='left';
-      // Download
-      const lnk=document.createElement('a');lnk.download='Receipt_'+(s.name||'Student').replace(/\s+/g,'_')+'.png';lnk.href=cv.toDataURL('image/png',1.0);lnk.click();
+
+      c.fillStyle='#eff6ff'; _roundRect(c,col2X,fy,col2W,86,10); c.fill();
+      c.strokeStyle='#bfdbfe'; c.lineWidth=1.5; _roundRect(c,col2X,fy,col2W,86,10); c.stroke();
+      c.textAlign='center'; c.font='10px Arial'; c.fillStyle='#6b7280';
+      c.fillText('TOTAL FEE', col2X+col2W/2, fy+18);
+      c.font='11px "Hind Siliguri",Arial'; c.fillText('মোট ফি', col2X+col2W/2, fy+33);
+      c.font='bold 30px Arial'; c.fillStyle='#1e3a8a';
+      c.fillText(tot>0?'BDT '+tot.toLocaleString('en-IN'):'—', col2X+col2W/2, fy+68);
+      fy+=98;
+
+      c.fillStyle='#f0fdf4'; _roundRect(c,col2X,fy,col2W,72,10); c.fill();
+      c.strokeStyle='#86efac'; c.lineWidth=1.5; _roundRect(c,col2X,fy,col2W,72,10); c.stroke();
+      c.font='10px Arial'; c.fillStyle='#6b7280';
+      c.fillText('PAID / পরিশোধিত', col2X+col2W/2, fy+20);
+      c.font='bold 28px Arial'; c.fillStyle='#166534';
+      c.fillText('BDT '+paid.toLocaleString('en-IN'), col2X+col2W/2, fy+55);
+      fy+=84;
+
+      const dC=due>0?{bg:'#fef2f2',brd:'#fca5a5',fg:'#991b1b'}:{bg:'#f0fdf4',brd:'#86efac',fg:'#166534'};
+      c.fillStyle=dC.bg; _roundRect(c,col2X,fy,col2W,72,10); c.fill();
+      c.strokeStyle=dC.brd; c.lineWidth=1.5; _roundRect(c,col2X,fy,col2W,72,10); c.stroke();
+      c.font='10px Arial'; c.fillStyle='#6b7280';
+      c.fillText('DUE / বকেয়া', col2X+col2W/2, fy+20);
+      c.font='bold 28px Arial'; c.fillStyle=dC.fg;
+      c.fillText('BDT '+due.toLocaleString('en-IN'), col2X+col2W/2, fy+55);
+      fy+=84;
+      c.textAlign='left';
+
+      // === SEPARATOR ===
+      const sepY=Math.max(tableEnd, fy)+20;
+      c.strokeStyle='#d1fae5'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(M,sepY); c.lineTo(W-M,sepY); c.stroke();
+
+      // === NOTE BOX ===
+      const noteY=sepY+14;
+      c.fillStyle='#f9fbfa'; _roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.fill();
+      c.strokeStyle='#d1fae5'; c.lineWidth=1; _roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.stroke();
+      c.fillStyle='#374151'; c.font='13px "Hind Siliguri",Arial';
+      c.fillText('Note: This receipt is auto-generated by সবুজ কম্পিউটার ট্রেনিং সেন্টার. Please retain for records.', M+12, noteY+22);
+      c.fillText('Contact: 01724084350 | sabujcomputers.pro.bd', M+12, noteY+44);
+      c.fillStyle='#9ca3af'; c.font='11px Arial';
+      c.fillText('Printed: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+12, noteY+64);
+
+      // === SIGNATURES ===
+      const sigY=noteY+NOTE_H+10;
+      const sigW=168;
+      [[M+20,sigY],[W/2-sigW/2,sigY],[W-M-sigW-20,sigY]].forEach(([x,sy],i)=>{
+        c.strokeStyle='#9ca3af'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(x,sy); c.lineTo(x+sigW,sy); c.stroke();
+        c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+        c.fillText(['Signature of Student','Accounts Officer','Proprietor'][i], x+sigW/2, sy+17);
+        if(i===2){c.font='12px "Hind Siliguri",Arial'; c.fillStyle='#6b7280'; c.fillText('Md. Sabuj Ali', x+sigW/2, sy+33);}
+      });
+      c.textAlign='left';
+
+      // === FOOTER ===
+      const ftY=sigY+SIG_H;
+      c.fillStyle='#031e09'; c.fillRect(0,ftY,W,FTR);
+      c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+      c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+      c.fillText(rNo+' | Code: 5424 | Reg: '+(s.reg||'N/A')+' | Status: '+sts.toUpperCase(), W/2, ftY+27);
+      c.textAlign='left';
+
+      const lnk=document.createElement('a');
+      lnk.download='FeeReceipt_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
+      lnk.href=cv.toDataURL('image/png',1.0); lnk.click();
       alert('✅ ফি রসিদ ডাউনলোড হয়েছে!');
     }
 
-    // ═══ RESULT CARD — Canvas PNG (matching main website) ═══
+    // ═══════════════════════════════════════════════════════════════
+    // RESULT CARD — Professional A4 PNG Generator (Portal)
+    // ═══════════════════════════════════════════════════════════════
     function buildPortalResult(app,courseName){
       const result=app.exam?.result;if(!result||!result.trim()){alert('❌ ফলাফল এখনো প্রকাশিত হয়নি');return;}
-      const s={name:app.personal?.nameBn||'',reg:currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',motherName:app.personal?.motherName||'',session:app.enrollment?.session||'',photo:app.personal?.photo||null,result:result};
-      const gs=_gradeStyle(s.result);const GPA={'A+':5,'A':4,'A-':3.5,'B+':3,'B':2.5,'B-':2,'C':1.5,'D':1,'F':0};
-      const gpa=GPA[s.result]!==undefined?GPA[s.result].toFixed(2):'N/A';const passed=s.result!=='F';
-      const W=900,M=52,HDR=192,GRADE_H=308,BAN_H=52,TABLE_Y=HDR+GRADE_H+BAN_H+12;
-      const ROW_H=46,NOTE_H=86,SIG_H=72,FTR=44,phW=132,phH=168;
-      const allR=[['NAME',s.name,true],['REG NO.',s.reg,true],['COURSE',courseName,false],['SESSION',s.session,false],['FATHER',s.fatherName,false],['MOTHER',s.motherName,false],['GRADE/GPA',s.result+' (GPA '+gpa+')',true]].filter(r=>r[1]&&String(r[1]).trim());
-      const H=TABLE_Y+Math.max(allR.length*ROW_H,phH+130)+NOTE_H+SIG_H+FTR+20;
-      const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
-      c.fillStyle='#faf8ff';c.fillRect(0,0,W,H);
-      // Header
-      const hg=c.createLinearGradient(0,0,W,0);hg.addColorStop(0,'#1a0840');hg.addColorStop(0.45,'#5521b5');hg.addColorStop(1,'#1a0840');
-      c.fillStyle=hg;c.fillRect(0,0,W,HDR);c.fillStyle='#c8a847';c.fillRect(0,0,W,5);
-      const logoImg=document.getElementById('headerLogo');const lSz=152,lX=M,lY=19;
-      c.save();c.beginPath();_roundClip(c,lX,lY,lSz,lSz,16);c.clip();
-      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#5521b5');}}else _fbLogo2(c,lX,lY,lSz,'#5521b5');
-      c.restore();
-      const iX=lX+lSz+18;c.textAlign='left';c.fillStyle='#fff';c.font='bold 36px "Hind Siliguri",sans-serif';c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার',iX,60);
-      c.font='15px "Hind Siliguri"';c.fillStyle='rgba(255,255,255,0.75)';c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর',iX,86);
-      c.fillStyle='#e9d5ff';c.font='bold 21px Arial';c.fillText('RESULT CARD',iX,142);
-      c.fillStyle='rgba(255,255,255,0.62)';c.font='14px "Hind Siliguri"';c.fillText('ফলাফল কার্ড',iX,166);
-      // Grade circle
-      const cX=W/2,cY2=HDR+145,cR=90;
-      c.fillStyle=gs.bg;c.beginPath();c.arc(cX,cY2,cR,0,Math.PI*2);c.fill();
-      c.strokeStyle=gs.fg;c.lineWidth=8;c.beginPath();c.arc(cX,cY2,cR,0,Math.PI*2);c.stroke();
-      c.fillStyle=gs.fg;c.font='bold 78px Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(s.result,cX,cY2);c.textBaseline='alphabetic';
-      const gpY=cY2+cR+14;c.fillStyle=gs.bg;_roundRect(c,cX-84,gpY,168,40,10);c.fill();c.strokeStyle=gs.fg;c.lineWidth=2;_roundRect(c,cX-84,gpY,168,40,10);c.stroke();
-      c.fillStyle=gs.fg;c.font='bold 19px Arial';c.fillText('GPA : '+gpa,cX,gpY+27);
-      // Pass/Fail
-      const banY=gpY+52;const bC=passed?{bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'PASSED / উত্তীর্ণ'}:{bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'FAILED / অনুত্তীর্ণ'};
-      c.fillStyle=bC.bg;_roundRect(c,M,banY,W-M*2,50,12);c.fill();c.strokeStyle=bC.brd;c.lineWidth=3;_roundRect(c,M,banY,W-M*2,50,12);c.stroke();
-      c.fillStyle=bC.fg;c.font='bold 22px "Hind Siliguri",Arial';c.fillText(bC.tx,W/2,banY+33);c.textAlign='left';
-      // Table
-      const phX=W-M-phW,tW=phX-M-14;
-      c.fillStyle='#4c1d95';c.fillRect(M,TABLE_Y,tW,2.5);c.font='bold 11px Arial';c.fillText('STUDENT DETAILS',M,TABLE_Y-7);
-      allR.forEach(([l,v,b],i)=>{const rY=TABLE_Y+i*ROW_H;c.fillStyle=i%2===0?'#f5f3ff':'#faf8ff';c.fillRect(M,rY,tW,ROW_H);c.fillStyle='#9ca3af';c.font='10px Arial';c.fillText(l,M+10,rY+14);c.fillStyle=l.startsWith('GRADE')?gs.fg:'#1f2937';c.font=(b?'bold ':'')+'14px "Hind Siliguri",Arial';c.fillText(String(v),M+10,rY+36);});
-      // Photo placeholder
-      c.fillStyle='#f0ebff';c.fillRect(phX,TABLE_Y,phW,phH);c.strokeStyle='#7c3aed';c.lineWidth=1.5;c.strokeRect(phX,TABLE_Y,phW,phH);
-      // QR
-      const qrSz=114,qrX=phX+(phW-qrSz)/2,qrY=TABLE_Y+phH+12;
-      _drawQR(c,qrX,qrY,qrSz,'https://sabujcomputers.pro.bd/index.html?verify='+encodeURIComponent(s.reg));
-      // Footer
-      const tEnd=TABLE_Y+allR.length*ROW_H;const noteY=Math.max(tEnd,qrY+qrSz+24)+18;
-      c.fillStyle='#374151';c.font='13px "Hind Siliguri",Arial';c.fillText('Auto-generated by সবুজ কম্পিউটার ট্রেনিং সেন্টার | 01724084350',M+12,noteY+22);
-      const sigY=noteY+NOTE_H+8,sigW2=168;
-      [[M+20,sigY],[W/2-sigW2/2,sigY],[W-M-sigW2-20,sigY]].forEach(([x,sy],i)=>{c.strokeStyle='#9ca3af';c.lineWidth=1;c.beginPath();c.moveTo(x,sy);c.lineTo(x+sigW2,sy);c.stroke();c.fillStyle='#374151';c.font='12px Arial';c.textAlign='center';c.fillText(['Student','Examiner','Proprietor'][i],x+sigW2/2,sy+17);});c.textAlign='left';
-      const ftY=sigY+SIG_H;c.fillStyle='#1a0840';c.fillRect(0,ftY,W,FTR);c.fillStyle='#c8a847';c.fillRect(0,ftY,W,3);
-      c.fillStyle='#fff';c.font='12px Arial';c.textAlign='center';c.fillText('Reg: '+s.reg+' | Result: '+s.result+' (GPA '+gpa+')',W/2,ftY+27);c.textAlign='left';
-      // Photo + download
-      if(s.photo){const pi=new Image();pi.crossOrigin='Anonymous';pi.onload=()=>{c.drawImage(pi,phX+2,TABLE_Y+2,phW-4,phH-4);_dlCanvas(cv,s,'ResultCard');};pi.onerror=()=>_dlCanvas(cv,s,'ResultCard');pi.src=s.photo;}else _dlCanvas(cv,s,'ResultCard');
-    }
+      const s={name:app.personal?.nameBn||'',reg:app.regNo||currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',motherName:app.personal?.motherName||'',session:app.enrollment?.session||'',year:app.enrollment?.year||'',photo:app.personal?.photo||null,result:result};
+      const gs=_gradeStyle(s.result);
+      const GPA_MAP={'A+':5.00,'A':4.00,'A-':3.50,'B+':3.00,'B':2.50,'B-':2.00,'C':1.50,'D':1.00,'F':0.00};
+      const gpa=GPA_MAP[s.result]!==undefined?GPA_MAP[s.result].toFixed(2):'N/A';
+      const passed=s.result!=='F';
 
-    // ═══ REGISTRATION CARD — Canvas PNG (matching main website) ═══
-    function buildPortalRegCard(app,courseName){
-      const s={name:app.personal?.nameBn||'',reg:currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',motherName:app.personal?.motherName||'',gender:app.personal?.gender||'',session:app.enrollment?.session||'',photo:app.personal?.photo||null};
-      const W=1240,H=1754,M=52;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
-      c.fillStyle='#fff';c.fillRect(0,0,W,H);
-      c.strokeStyle='#6B0000';c.lineWidth=16;c.strokeRect(10,10,W-20,H-20);
-      c.strokeStyle='#6B0000';c.lineWidth=4;c.strokeRect(26,26,W-52,H-52);
-      c.strokeStyle='#B8860B';c.lineWidth=2;c.strokeRect(32,32,W-64,H-64);
+      const allRows=[
+        ['NAME / নাম', s.name||'N/A', true],
+        ['REGISTRATION NO.', s.reg||'N/A', true],
+        ['COURSE / কোর্স', courseName, false],
+        ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
+        ["FATHER'S NAME", s.fatherName, false],
+        ["MOTHER'S NAME", s.motherName, false],
+        ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):null, false],
+        ['GRADE / GPA', s.result+(gpa!=='N/A'?' (GPA '+gpa+')':''), true],
+      ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='N/A');
+
+      const W=900, M=52, HDR=192, GRADE_H=308, BAN_H=52, TABLE_Y=HDR+GRADE_H+BAN_H+12;
+      const ROW_H=46, NOTE_H=86, SIG_H=72, FTR=44, phW=132, phH=168;
+      const H=TABLE_Y+Math.max(allRows.length*ROW_H, phH+130)+NOTE_H+SIG_H+FTR+20;
+
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c=cv.getContext('2d');
+
+      // Background
+      c.fillStyle='#faf8ff'; c.fillRect(0,0,W,H);
+      c.fillStyle='rgba(76,29,149,0.02)';
+      for(let gx=20;gx<W;gx+=20) for(let gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
+
+      // === HEADER ===
+      const hg=c.createLinearGradient(0,0,W,0);
+      hg.addColorStop(0,'#1a0840'); hg.addColorStop(0.45,'#5521b5'); hg.addColorStop(1,'#1a0840');
+      c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+      c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
+      c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
+
       // Logo
       const logoImg=document.getElementById('headerLogo');
-      c.save();if(logoImg&&logoImg.complete){try{c.globalAlpha=0.06;c.drawImage(logoImg,W/2-350,H/2-350,700,700);}catch(e){}}c.restore();
-      if(logoImg&&logoImg.complete){try{c.save();c.beginPath();_roundClip(c,M+8,46,118,118,12);c.clip();c.drawImage(logoImg,M+8,46,118,118);c.restore();}catch(e){}}
-      c.textAlign='center';c.font='bold 54px "Hind Siliguri",Arial';c.fillStyle='#0a2800';c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার',W/2,86);
-      c.font='bold 30px Arial';c.fillStyle='#111';c.fillText('SABUJ COMPUTER TRAINING CENTER',W/2,126);
-      c.font='20px "Hind Siliguri",Arial';c.fillStyle='#555';c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর',W/2,157);
-      c.font='18px Arial';c.fillStyle='#777';c.fillText('01724084350 | sabujcomputers.pro.bd',W/2,180);
-      c.strokeStyle='#0d3d1f';c.lineWidth=4;c.beginPath();c.moveTo(M,200);c.lineTo(W-M,200);c.stroke();
-      c.font='bold 56px Arial';c.fillStyle='#8B0000';c.fillText('REGISTRATION CARD',W/2,278);
-      c.font='bold 34px "Hind Siliguri",Arial';c.fillStyle='#111';c.fillText(courseName,W/2,336);
-      c.font='25px Arial';c.fillStyle='#555';c.fillText('Institute Code: 5424',W/2,372);
+      const lSz=152, lX=M, lY=19;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.clip();
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#5521b5');}}
+      else _fbLogo2(c,lX,lY,lSz,'#5521b5');
+      c.restore();
+      c.strokeStyle='rgba(200,168,71,0.7)'; c.lineWidth=2.5;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,16); c.stroke(); c.restore();
+
+      // Institute info
+      const iX=lX+lSz+18;
+      c.textAlign='left';
+      c.fillStyle='#ffffff'; c.font='bold 36px "Hind Siliguri",sans-serif';
+      c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', iX, 60);
+      c.font='15px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+      c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 86);
+      c.font='13px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+      c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', iX, 108);
+      c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(iX,118); c.lineTo(W-M,118); c.stroke();
+      c.fillStyle='#e9d5ff'; c.font='bold 21px Arial';
+      c.fillText('RESULT CARD', iX, 142);
+      c.fillStyle='rgba(255,255,255,0.62)'; c.font='14px "Hind Siliguri",sans-serif';
+      c.fillText('ফলাফল কার্ড', iX, 166);
+      c.textAlign='right'; c.fillStyle='rgba(255,255,255,0.5)'; c.font='12px Arial';
+      c.fillText((s.session||'')+(s.year?' | '+s.year:''), W-M, 88);
+      c.textAlign='left';
+
+      // === GRADE CIRCLE ===
+      const cX=W/2, cY2=HDR+145, cR=90;
+      c.save(); c.globalAlpha=0.05; c.fillStyle=gs.fg; c.beginPath(); c.arc(cX,cY2,cR+40,0,Math.PI*2); c.fill(); c.restore();
+      c.save(); c.globalAlpha=0.10; c.fillStyle=gs.fg; c.beginPath(); c.arc(cX,cY2,cR+22,0,Math.PI*2); c.fill(); c.restore();
+      c.fillStyle=gs.bg; c.beginPath(); c.arc(cX,cY2,cR,0,Math.PI*2); c.fill();
+      c.strokeStyle=gs.fg; c.lineWidth=8; c.beginPath(); c.arc(cX,cY2,cR,0,Math.PI*2); c.stroke();
+      c.fillStyle=gs.fg; c.font='bold 78px Arial';
+      c.textAlign='center'; c.textBaseline='middle'; c.fillText(s.result,cX,cY2);
+      c.textBaseline='alphabetic';
+
+      // GPA pill
+      const gpY=cY2+cR+14;
+      c.fillStyle=gs.bg; _roundRect(c,cX-84,gpY,168,40,10); c.fill();
+      c.strokeStyle=gs.fg; c.lineWidth=2; _roundRect(c,cX-84,gpY,168,40,10); c.stroke();
+      c.fillStyle=gs.fg; c.font='bold 19px Arial'; c.textAlign='center';
+      c.fillText('GPA : '+gpa, cX, gpY+27);
+
+      // Pass/Fail banner
+      const banY=gpY+52;
+      const bC=passed
+        ?{bg:'#dcfce7',brd:'#34d399',fg:'#065f46',tx:'PASSED  /  উত্তীর্ণ'}
+        :{bg:'#fee2e2',brd:'#f87171',fg:'#991b1b',tx:'FAILED  /  অনুত্তীর্ণ'};
+      c.fillStyle=bC.bg; _roundRect(c,M,banY,W-M*2,50,12); c.fill();
+      c.strokeStyle=bC.brd; c.lineWidth=3; _roundRect(c,M,banY,W-M*2,50,12); c.stroke();
+      c.fillStyle=bC.fg; c.font='bold 22px "Hind Siliguri",Arial'; c.textAlign='center';
+      c.fillText(bC.tx, W/2, banY+33); c.textAlign='left';
+
+      // === STUDENT TABLE ===
+      const phX=W-M-phW;
+      const tW=phX-M-14;
+      c.fillStyle='#4c1d95'; c.fillRect(M,TABLE_Y,tW,2.5);
+      c.font='bold 11px Arial'; c.fillStyle='#4c1d95'; c.fillText('STUDENT DETAILS', M, TABLE_Y-7);
+
+      allRows.forEach(([lbl,val,bold],i)=>{
+        const rY=TABLE_Y+i*ROW_H;
+        c.fillStyle=i%2===0?'#f5f3ff':'#faf8ff'; c.fillRect(M,rY,tW,ROW_H);
+        c.strokeStyle='#ede9fe'; c.lineWidth=0.5; c.strokeRect(M,rY,tW,ROW_H);
+        c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(lbl, M+10, rY+14);
+        const isGrade=lbl.startsWith('GRADE');
+        c.fillStyle=isGrade?gs.fg:'#1f2937';
+        c.font=(bold?'bold ':'')+'14px "Hind Siliguri",Arial';
+        let v=String(val||'N/A'); while(c.measureText(v).width>tW-22&&v.length>4) v=v.slice(0,-1)+'..';
+        c.fillText(v, M+10, rY+36);
+      });
+      const tEnd=TABLE_Y+allRows.length*ROW_H;
+      c.strokeStyle='#ede9fe'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(M,tEnd); c.lineTo(M+tW,tEnd); c.stroke();
+
       // Photo box
-      const phW=196,phH=248,phX=W-M-phW,phY=404;
-      c.strokeStyle='#444';c.lineWidth=2.5;c.strokeRect(phX,phY,phW,phH);
-      // Table
-      const allR=[{l:"Student Name",v:s.name},{l:"Father's Name",v:s.fatherName},{l:"Mother's Name",v:s.motherName},{l:"Gender",v:s.gender},{l:"Institute",v:'(5424) SABUJ COMPUTER TRAINING CENTER'},{l:"Course",v:courseName},{l:"Registration No.",v:s.reg},{l:"Study Session",v:s.session}].filter(r=>r.v&&String(r.v).trim());
-      const tX=M,tW=phX-M-20,lblW=286;let ry=404;const rH=Math.min(68,Math.floor(258/allR.length));
-      allR.forEach((r,i)=>{if(i%2===0){c.fillStyle='#f7f7f7';c.fillRect(tX,ry,tW,rH);}c.strokeStyle='#ddd';c.lineWidth=1;c.beginPath();c.moveTo(tX,ry);c.lineTo(tX+tW,ry);c.stroke();c.font='bold 22px Arial';c.fillStyle='#333';c.textAlign='left';c.fillText(r.l,tX+12,ry+rH/2+8);const isR=r.l==="Registration No.";c.font=isR?'bold 31px Arial':'25px "Hind Siliguri",Arial';c.fillStyle=isR?'#0d3d1f':'#111';c.fillText(String(r.v||'—'),tX+lblW+14,ry+rH/2+8);ry+=rH;});
-      c.strokeStyle='#bbb';c.lineWidth=1.5;c.strokeRect(tX,404,tW,ry-404);
+      const phY=TABLE_Y;
+      c.fillStyle='#f0ebff'; c.fillRect(phX,phY,phW,phH);
+      c.strokeStyle='#7c3aed'; c.lineWidth=1.5; c.strokeRect(phX,phY,phW,phH);
+      c.fillStyle='#c4b5fd'; c.font='bold 44px Arial';
+      c.textAlign='center'; c.textBaseline='middle';
+      c.fillText((s.name||'?')[0].toUpperCase(), phX+phW/2, phY+phH/2-8);
+      c.font='11px Arial'; c.fillStyle='#a78bfa'; c.fillText('PHOTO', phX+phW/2, phY+phH-13);
+      c.textBaseline='alphabetic'; c.textAlign='left';
+
       // QR
-      const qrSz=140,qrX=phX+(phW-qrSz)/2,qrY=phY+phH+32;
-      _drawQR(c,qrX,qrY,qrSz,'https://sabujcomputers.pro.bd/index.html?verify='+encodeURIComponent(s.reg));
-      // Note & signatures
-      const aY=Math.max(ry,qrY+qrSz+30)+250;
-      c.fillStyle='#f5f5f0';c.fillRect(M,aY,W-M*2,80);c.strokeStyle='#ccc';c.lineWidth=1;c.strokeRect(M,aY,W-M*2,80);
-      c.font='18px Arial';c.fillStyle='#444';c.textAlign='left';
-      c.fillText('Note: Valid for six (6) months. Scan QR code for verification.',M+14,aY+24);
-      c.fillText('Institute code & reg no. must be mentioned in all communications.',M+14,aY+48);
-      const sY=aY+100,sW=210;
-      [[M+50,sY],[W/2-sW/2,sY],[W-M-sW-50,sY]].forEach(([x,y])=>{c.strokeStyle='#333';c.lineWidth=1.5;c.beginPath();c.moveTo(x,y);c.lineTo(x+sW,y);c.stroke();});
-      c.font='19px Arial';c.fillStyle='#222';c.textAlign='center';c.fillText('Student',M+50+sW/2,sY+28);c.fillText('Head of Institute',W/2,sY+28);c.fillText('Proprietor',W-M-sW/2-50,sY+28);c.textAlign='left';
-      // Photo + download
-      if(s.photo){const pi=new Image();pi.crossOrigin='Anonymous';pi.onload=()=>{c.drawImage(pi,phX+3,phY+3,phW-6,phH-6);_dlCanvas(cv,s,'RegCard');};pi.onerror=()=>_dlCanvas(cv,s,'RegCard');pi.src=s.photo;}else _dlCanvas(cv,s,'RegCard');
+      const qrSz=114, qrX=phX+(phW-qrSz)/2, qrY=phY+phH+12;
+      _drawQR(c, qrX, qrY, qrSz, 'https://sabujcomputers.pro.bd/index.html?verify='+encodeURIComponent(s.reg));
+
+      // === NOTE ===
+      const noteY=Math.max(tEnd, qrY+qrSz+24)+18;
+      c.fillStyle='#f9f8ff'; _roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.fill();
+      c.strokeStyle='#e4e0f7'; c.lineWidth=1; _roundRect(c,M,noteY,W-M*2,NOTE_H-4,8); c.stroke();
+      c.fillStyle='#374151'; c.font='13px "Hind Siliguri",Arial';
+      c.fillText('This result card is auto-generated by সবুজ কম্পিউটার ট্রেনিং সেন্টার.', M+12, noteY+22);
+      c.fillText('Date: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), M+12, noteY+44);
+      c.fillStyle='#9ca3af'; c.font='11px Arial';
+      c.fillText('Contact: 01724084350 | sabujcomputers.pro.bd', M+12, noteY+64);
+
+      // === SIGNATURES ===
+      const sigY=noteY+NOTE_H+8;
+      const sigW=168;
+      [[M+20,sigY],[W/2-sigW/2,sigY],[W-M-sigW-20,sigY]].forEach(([x,sy],i)=>{
+        c.strokeStyle='#9ca3af'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(x,sy); c.lineTo(x+sigW,sy); c.stroke();
+        c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+        c.fillText(['Signature of Student','Examiner','Proprietor'][i], x+sigW/2, sy+17);
+        if(i===2){c.font='12px "Hind Siliguri",Arial'; c.fillStyle='#6b7280'; c.fillText('Md. Sabuj Ali', x+sigW/2, sy+33);}
+      });
+      c.textAlign='left';
+
+      // === FOOTER ===
+      const ftY=sigY+SIG_H;
+      c.fillStyle='#1a0840'; c.fillRect(0,ftY,W,FTR);
+      c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+      c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+      c.fillText('Code: 5424 | Reg: '+(s.reg||'N/A')+' | Result: '+s.result+' (GPA '+gpa+') | '+new Date().getFullYear(), W/2, ftY+27);
+      c.textAlign='left';
+
+      // Photo then download
+      if(s.photo){
+        const pi=new Image();pi.crossOrigin='Anonymous';
+        pi.onload=()=>{c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);_dlCanvas(cv,s,'ResultCard');};
+        pi.onerror=()=>_dlCanvas(cv,s,'ResultCard');
+        pi.src=s.photo;
+      } else _dlCanvas(cv,s,'ResultCard');
     }
 
-    function _dlCanvas(cv,s,prefix){const lnk=document.createElement('a');lnk.download=prefix+'_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';lnk.href=cv.toDataURL('image/png',1.0);lnk.click();alert('✅ '+prefix+' ডাউনলোড হয়েছে!');}
+    // ═══════════════════════════════════════════════════════════════
+    // REGISTRATION CARD — Professional A4 PNG Generator (Portal)
+    // ═══════════════════════════════════════════════════════════════
+    function buildPortalRegCard(app,courseName){
+      const s={name:app.personal?.nameBn||'',reg:app.regNo||currentAppId,phone:app.personal?.phone||'',fatherName:app.personal?.fatherName||'',motherName:app.personal?.motherName||'',gender:app.personal?.gender||'',session:app.enrollment?.session||'',year:app.enrollment?.year||'',photo:app.personal?.photo||null};
+      const W=1240, H=1754, M=52;
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c=cv.getContext('2d');
+
+      c.fillStyle='#ffffff'; c.fillRect(0,0,W,H);
+
+      // ── Decorative border (BTEB style) ──
+      c.strokeStyle='#6B0000'; c.lineWidth=16; c.strokeRect(10,10,W-20,H-20);
+      c.strokeStyle='#6B0000'; c.lineWidth=4; c.strokeRect(26,26,W-52,H-52);
+      c.strokeStyle='#B8860B'; c.lineWidth=2; c.strokeRect(32,32,W-64,H-64);
+
+      // Corner ornaments
+      [[38,38,1,1],[W-38,38,-1,1],[38,H-38,1,-1],[W-38,H-38,-1,-1]].forEach(([x,y,sx,sy])=>{
+        c.strokeStyle='#6B0000'; c.lineWidth=3;
+        c.beginPath(); c.moveTo(x,y+sy*70); c.lineTo(x,y); c.lineTo(x+sx*70,y); c.stroke();
+        c.beginPath(); c.moveTo(x+sx*20,y+sy*8); c.lineTo(x+sx*8,y+sy*8); c.lineTo(x+sx*8,y+sy*20); c.stroke();
+        c.fillStyle='#B8860B'; c.beginPath();
+        c.moveTo(x+sx*8,y); c.lineTo(x+sx*18,y+sy*10);
+        c.lineTo(x+sx*8,y+sy*20); c.lineTo(x,y+sy*10);
+        c.closePath(); c.fill();
+      });
+
+      // ── Logo watermark ──
+      const logoImg=document.getElementById('headerLogo');
+      c.save();
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
+        try{c.globalAlpha=0.06;c.drawImage(logoImg,W/2-350,H/2-350,700,700);}catch(e){}
+      }
+      c.restore();
+
+      // ── Logo (left) ──
+      const lSz=118, lX=M+8, lY=46;
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){
+        try{c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,12); c.clip();
+        c.drawImage(logoImg,lX,lY,lSz,lSz); c.restore();}catch(e){_drawLogoFB(c,lX,lY,lSz);}
+      } else { _drawLogoFB(c,lX,lY,lSz); }
+
+      // ── INSTITUTION NAME ──
+      c.textAlign='center';
+      c.font='bold 54px "Hind Siliguri",Arial'; c.fillStyle='#0a2800';
+      c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', W/2, 86);
+      c.font='bold 30px Arial'; c.fillStyle='#111';
+      c.fillText('SABUJ COMPUTER TRAINING CENTER', W/2, 126);
+      c.font='20px "Hind Siliguri",Arial'; c.fillStyle='#555';
+      c.fillText('তমালতলা বাজার (কলেজ রোড), বাগাতিপাড়া, নাটোর', W/2, 157);
+      c.font='18px Arial'; c.fillStyle='#777';
+      c.fillText('01724084350 | sabujcomputers.pro.bd', W/2, 180);
+
+      // ── Double divider ──
+      c.strokeStyle='#0d3d1f'; c.lineWidth=4;
+      c.beginPath(); c.moveTo(M,200); c.lineTo(W-M,200); c.stroke();
+      c.strokeStyle='#0d3d1f'; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(M,208); c.lineTo(W-M,208); c.stroke();
+
+      // ── TITLE ──
+      c.font='bold 56px Arial'; c.fillStyle='#8B0000'; c.textAlign='center';
+      c.fillText('REGISTRATION CARD', W/2, 278);
+      const tw=c.measureText('REGISTRATION CARD').width;
+      c.strokeStyle='#CC0000'; c.lineWidth=3;
+      c.beginPath(); c.moveTo(W/2-tw/2,288); c.lineTo(W/2+tw/2,288); c.stroke();
+
+      // ── Course & Code ──
+      c.font='bold 34px "Hind Siliguri",Arial'; c.fillStyle='#111'; c.textAlign='center';
+      c.fillText(courseName, W/2, 336);
+      c.font='25px Arial'; c.fillStyle='#555';
+      c.fillText('Institute Code: 5424', W/2, 372);
+
+      c.strokeStyle='#bbb'; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(M,390); c.lineTo(W-M,390); c.stroke();
+
+      // ── PHOTO BOX ──
+      const phW=196, phH=248, phX=W-M-phW, phY=404;
+      c.strokeStyle='#444'; c.lineWidth=2.5;
+      c.strokeRect(phX,phY,phW,phH);
+      c.font='17px Arial'; c.fillStyle='#888'; c.textAlign='center';
+      c.fillText('Photograph',phX+phW/2,phY+phH+22);
+
+      // ── INFO TABLE ──
+      const allR=[
+        {label:"Student Name",          val:s.name,          always:true},
+        {label:"Father's Name",         val:s.fatherName,    always:false},
+        {label:"Mother's Name",         val:s.motherName,    always:false},
+        {label:"Gender",                val:s.gender,        always:false},
+        {label:"Institute Code & Name", val:'(5424) SABUJ COMPUTER TRAINING CENTER', always:true},
+        {label:"Trade / Course",        val:courseName,      always:true},
+        {label:"Registration No.",      val:s.reg,           always:true},
+        {label:"Study Session",         val:(s.session||'')+(s.year?', '+s.year:''), always:true},
+      ];
+      const rows=allR.filter(r=>r.always||(r.val&&String(r.val).trim()!==''&&r.val!=='—'));
+
+      const tX=M, tW=phX-M-20;
+      const lblW=286, valStartX=tX+lblW+14;
+      const totalRowsH=phH+10;
+      const rH=Math.min(68,Math.floor(totalRowsH/rows.length));
+      let ry=404;
+
+      rows.forEach((row,i)=>{
+        if(i%2===0){c.fillStyle='#f7f7f7';c.fillRect(tX,ry,tW,rH);}
+        c.strokeStyle='#ddd'; c.lineWidth=1;
+        c.beginPath();c.moveTo(tX,ry);c.lineTo(tX+tW,ry);c.stroke();
+        c.beginPath();c.moveTo(tX+lblW,ry);c.lineTo(tX+lblW,ry+rH);c.stroke();
+
+        c.font='bold 22px Arial'; c.fillStyle='#333'; c.textAlign='left';
+        c.fillText(row.label,tX+12,ry+rH/2+8);
+        c.fillText(':',tX+lblW-16,ry+rH/2+8);
+
+        const isReg=(row.label==="Registration No.");
+        c.font=isReg?'bold 31px Arial':'25px "Hind Siliguri",Arial';
+        c.fillStyle=isReg?'#0d3d1f':'#111';
+        let val=String(row.val||'—');
+        const maxW=tW-lblW-20;
+        while(c.measureText(val).width>maxW&&val.length>4)val=val.slice(0,-1)+'…';
+        c.fillText(val,valStartX,ry+rH/2+8);
+        ry+=rH;
+      });
+      c.strokeStyle='#ddd';c.lineWidth=1;
+      c.beginPath();c.moveTo(tX,ry);c.lineTo(tX+tW,ry);c.stroke();
+      c.strokeStyle='#bbb';c.lineWidth=1.5;
+      c.strokeRect(tX,404,tW,ry-404);
+
+      // ── QR code below photo ──
+      const qrSz=140, qrX2=phX+(phW-qrSz)/2, qrY2=phY+phH+32;
+      _drawQR(c, qrX2, qrY2, qrSz, 'https://sabujcomputers.pro.bd/index.html?verify='+encodeURIComponent(s.reg));
+
+      // ── Note, signatures, footer ──
+      const afterY = Math.max(ry, qrY2+qrSz+30) + 250;
+      const noteH = 80;
+
+      c.fillStyle='#f5f5f0';c.fillRect(M,afterY,W-M*2,noteH);
+      c.strokeStyle='#ccc';c.lineWidth=1;c.strokeRect(M,afterY,W-M*2,noteH);
+      c.font='18px Arial';c.fillStyle='#444';c.textAlign='left';
+      ['Note: This registration card is valid for six (6) months from the date of issue.',
+       'Institute code, registration number and study session must be mentioned in all communications.',
+       'This card must be printed in color. Scan the QR code for verification.'
+      ].forEach((ln,i)=>c.fillText(ln,M+14,afterY+24+i*24));
+
+      const sigY2 = afterY + noteH + 20;
+      const sigW2=210;
+      [[M+50,sigY2],[W/2-sigW2/2,sigY2],[W-M-sigW2-50,sigY2]].forEach(([x,y])=>{
+        c.strokeStyle='#333';c.lineWidth=1.5;
+        c.beginPath();c.moveTo(x,y);c.lineTo(x+sigW2,y);c.stroke();
+      });
+      c.font='19px Arial';c.fillStyle='#222';c.textAlign='center';
+      c.fillText('Signature of Student',  M+50+sigW2/2,  sigY2+28);
+      c.fillText('Head of the Institute', W/2,           sigY2+28);
+      c.fillText('Md. Sabuj Ali', W-M-sigW2/2-50, sigY2+28);
+      c.font='17px Arial';c.fillStyle='#666';
+      c.fillText('Proprietor', W-M-sigW2/2-50, sigY2+50);
+
+      const ftY2 = sigY2 + 70;
+      c.strokeStyle='#0d3d1f';c.lineWidth=2.5;
+      c.beginPath();c.moveTo(M,ftY2);c.lineTo(W-M,ftY2);c.stroke();
+      c.strokeStyle='#0d3d1f';c.lineWidth=1;
+      c.beginPath();c.moveTo(M,ftY2+7);c.lineTo(W-M,ftY2+7);c.stroke();
+      c.font='19px Arial';c.fillStyle='#333';
+      c.textAlign='left';
+      c.fillText('Printing Date: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),M,ftY2+25);
+      c.textAlign='right';
+      c.fillText('Serial No.: '+new Date().getFullYear()+'_5424_'+s.reg,W-M,ftY2+32);
+
+      // ── DRAW PHOTO (async) ──
+      if(s.photo){
+        const img=new Image();img.crossOrigin='Anonymous';
+        img.onload=()=>{
+          c.drawImage(img,phX+3,phY+3,phW-6,phH-6);
+          c.strokeStyle='#444';c.lineWidth=2.5;c.strokeRect(phX,phY,phW,phH);
+          _dlCanvas(cv,s,'RegCard');
+        };
+        img.onerror=()=>{_drawPhotoFB(c,phX,phY,phW,phH,s.name);_dlCanvas(cv,s,'RegCard');};
+        img.src=s.photo;
+      } else {
+        _drawPhotoFB(c,phX,phY,phW,phH,s.name);
+        _dlCanvas(cv,s,'RegCard');
+      }
+    }
+
+    function _drawLogoFB(c,x,y,sz){
+      c.fillStyle='#0d3d1f';c.beginPath();c.arc(x+sz/2,y+sz/2,sz/2,0,Math.PI*2);c.fill();
+      c.font='bold '+(sz*0.48)+'px Arial';c.fillStyle='#fff';
+      c.textAlign='center';c.textBaseline='middle';c.fillText('স',x+sz/2,y+sz/2);c.textBaseline='alphabetic';
+    }
+    function _drawPhotoFB(c,x,y,w,h,name){
+      c.fillStyle='#e8f5ec';c.fillRect(x+2,y+2,w-4,h-4);
+      c.font='bold 70px Arial';c.fillStyle='#1a6b35';
+      c.textAlign='center';c.textBaseline='middle';c.fillText((name||'?')[0].toUpperCase(),x+w/2,y+h/2);c.textBaseline='alphabetic';
+    }
 
     // Dynamic Library Loading
     db.ref('sabuj/library').on('value', snap => {

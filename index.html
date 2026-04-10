@@ -529,7 +529,7 @@ header.nav-glass{
 }
 
 /* ===== SCROLL REVEAL ANIMATION ===== */
-.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
+.reveal{opacity:1;transform:none;transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 .reveal-delay-1{transition-delay:.1s}
 .reveal-delay-2{transition-delay:.2s}
@@ -699,6 +699,24 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
   #hamBtn{display:flex!important;flex-direction:column;justify-content:center}
   #navCloseBtn{display:block!important}
   .hdr-contact-mobile{display:block!important}
+}
+/* ===== MOBILE CARD OVERFLOW FIX ===== */
+@media(max-width:480px){
+  .why-grid,.services-grid,.training-cards,.achieve-grid,.testi-grid{
+    grid-template-columns:1fr!important;
+  }
+  .why-card,.svc-card,.trn-card,.ach-card,.testi-card{
+    word-wrap:break-word;overflow-wrap:break-word;
+  }
+  .why-card h3,.svc-card h3,.trn-card h3{font-size:16px}
+  .why-card p,.svc-card p,.testi-text{font-size:13px}
+  .res-grid{grid-template-columns:1fr!important}
+  .res-top{flex-direction:column;align-items:center;text-align:center}
+  .hero-stats{gap:12px}
+  .stat-num{font-size:26px}
+  .search-row{flex-direction:column}
+  .search-card{padding:20px}
+  .contact-inner{grid-template-columns:1fr!important}
 }
 
 </style>
@@ -1452,14 +1470,15 @@ function closePremiumGate() {
         observer.unobserve(entry.target);
       }
     });
-  }, {threshold: 0.12, rootMargin: '0px 0px -40px 0px'});
+  }, {threshold: 0.08, rootMargin: '0px 0px -20px 0px'});
   function observeAll(){
-    document.querySelectorAll('.reveal').forEach(function(el){
-      observer.observe(el);
-    });
+    document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
   }
-  document.addEventListener('DOMContentLoaded', observeAll);
-  // Also re-observe after dynamic content renders
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', observeAll);
+  } else {
+    observeAll();
+  }
   window._revealObserver = observer;
   window._reObserveReveal = observeAll;
 })();
@@ -1566,8 +1585,8 @@ function loadDB(callback) {
       if (val.photos) {
         const photosObj = val.photos;
         DB.students.forEach((s) => {
-          if (s.hasPhoto && s.reg) {
-            const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+          if (s.hasPhoto && (s.reg || s.applicationId)) {
+            const safeKey = String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
             if (photosObj[safeKey]) {
               s.photo = photosObj[safeKey];
             }
@@ -1601,13 +1620,16 @@ function saveDB(path, value) {
     const studentsNoPhoto = (value||[]).map(s => {
       const {photo, ...rest} = s;
       if (photo && photo.startsWith('data:')) {
-        const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+        const safeKey = String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
         if(safeKey) {
           photoSavePromises.push(
             db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
           );
         }
         return {...rest, hasPhoto: !!safeKey};
+      } else if (photo && (photo.startsWith('http://') || photo.startsWith('https://'))) {
+        // Keep Cloudinary/URL photos in the student object
+        return {...rest, photo: photo};
       }
       return {...rest, hasPhoto: false};
     });
@@ -2065,7 +2087,6 @@ function gradeStyle(g){
 // ===================================================
 // CERTIFICATE (Modern Design)
 // ===================================================
-// ═══════════════════════════════════════════════════════════════
 // COURSE FEE RECEIPT — Professional A4 PNG Generator
 // ═══════════════════════════════════════════════════════════════
 function downloadFeeReceipt(){
@@ -2176,7 +2197,7 @@ function buildFeeReceipt(s){
     ['COURSE / কোর্স', courseName, false, '#1f2937'],
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
     ["FATHER'S NAME", s.fatherName||'N/A', false, '#374151'],
-    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
   ];
   infoRows.forEach(([lbl,val,bold,vc],i)=>{
     const rY=TABLE_TOP+i*ROW_H;
@@ -2317,10 +2338,10 @@ function drawLocalQR(c, x, y, size, text){
   } catch(e) {
     c.fillStyle='#ffffff'; c.fillRect(x,y,size,size);
     c.strokeStyle='#333'; c.lineWidth=2; c.strokeRect(x+2,y+2,size-4,size-4);
-    c.fillStyle='#374151'; c.font=`bold ${Math.floor(size/7)}px Arial`; c.textAlign='center';
+    c.fillStyle='#374151'; c.font='bold '+Math.floor(size/7)+'px Arial'; c.textAlign='center';
     c.fillText('QR', x+size/2, y+size/2+6);
   }
-  c.fillStyle='#374151'; c.font=`${Math.floor(size/10)}px Arial`; c.textAlign='center';
+  c.fillStyle='#374151'; c.font=Math.floor(size/10)+'px Arial'; c.textAlign='center';
   c.fillText('Scan to Verify', x+size/2, y+size+16);
 }
 
@@ -2343,7 +2364,7 @@ function buildResultCard(s){
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
     ["FATHER'S NAME", s.fatherName, false],
     ["MOTHER'S NAME", s.motherName, false],
-    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):null, false],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\\d/g,'*')+s.phone.slice(-4):null, false],
     ['GRADE / GPA', s.result+(gpaVal!=='N/A'?' (GPA '+gpaVal+')':''), true],
   ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='N/A');
 
@@ -2499,7 +2520,7 @@ function buildResultCard(s){
   // Photo then download
  if(s.photo){
     const pi=new Image();
-    pi.crossOrigin = "Anonymous"; // <--- এই লাইনটি যুক্ত করুন
+    pi.crossOrigin = "Anonymous";
     pi.onload=()=>{
       c.drawImage(pi,phX+2,phY+2,phW-4,phH-4);
       const lnk=document.createElement('a');
@@ -2742,7 +2763,7 @@ function finishRegCard(c,cv,s,phX,phY,phW,phH,afterY,noteH,sigY,ftY){
   // ── DRAW PHOTO (async) ──
 if(s.photo){
     const img=new Image();
-    img.crossOrigin = "Anonymous"; // <--- এই লাইনটি যুক্ত করুন
+    img.crossOrigin = "Anonymous";
     img.onload=()=>{
       c.drawImage(img,phX+3,phY+3,phW-6,phH-6);
       c.strokeStyle='#444';c.lineWidth=2.5;c.strokeRect(phX,phY,phW,phH);
@@ -3208,6 +3229,11 @@ function quickSaveResult(i){
   if(!val){showNotif('❌ একটি গ্রেড বাছুন');return;}
   DB.students[i].result=val;
   saveDB('students',DB.students);
+  // Sync to student portal via applicationId
+  const appKey = DB.students[i].applicationId || (DB.students[i].reg && DB.students[i].reg.startsWith('SCTC-APP-') ? DB.students[i].reg : '');
+  if(appKey) {
+    db.ref('sabuj/applications/' + appKey + '/exam').update({ result: val });
+  }
   renderAdminStudents();
   showNotif('✅ '+DB.students[i].name+' → গ্রেড '+val+' সংরক্ষিত');
 }
@@ -3238,13 +3264,28 @@ function saveStudent(){
       feeStatus:document.getElementById('s-fee-status').value||'',
       photo:photo||(existing?existing.photo:null)
     };
-    if(!obj.name||!obj.reg){showNotif('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
+    if(!obj.name){showNotif('❌ নাম আবশ্যক');return;}
     if(!obj.course){showNotif('❌ কোর্স বাছুন (FOUNDATION বা BTEB)');return;}
-    const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&(idx===''||_i!==+idx));
-    if(_dup>=0){showNotif('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
-    if(idx!=='')DB.students[+idx]=obj;
-    else DB.students.push(obj);
-    saveDB('students',DB.students);renderAdminStudents();
+    if(obj.reg) {
+      const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&st.reg!==''&&(idx===''||_i!==+idx));
+      if(_dup>=0){showNotif('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
+    }
+    // Preserve applicationId from existing student
+    if(idx!=='') {
+      obj.applicationId = DB.students[+idx].applicationId || '';
+      DB.students[+idx]=obj;
+    } else DB.students.push(obj);
+    saveDB('students',DB.students);
+    // Sync to applications if linked
+    const appKey = obj.applicationId || '';
+    if(appKey && appKey.startsWith('SCTC-APP-')) {
+      db.ref('sabuj/applications/' + appKey + '/exam').update({ result: obj.result });
+      db.ref('sabuj/applications/' + appKey + '/payment').update({ total: obj.feeTotal, paid: obj.feePaid, due: obj.feeDue, status: obj.feeStatus });
+      db.ref('sabuj/applications/' + appKey + '/personal').update({ nameBn: obj.name, phone: obj.phone });
+      db.ref('sabuj/applications/' + appKey + '/enrollment').update({ courseId: obj.course });
+      db.ref('sabuj/applications/' + appKey + '/regNo').set(obj.reg || '');
+    }
+    renderAdminStudents();
     if(document.getElementById('achTotal'))document.getElementById('achTotal').textContent=DB.students.length+'+';
     if(document.getElementById('statStudents'))document.getElementById('statStudents').textContent=DB.students.length+'+';
     clearStudentForm();showNotif(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
@@ -3338,10 +3379,16 @@ function deleteStudent(i){
   if(!_adm.requireAuth()) return;
   if(!confirm('এই শিক্ষার্থীকে মুছে ফেলবেন?'))return;
   const s=DB.students[i];
-  // Remove photo from Firebase photos node
-  if(s&&s.reg){
-    const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
-    db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
+  if(s){
+    const keyForPhoto=String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
+    if(keyForPhoto) db.ref('sabuj/photos/'+keyForPhoto).remove().catch(()=>{});
+    const appKey = s.applicationId || (s.reg && s.reg.startsWith('SCTC-APP-') ? s.reg : '');
+    if(appKey) {
+      db.ref('sabuj/applications/' + appKey).update({ status: 'removed' }).catch(()=>{});
+      db.ref('sabuj/applications/' + appKey + '/uid').once('value').then(snap => {
+        if(snap.val()) db.ref('sabuj/students_auth/' + snap.val()).update({ status: 'removed' }).catch(()=>{});
+      });
+    }
   }
   DB.students.splice(i,1);saveDB('students',DB.students);renderAdminStudents();
   if(document.getElementById('achTotal'))document.getElementById('achTotal').textContent=DB.students.length+'+';
