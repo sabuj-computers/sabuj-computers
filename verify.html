@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>সনদ যাচাই - সবুজ কম্পিউটার ট্রেনিং সেন্টার</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
   
   <!-- Firebase SDK -->
@@ -86,7 +87,7 @@
     function verifyCert(id = null) {
       const certId = id || document.getElementById('certId').value.trim();
       if(!certId) {
-        alert('অনুগ্রহ করে একটি আইডি প্রদান করুন।');
+        alert('অনুগ্রহ করে একটি আইডি বা সনদ নম্বর প্রদান করুন।');
         return;
       }
       
@@ -94,23 +95,45 @@
       document.getElementById('loader').style.display = 'block';
       document.getElementById('resultBox').style.display = 'none';
 
-      db.ref('sabuj/applications/' + certId).once('value').then(snap => {
+      db.ref('sabuj/applications').once('value').then(snap => {
         document.getElementById('loader').style.display = 'none';
         const data = snap.val();
         const resultBox = document.getElementById('resultBox');
         
+        let foundApp = null;
+        let foundAppId = null;
+
+        if (data) {
+          // Check if it's an application ID
+          if (data[certId]) {
+            foundApp = data[certId];
+            foundAppId = certId;
+          } else {
+            // Search by Certificate Number
+            for (const key in data) {
+              if (data[key].certificate && data[key].certificate.sonodNo === certId) {
+                foundApp = data[key];
+                foundAppId = key;
+                break;
+              }
+            }
+          }
+        }
+
         // Check if data exists and status is approved/active
-        if(data && (data.status === 'approved' || data.status === 'active')) {
-          const courseName = data.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
-          const imgHtml = data.personal?.photo ? `<img src="${data.personal.photo}" class="student-img">` : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👤</div>';
+        if(foundApp && (foundApp.status === 'approved' || foundApp.status === 'active')) {
+          const courseName = foundApp.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
+          const imgHtml = foundApp.personal?.photo ? `<img src="${foundApp.personal.photo}" class="student-img">` : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👤</div>';
+          const certNoHtml = foundApp.certificate?.sonodNo ? `<p style="margin: 5px 0 0; color: #6b8c76; font-size: 15px;">সনদ নম্বর: ${foundApp.certificate.sonodNo}</p>` : '';
           
           resultBox.className = 'result success';
           resultBox.innerHTML = `
             <div class="icon-large">✅</div>
             <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 22px;">সনদটি সঠিক ও ভেরিফাইড!</h3>
             ${imgHtml}
-            <h2 style="margin: 15px 0 5px; color: var(--g1); font-size: 24px;">${data.personal?.nameBn || data.personal?.nameEn}</h2>
-            <p style="margin: 0; color: #4a6040; font-weight: bold; font-size: 16px;">ID: ${certId}</p>
+            <h2 style="margin: 15px 0 5px; color: var(--g1); font-size: 24px;">${foundApp.personal?.nameBn || foundApp.personal?.nameEn}</h2>
+            <p style="margin: 0; color: #4a6040; font-weight: bold; font-size: 16px;">Registration ID: ${foundAppId}</p>
+            ${certNoHtml}
             <p style="margin: 5px 0 0; color: #6b8c76; font-size: 15px;">কোর্স: ${courseName}</p>
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #bbf7d0;">
               <p style="margin: 0; color: #15803d; font-size: 14px;">এই শিক্ষার্থী সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত ছাত্র/ছাত্রী।</p>
@@ -121,7 +144,7 @@
           resultBox.innerHTML = `
             <div class="icon-large">❌</div>
             <h3 style="color: #991b1b; margin: 0 0 10px 0; font-size: 22px;">সনদটি খুঁজে পাওয়া যায়নি!</h3>
-            <p style="margin: 0; color: #7f1d1d; font-size: 15px;">দয়া করে সঠিক আইডি প্রদান করুন অথবা কর্তৃপক্ষের সাথে যোগাযোগ করুন। হতে পারে আবেদনটি এখনো পেন্ডিং অবস্থায় আছে।</p>
+            <p style="margin: 0; color: #7f1d1d; font-size: 15px;">দয়া করে সঠিক আইডি বা সনদ নম্বর প্রদান করুন অথবা কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>
           `;
         }
         resultBox.style.display = 'block';

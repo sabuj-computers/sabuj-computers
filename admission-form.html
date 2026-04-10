@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>অনলাইন ভর্তি ফর্ম - সবুজ কম্পিউটার ট্রেনিং সেন্টার</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
   
   <!-- Firebase SDK -->
@@ -71,7 +72,7 @@
 
   <header>
     <div class="logo-area">
-      <div class="logo-circle">স</div>
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" style="width:50px;height:50px;border-radius:12px;background:white;padding:3px;">
       <h1 class="brand-title">সবুজ কম্পিউটার্স</h1>
     </div>
     <button class="logout-btn" id="logoutBtn">লগআউট</button>
@@ -93,6 +94,7 @@
           <div class="step-circle" id="step3-circle">3</div>
           <div class="step-circle" id="step4-circle">4</div>
           <div class="step-circle" id="step5-circle">5</div>
+          <div class="step-circle" id="step6-circle">6</div>
         </div>
       </div>
 
@@ -209,11 +211,15 @@
           <div class="form-grid">
             <div class="input-group">
               <label>কোর্সের নাম *</label>
-              <select id="courseSelect" required>
+              <select id="courseSelect" required onchange="updateCourseFee()">
                 <option value="">— কোর্স নির্বাচন করুন —</option>
                 <option value="BTEB">Computer Office Application (BTEB)</option>
                 <option value="FOUNDATION">Computer Office Application (Foundation)</option>
               </select>
+              <div id="courseFeeDisplay" style="display:none; margin-top:10px; background:#f0fdf4; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
+                <p style="margin:0; color:#166534; font-weight:bold; font-size:15px;">কোর্স ফি: <span id="feeAmount"></span> টাকা</p>
+                <p style="margin:5px 0 0; font-size:13px; color:#15803d;">⚠️ কোর্স ফি প্রতিষ্ঠানে এসে পরিশোধ করতে হবে।</p>
+              </div>
             </div>
             <div class="input-group">
               <label>কোথা থেকে জানলেন?</label>
@@ -259,13 +265,24 @@
             </div>
           </div>
 
-          <div class="checkbox-group" style="margin-top: 30px; background: #fff7ed; padding: 15px; border-radius: 10px; border: 1px solid #fed7aa;">
+          <div class="btn-group">
+            <button type="button" class="btn-prev" onclick="prevStep(4)">← পূর্ববর্তী</button>
+            <button type="button" class="btn-next" onclick="nextStep(6)">প্রিভিউ দেখুন →</button>
+          </div>
+        </div>
+
+        <!-- STEP 6: Preview -->
+        <div class="form-step" id="step6">
+          <div class="section-title"><span>👁️</span> প্রিভিউ ও সাবমিট (ধাপ ৬/৬)</div>
+          <div id="previewContent" style="background:#f7faf8; padding:20px; border-radius:10px; border:1px solid #e4ece7; margin-bottom:20px; font-size:14px; line-height:1.6;">
+            <!-- Preview data will be injected here -->
+          </div>
+          <div class="checkbox-group" style="margin-top: 20px; background: #fff7ed; padding: 15px; border-radius: 10px; border: 1px solid #fed7aa;">
             <input type="checkbox" id="declaration" required style="width: 20px; height: 20px;">
             <label for="declaration" style="color: #9a3412; font-weight: 600; cursor: pointer;">আমি ঘোষণা করছি যে উপরের সকল তথ্য সত্য ও সঠিক এবং আমি প্রতিষ্ঠানের সকল নিয়মকানুন মেনে চলতে সম্মত। *</label>
           </div>
-
           <div class="btn-group">
-            <button type="button" class="btn-prev" onclick="prevStep(4)">← পূর্ববর্তী</button>
+            <button type="button" class="btn-prev" onclick="prevStep(5)">← পূর্ববর্তী</button>
             <button type="submit" class="btn-submit" id="submitBtn">
               <span id="submitText">আবেদন জমা দিন</span>
               <div class="loader" id="submitLoader"></div>
@@ -292,6 +309,11 @@
     const db = firebase.database();
     let currentUser = null;
 
+    // Load Logo
+    db.ref('sabuj/general/logo').on('value', snap => {
+      if(snap.val()) document.getElementById('headerLogo').src = snap.val();
+    });
+
     auth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
@@ -300,7 +322,7 @@
           if (data) {
             document.getElementById('nameBn').value = data.name || '';
             document.getElementById('phone').value = data.phone || '';
-            if (data.status === 'active' || data.status === 'pending_approval') {
+            if (data.status === 'active' || data.status === 'pending_approval' || data.status === 'pending' || data.status === 'rejected') {
               window.location.href = 'student-dashboard.html';
             }
           }
@@ -324,12 +346,16 @@
       inputs.forEach(inp => { if(!inp.value) { inp.style.borderColor = 'red'; isValid = false; } else { inp.style.borderColor = '#dde8e0'; } });
       if(!isValid) { alert('অনুগ্রহ করে লাল চিহ্নিত ফিল্ডগুলো পূরণ করুন।'); return; }
 
+      if (step === 6) {
+        generatePreview();
+      }
+
       document.getElementById('step' + currentStep).classList.remove('active');
       document.getElementById('step' + step).classList.add('active');
       document.getElementById('step' + step + '-circle').classList.add('active');
       document.getElementById('step' + currentStep + '-circle').classList.add('completed');
       currentStep = step;
-      document.getElementById('progressFill').style.width = ((step-1) * 25) + '%';
+      document.getElementById('progressFill').style.width = ((step-1) * 20) + '%';
     }
 
     function prevStep(step) {
@@ -337,7 +363,28 @@
       document.getElementById('step' + step).classList.add('active');
       document.getElementById('step' + currentStep + '-circle').classList.remove('active');
       currentStep = step;
-      document.getElementById('progressFill').style.width = ((step-1) * 25) + '%';
+      document.getElementById('progressFill').style.width = ((step-1) * 20) + '%';
+    }
+
+    function generatePreview() {
+      const p = document.getElementById('previewContent');
+      const courseSelect = document.getElementById('courseSelect');
+      const courseName = courseSelect.options[courseSelect.selectedIndex]?.text || '';
+      p.innerHTML = `
+        <h4 style="margin:0 0 10px; color:var(--g1);">ব্যক্তিগত তথ্য</h4>
+        <p><strong>নাম (বাংলায়):</strong> ${document.getElementById('nameBn').value}</p>
+        <p><strong>নাম (ইংরেজিতে):</strong> ${document.getElementById('nameEn').value}</p>
+        <p><strong>পিতার নাম:</strong> ${document.getElementById('fatherName').value}</p>
+        <p><strong>মাতার নাম:</strong> ${document.getElementById('motherName').value}</p>
+        <p><strong>মোবাইল:</strong> ${document.getElementById('phone').value}</p>
+        <hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">
+        <h4 style="margin:0 0 10px; color:var(--g1);">কোর্স তথ্য</h4>
+        <p><strong>কোর্স:</strong> ${courseName}</p>
+        <p><strong>কোর্সের মেয়াদ:</strong> ৬ মাস</p>
+        <hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">
+        <h4 style="margin:0 0 10px; color:var(--g1);">ঠিকানা</h4>
+        <p><strong>বর্তমান:</strong> ${document.getElementById('preVillage').value}, ${document.getElementById('preUpazila').value}, ${document.getElementById('preDistrict').value}</p>
+      `;
     }
 
     function togglePermanentAddress() {
@@ -358,6 +405,22 @@
       }
     }
 
+    function updateCourseFee() {
+      const course = document.getElementById('courseSelect').value;
+      const feeDisplay = document.getElementById('courseFeeDisplay');
+      const feeAmount = document.getElementById('feeAmount');
+      
+      if(course === 'BTEB') {
+        feeAmount.textContent = '৪৫০০';
+        feeDisplay.style.display = 'block';
+      } else if(course === 'FOUNDATION') {
+        feeAmount.textContent = '৩৫০০';
+        feeDisplay.style.display = 'block';
+      } else {
+        feeDisplay.style.display = 'none';
+      }
+    }
+
     // File Upload Labels
     document.getElementById('photoUpload').addEventListener('change', function(e) {
       if(e.target.files[0]) document.getElementById('photoLabel').textContent = '✅ ' + e.target.files[0].name;
@@ -368,27 +431,14 @@
 
     // Cloudinary Upload Helper
     function uploadToCloudinary(file, callback) {
-      const r = new FileReader();
-      r.onload = e => {
-        const img = new Image();
-        img.onload = () => {
-          const cv = document.createElement('canvas');
-          const maxW = 600, maxH = 800;
-          let w = img.width, h = img.height;
-          if(w > maxW || h > maxH){ const sc = Math.min(maxW/w, maxH/h); w = Math.round(w*sc); h = Math.round(h*sc); }
-          cv.width = w; cv.height = h;
-          cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          const base64Image = cv.toDataURL('image/jpeg', 0.95);
-
-          let formData = new FormData();
-          formData.append("file", base64Image);
-          formData.append("upload_preset", "eopkol2t"); // Cloudinary Preset
-          fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", { method: "POST", body: formData })
-          .then(res => res.json()).then(res => callback(res.secure_url || null)).catch(() => callback(null));
-        };
-        img.src = e.target.result;
-      };
-      r.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "sctc_unsigned");
+      
+      fetch("https://api.cloudinary.com/v1_1/dwyxep1kq/upload", { method: "POST", body: formData })
+      .then(res => res.json())
+      .then(res => callback(res.secure_url || null))
+      .catch(() => callback(null));
     }
 
     // Submit Form
@@ -401,8 +451,9 @@
       document.getElementById('submitLoader').style.display = 'block';
 
       const photoFile = document.getElementById('photoUpload').files[0];
+      const nidFile = document.getElementById('nidUpload').files[0];
       
-      const processSubmit = (photoUrl) => {
+      const processSubmit = (photoUrl, nidUrl) => {
         const appId = `SCTC-APP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
         const formData = {
           applicationId: appId, uid: currentUser.uid, status: 'pending',
@@ -414,7 +465,7 @@
             gender: document.getElementById('gender').value, religion: document.getElementById('religion').value,
             bloodGroup: document.getElementById('bloodGroup').value, nid: document.getElementById('nid').value,
             phone: document.getElementById('phone').value, hasWhatsApp: document.getElementById('hasWhatsApp').checked,
-            guardianPhone: document.getElementById('guardianPhone').value, photo: photoUrl
+            guardianPhone: document.getElementById('guardianPhone').value, photo: photoUrl, nidDoc: nidUrl
           },
           education: {
             lastExam: document.getElementById('lastExam').value, passingYear: document.getElementById('passingYear').value,
@@ -433,8 +484,16 @@
         db.ref('sabuj/applications/' + appId).set(formData)
           .then(() => db.ref('sabuj/students_auth/' + currentUser.uid).update({ status: 'pending_approval', applicationId: appId }))
           .then(() => {
-            alert('✅ আপনার আবেদন সফলভাবে জমা হয়েছে! প্রতিষ্ঠান থেকে শীঘ্রই যোগাযোগ করা হবে।');
-            window.location.href = 'student-dashboard.html';
+            document.getElementById('step6').innerHTML = `
+              <div style="text-align:center; padding:40px 20px;">
+                <div style="font-size:60px; color:#166534; margin-bottom:20px;">✅</div>
+                <h2 style="color:var(--g1); margin:0 0 10px;">আবেদন সফলভাবে জমা হয়েছে!</h2>
+                <p style="color:var(--muted); margin-bottom:30px;">আপনার আবেদন আইডি: <strong>${appId}</strong></p>
+                <button onclick="window.location.href='student-dashboard.html'" style="background:var(--g2); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; margin-right:10px;">ড্যাশবোর্ডে যান</button>
+              </div>
+            `;
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('step6-circle').classList.add('completed');
           }).catch(() => {
             alert('❌ সমস্যা হয়েছে। আবার চেষ্টা করুন।');
             document.getElementById('submitBtn').disabled = false;
@@ -444,12 +503,20 @@
       };
 
       if(photoFile) {
-        uploadToCloudinary(photoFile, (url) => {
-          if(url) processSubmit(url);
+        uploadToCloudinary(photoFile, (photoUrl) => {
+          if(photoUrl) {
+            if(nidFile) {
+              uploadToCloudinary(nidFile, (nidUrl) => {
+                processSubmit(photoUrl, nidUrl);
+              });
+            } else {
+              processSubmit(photoUrl, null);
+            }
+          }
           else { alert('❌ ছবি আপলোডে সমস্যা হয়েছে'); document.getElementById('submitBtn').disabled = false; document.getElementById('submitText').style.display = 'block'; document.getElementById('submitLoader').style.display = 'none'; }
         });
       } else {
-        processSubmit(null);
+        processSubmit(null, null);
       }
     });
   </script>

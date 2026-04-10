@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>লগইন ও রেজিস্ট্রেশন - SCTC</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
   
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -46,7 +47,7 @@
 <body>
 
   <header>
-    <div class="logo-area"><div class="logo-circle">স</div><h2 style="margin:0; font-size:18px; font-family:'Noto Serif Bengali', serif;">সবুজ কম্পিউটার্স</h2></div>
+    <div class="logo-area"><img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" style="width:40px;height:40px;border-radius:50%;background:white;padding:3px;"><h2 style="margin:0; font-size:18px; font-family:'Noto Serif Bengali', serif;">সবুজ কম্পিউটার্স</h2></div>
     <a href="index.html" style="color:white; text-decoration:none; font-size:14px;">← হোম</a>
   </header>
 
@@ -115,6 +116,11 @@
     const db = firebase.database();
 
     let currentRole = 'student';
+
+    // Load Logo
+    db.ref('sabuj/general/logo').on('value', snap => {
+      if(snap.val()) document.getElementById('headerLogo').src = snap.val();
+    });
 
     function setRole(role) {
       currentRole = role;

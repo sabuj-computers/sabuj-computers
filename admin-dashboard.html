@@ -4,11 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>অ্যাডমিন ড্যাশবোর্ড - SCTC</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
   
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
     :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --sidebar: #0a2e17; }
@@ -16,7 +20,8 @@
     
     /* Sidebar */
     .sidebar { width: 260px; background: var(--sidebar); color: white; display: flex; flex-direction: column; overflow-y: auto; }
-    .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .sidebar-header img { width: 60px; height: 60px; border-radius: 50%; background: white; padding: 5px; }
     .sidebar-header h2 { margin: 0; font-size: 18px; }
     .nav-list { list-style: none; padding: 0; margin: 0; }
     .nav-item { padding: 15px 20px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
@@ -41,6 +46,32 @@
     .btn-sm { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
     .btn-approve { background: #dcfce7; color: #166534; }
     .btn-reject { background: #fee2e2; color: #991b1b; }
+    .btn-save { background: var(--g2); color: white; }
+    
+    input[type="text"], input[type="number"], input[type="date"], textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 100%; box-sizing: border-box; font-family: inherit; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--g1); }
+
+    /* Advanced Student Management CSS */
+    .student-add-form { background:linear-gradient(135deg,#edfaf3,#e2f5ea); border-radius:16px; padding:22px 24px; margin-bottom:22px; border:1.5px solid #bbddc8; box-shadow:0 2px 12px rgba(13,61,31,.07); }
+    .admin-student-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:10px; border-radius:12px; overflow:hidden; }
+    .admin-student-table th { background:var(--g1); color:#fff; padding:11px 14px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.3px; }
+    .admin-student-table td { padding:10px 14px; border-bottom:1px solid #f0f4f1; }
+    .admin-student-table tr:hover td { background:#f7fbf8; }
+    .badge-edit { background:#fff7d6; color:#7a4f00; border:none; padding:4px 12px; border-radius:7px; cursor:pointer; font-size:12px; font-weight:700; }
+    .badge-del { background:#fee2e2; color:#dc2626; border:none; padding:4px 12px; border-radius:7px; cursor:pointer; font-size:12px; font-weight:700; margin-left:4px; }
+    .stud-filter-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; padding:14px 16px; background:#f7faf8; border-radius:12px; border:1px solid #e4ece7; }
+    .stud-filter-bar input, .stud-filter-bar select { padding:9px 12px; border:2px solid #dde8e0; border-radius:10px; font-family:'Hind Siliguri',sans-serif; font-size:13px; outline:none; }
+    .stud-filter-bar input:focus, .stud-filter-bar select:focus { border-color:var(--g2); }
+    .filter-count { font-size:12px; color:var(--muted); white-space:nowrap; margin-left:auto; }
+    .badge-pending { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; padding:2px 10px; border-radius:8px; font-size:12px; font-weight:700; }
+    .quick-result-wrap { display:flex; align-items:center; gap:6px; }
+    .quick-result-select { padding:3px 6px; border:1.5px solid #dde8e0; border-radius:8px; font-size:12px; background:#fff; cursor:pointer; outline:none; }
+    .btn-quick-save { background:var(--g2); color:#fff; border:none; border-radius:7px; padding:3px 9px; font-size:11px; cursor:pointer; }
+    .fr3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .fg { margin-bottom:16px; }
+    .fg label { display:block; font-weight:700; font-size:12px; color:#0d3d1f; margin-bottom:5px; }
+    .fg input, .fg select { width:100%; padding:10px 14px; border:1.5px solid #dde8e0; border-radius:10px; font-family:'Hind Siliguri'; font-size:14px; }
   </style>
 </head>
 <body>
@@ -48,6 +79,7 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-header">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="adminLogo">
       <h2>🛡️ অ্যাডমিন প্যানেল</h2>
     </div>
     <ul class="nav-list">
@@ -55,13 +87,11 @@
       <li class="nav-item" onclick="switchTab('applications')">📋 Applications <span id="appBadge" style="background:#ef4444;border-radius:10px;padding:2px 6px;font-size:10px;margin-left:auto;">0</span></li>
       <li class="nav-item" onclick="switchTab('students')">👨‍🎓 Students</li>
       <li class="nav-item" onclick="switchTab('attendance')">📅 Attendance</li>
-      <li class="nav-item" onclick="switchTab('exams')">📝 Exams</li>
-      <li class="nav-item" onclick="switchTab('results')">🏆 Results</li>
+      <li class="nav-item" onclick="switchTab('exams')">📝 Exams & Results</li>
       <li class="nav-item" onclick="switchTab('payments')">💳 Payments</li>
       <li class="nav-item" onclick="switchTab('certificates')">🎓 Certificates</li>
-      <li class="nav-item" onclick="switchTab('notices')">📢 Notices</li>
-      <li class="nav-item" onclick="switchTab('library')">📚 Library</li>
       <li class="nav-item" onclick="switchTab('reports')">📈 Reports</li>
+      <li class="nav-item" onclick="switchTab('notices')">📢 Notices & Announce</li>
       <li class="nav-item" onclick="switchTab('settings')">⚙️ Settings</li>
     </ul>
   </div>
@@ -78,7 +108,7 @@
       <!-- 1. Overview -->
       <div class="tab-content active" id="tab-overview">
         <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;">
-          <div class="card" style="border-left:4px solid #3b82f6;"><h3>মোট শিক্ষার্থী</h3><h2 style="margin:0;">০</h2></div>
+          <div class="card" style="border-left:4px solid #3b82f6;"><h3>মোট শিক্ষার্থী</h3><h2 style="margin:0;" id="overviewTotal">০</h2></div>
           <div class="card" style="border-left:4px solid #ef4444;"><h3>পেন্ডিং আবেদন</h3><h2 style="margin:0;" id="overviewPending">০</h2></div>
           <div class="card" style="border-left:4px solid #10b981;"><h3>আজকের উপস্থিতি</h3><h2 style="margin:0;">০%</h2></div>
           <div class="card" style="border-left:4px solid #f59e0b;"><h3>মোট আয়</h3><h2 style="margin:0;">৳০</h2></div>
@@ -89,25 +119,277 @@
       <div class="tab-content" id="tab-applications">
         <div class="card">
           <h3 style="margin-top:0;">নতুন ভর্তির আবেদন</h3>
-          <table>
-            <thead><tr><th>তারিখ</th><th>নাম</th><th>মোবাইল</th><th>কোর্স</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
-            <tbody id="appTbody"><tr><td colspan="6" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>তারিখ</th><th>নাম</th><th>মোবাইল</th><th>কোর্স</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="appTbody"><tr><td colspan="6" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Students -->
+      <div class="tab-content" id="tab-students">
+        <div class="student-add-form">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+            <h4 style="color:var(--g1);font-size:16px;margin:0">শিক্ষার্থী যোগ / সম্পাদনা (মূল ওয়েবসাইটের সাথে সিঙ্কড)</h4>
+            <div style="display:flex; flex-direction:column; gap:10px; width: 100%;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content: flex-end;">
+                <input type="file" id="bulkExcelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleBulkUpload(event)">
+                <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#e2e8f0; color:#1e293b; border:none; border-radius:8px; cursor:pointer;" onclick="document.getElementById('bulkExcelInput').click()">📥 Excel থেকে আপলোড</button>
+                <button class="btn-secondary" style="margin:0; padding:8px 16px; font-size:13px; background:#dbeafe; color:#1e3a8a; border:none; border-radius:8px; cursor:pointer;" onclick="downloadExcelTemplate()">📄 ডেমো ফাইল ডাউনলোড</button>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items: flex-end; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; justify-content: flex-end;">
+                  <div style="display:flex; flex-direction:column; gap:4px; text-align: left;">
+                      <label style="font-size:12px; font-weight:bold; color:#334155;">সিরিয়াল নম্বর (যেমন: 1-5, 8, All)</label>
+                      <input type="text" id="studentSelection" value="All" placeholder="All বা 1-10, 15" style="padding:8px 12px; border:2px solid #dde8e0; border-radius:8px; font-size:13px; width: 180px; outline:none;">
+                  </div>
+                  <button class="btn-secondary" style="margin:0; padding:10px 16px; font-size:13px; background:#dcfce7; color:#166534; font-weight:bold; width: auto; border:none; border-radius:8px; cursor:pointer;" onclick="printStudentList()">🖨️ প্রিন্ট লিস্ট</button>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="s-edit-idx" value="">
+          <div class="fr3">
+            <div class="fg"><label>নাম</label><input id="s-name" type="text" placeholder="শিক্ষার্থীর নাম"></div>
+            <div class="fg"><label>রেজিস্ট্রেশন নং</label><input id="s-reg" type="text" placeholder="500XXX"></div>
+            <div class="fg"><label>ফোন নম্বর</label><input id="s-phone" type="text" placeholder="01XXXXXXXXX"></div>
+          </div>
+          <div class="fr3">
+            <div class="fg"><label>পিতার নাম <span style="color:#9ca3af;font-weight:400">(ঐচ্ছিক)</span></label><input id="s-father" type="text" placeholder="পিতার নাম"></div>
+            <div class="fg"><label>মাতার নাম <span style="color:#9ca3af;font-weight:400">(ঐচ্ছিক)</span></label><input id="s-mother" type="text" placeholder="মাতার নাম"></div>
+            <div class="fg"><label>লিঙ্গ <span style="color:#9ca3af;font-weight:400">(ঐচ্ছিক)</span></label>
+              <select id="s-gender"><option value="">— বাছুন —</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
+            </div>
+          </div>
+          <div class="fr3">
+            <div class="fg"><label>সেশন</label><input id="s-session" type="text" placeholder="January - June"></div>
+            <div class="fg"><label>বছর</label><input id="s-year" type="text" placeholder="2024"></div>
+            <div class="fg"><label>ঠিকানা</label><input id="s-addr" type="text" placeholder="ঠিকানা"></div>
+          </div>
+          <div class="fr3">
+            <div class="fg"><label>ফলাফল</label>
+              <select id="s-result">
+                <option value="">— ফলাফল নেই —</option>
+                <option value="A+">A+</option><option value="A">A</option>
+                <option value="A-">A-</option><option value="B+">B+</option>
+                <option value="B">B</option><option value="B-">B-</option>
+                <option value="C">C</option><option value="D">D</option>
+                <option value="F">F</option>
+              </select>
+            </div>
+            <div class="fg"><label>কোর্স</label>
+              <select id="s-course-select" onchange="handleCourseSelect()" style="width:100%;padding:11px 15px;border:2px solid #dde8e0;border-radius:11px;font-family:'Hind Siliguri';font-size:14px;background:#fafcfb">
+                <option value="">— কোর্স বাছুন —</option>
+                <option value="FOUNDATION">ফাউন্ডেশন ভিত্তিক</option>
+                <option value="BTEB">BTEB</option>
+                <option value="OTHER">অন্যান্য (Other)</option>
+              </select>
+              <input id="s-course" type="hidden" value="">
+              <input id="s-course-other" type="text" placeholder="কোর্সের নাম লিখুন..." style="display:none;width:100%;margin-top:8px;padding:11px 15px;border:2px solid #dde8e0;border-radius:11px;font-family:'Hind Siliguri';font-size:14px" oninput="document.getElementById('s-course').value=this.value">
+            </div>
+            <div class="fg"><label>ছবি আপলোড</label>
+              <input type="file" id="s-photo" accept="image/*">
+            </div>
+          </div>
+          <div style="background:#f0f8f4;border:1.5px dashed #2e9e52;border-radius:12px;padding:16px;margin-top:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:12px">💳 কোর্স ফি তথ্য <span style="color:#9ca3af;font-weight:400">(সব ঐচ্ছিক)</span></div>
+            <div class="fr3">
+              <div class="fg">
+                <label>মোট ফি <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+                <input id="s-fee-total" type="number" placeholder="যেমন: 3000" min="0" oninput="calcFeeDue()">
+              </div>
+              <div class="fg">
+                <label>পরিশোধিত <span style="color:#9ca3af;font-weight:400">(টাকা)</span></label>
+                <input id="s-fee-paid" type="number" placeholder="যেমন: 1500" min="0" oninput="calcFeeDue()">
+              </div>
+              <div class="fg">
+                <label>স্ট্যাটাস</label>
+                <select id="s-fee-status">
+                  <option value="">— বাছুন —</option>
+                  <option value="Paid">✅ Paid (সম্পূর্ণ)</option>
+                  <option value="Partial">🟡 Partial (আংশিক)</option>
+                  <option value="Due">🔴 Due (বকেয়া)</option>
+                </select>
+              </div>
+            </div>
+            <div id="feeDuePreview" style="display:none;margin-top:8px;font-size:12px;color:#9a3412;font-weight:600;background:#fff7ed;padding:8px 12px;border-radius:8px">⚠️ বকেয়া: ৳<span id="feeDueAmt">0</span></div>
+          </div>
+          <button class="btn-save" style="padding:11px 22px; border:none; border-radius:8px; cursor:pointer;" onclick="saveStudent()">💾 সংরক্ষণ</button>
+          <button class="btn-secondary" style="width:auto;padding:11px 22px;margin-left:10px; border:none; border-radius:8px; cursor:pointer;" onclick="clearStudentForm()">বাতিল</button>
+        </div>
+        <!-- FILTER BAR -->
+        <div class="stud-filter-bar">
+          <input type="text" id="studFilterText" placeholder="🔍 নাম / রেজি. নং দিয়ে খুঁজুন..." oninput="renderAdminStudents()">
+          <select id="studFilterResult" onchange="renderAdminStudents()">
+            <option value="">সব ফলাফল</option>
+            <option value="PENDING">⏳ ফলাফল বাকি</option>
+            <option value="A+">A+</option><option value="A">A</option>
+            <option value="A-">A-</option><option value="B+">B+</option>
+            <option value="B">B</option><option value="B-">B-</option>
+            <option value="C">C</option><option value="D">D</option>
+            <option value="F">F (ফেল)</option>
+          </select>
+          <select id="studFilterCourse" onchange="renderAdminStudents()">
+            <option value="">সব কোর্স</option>
+            <option value="BTEB">BTEB</option>
+            <option value="FOUNDATION">ফাউন্ডেশন</option>
+          </select>
+          <select id="studFilterYear" onchange="renderAdminStudents()">
+            <option value="">সব বছর</option>
+          </select>
+          <span class="filter-count" id="studFilterCount"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-student-table">
+            <thead><tr><th>#</th><th>নাম</th><th>রেজিস্ট্রেশন</th><th>সেশন/বছর</th><th>ফি</th><th>ফলাফল</th><th>কোর্স</th><th>অ্যাকশন</th></tr></thead>
+            <tbody id="adminStudTbody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- 3-12. Other Tabs (Placeholders) -->
-      <div class="tab-content" id="tab-students"><div class="card"><h3>শিক্ষার্থী তালিকা</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-attendance"><div class="card"><h3>উপস্থিতি ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-exams"><div class="card"><h3>পরীক্ষা ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-results"><div class="card"><h3>ফলাফল ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-payments"><div class="card"><h3>পেমেন্ট ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-certificates"><div class="card"><h3>সার্টিফিকেট ইস্যু</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-notices"><div class="card"><h3>নোটিশ বোর্ড ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-library"><div class="card"><h3>লাইব্রেরি ম্যানেজমেন্ট</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-reports"><div class="card"><h3>রিপোর্টস</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
-      <div class="tab-content" id="tab-settings"><div class="card"><h3>সিস্টেম সেটিংস</h3><p>খুব শীঘ্রই আসছে...</p></div></div>
+      <!-- 4. Attendance -->
+      <div class="tab-content" id="tab-attendance">
+        <div class="card">
+          <h3 style="margin-top:0;">উপস্থিতি ম্যানেজমেন্ট</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>নাম</th><th>কোর্স</th><th>মোট ক্লাস</th><th>উপস্থিতি</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="attendanceTbody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
+      <!-- 5. Exams & Results -->
+      <div class="tab-content" id="tab-exams">
+        <div class="card">
+          <h3 style="margin-top:0;">ফলাফল ম্যানেজমেন্ট</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>নাম</th><th>কোর্স</th><th>ফলাফল/গ্রেড</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="examsTbody"><tr><td colspan="4" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Payments -->
+      <div class="tab-content" id="tab-payments">
+        <div class="card">
+          <h3 style="margin-top:0;">পেমেন্ট ম্যানেজমেন্ট</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>নাম</th><th>কোর্স</th><th>মোট ফি</th><th>পরিশোধিত</th><th>বকেয়া</th><th>পরবর্তী তারিখ</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="paymentsTbody"><tr><td colspan="7" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Certificates -->
+      <div class="tab-content" id="tab-certificates">
+        <div class="card">
+          <h3 style="margin-top:0;">সার্টিফিকেট ইস্যু</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>নাম</th><th>কোর্স</th><th>সনদ নম্বর</th><th>ইস্যুর তারিখ</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="certificatesTbody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Reports -->
+      <div class="tab-content" id="tab-reports">
+        <div class="card">
+          <h3 style="margin-top:0;">স্টুডেন্ট প্রোগ্রেস রিপোর্ট</h3>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>নাম</th><th>কোর্স</th><th>রিপোর্ট/মন্তব্য</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="reportsTbody"><tr><td colspan="4" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Notices & Announcements -->
+      <div class="tab-content" id="tab-notices">
+        <div class="card">
+          <h3 style="margin-top:0;">নতুন নোটিশ/অ্যানাউন্সমেন্ট যোগ করুন</h3>
+          <div class="form-group">
+            <label>শিরোনাম</label>
+            <input type="text" id="noticeTitle" placeholder="নোটিশের শিরোনাম">
+          </div>
+          <div class="form-group">
+            <label>বিস্তারিত</label>
+            <textarea id="noticeDesc" rows="3" placeholder="বিস্তারিত লিখুন"></textarea>
+          </div>
+          <div class="form-group">
+            <label>ফাইল (ছবি/PDF) - Cloudinary তে সেভ হবে</label>
+            <input type="file" id="noticeFile" accept="image/*,.pdf">
+          </div>
+          <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" id="isAnnouncement" style="width:auto;">
+            <label style="margin:0;">এটি একটি পপআপ অ্যানাউন্সমেন্ট হিসেবে দেখান</label>
+          </div>
+          <button class="btn-sm btn-save" style="padding:10px 20px; font-size:14px;" onclick="saveNotice()">পাবলিশ করুন</button>
+        </div>
+      </div>
+
+      <!-- 10. Settings -->
+      <div class="tab-content" id="tab-settings">
+        <div class="card">
+          <h3 style="margin-top:0;">সিস্টেম সেটিংস</h3>
+          <div class="form-group">
+            <label>অ্যাডমিন প্যানেল লোগো পরিবর্তন (Cloudinary)</label>
+            <input type="file" id="adminLogoUpload" accept="image/*" onchange="uploadAdminLogo(event)">
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">ভর্তি ফর্ম সেটিংস (ফিল্ড দেখান/লুকান)</h3>
+          <div id="formSettingsDiv">লোড হচ্ছে...</div>
+          <button class="btn-sm btn-save" style="margin-top:15px;" onclick="saveFormSettings()">সেটিংস সেভ করুন</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Application Details Modal -->
+  <div id="appDetailsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:30px; border-radius:16px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; position:relative;">
+      <button onclick="closeAppDetailsModal()" style="position:absolute; top:15px; right:15px; background:#fee2e2; color:#991b1b; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-weight:bold;">×</button>
+      <h3 style="margin-top:0; color:var(--g1); border-bottom:2px solid #e4ece7; padding-bottom:10px;">আবেদনের বিস্তারিত</h3>
+      <div id="appDetailsContent" style="font-size:14px; line-height:1.6; color:#1e3028;">
+        <!-- Details will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Student Modal -->
+  <div class="modal-overlay" id="editStudentModal">
+    <div class="modal-content" style="max-width: 500px; text-align: left;">
+      <h3 style="margin-top:0; color:var(--g1); border-bottom: 2px solid #e4ece7; padding-bottom: 10px;">শিক্ষার্থীর তথ্য এডিট করুন</h3>
+      <input type="hidden" id="editStudentAppId">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:13px; color:var(--g1); font-weight:bold;">নাম (বাংলায়)</label>
+        <input type="text" id="editNameBn" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:13px; color:var(--g1); font-weight:bold;">মোবাইল নম্বর</label>
+        <input type="text" id="editPhone" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:13px; color:var(--g1); font-weight:bold;">কোর্স</label>
+        <select id="editCourse" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
+          <option value="BTEB">Computer Office Application (BTEB)</option>
+          <option value="FOUNDATION">Computer Office Application (Foundation)</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 20px;">
+        <button onclick="closeEditStudentModal()" style="background:#e4ece7; color:var(--text); border:none; padding:8px 16px; border-radius:5px; cursor:pointer;">বাতিল</button>
+        <button onclick="saveStudentEdit()" style="background:var(--g2); color:white; border:none; padding:8px 16px; border-radius:5px; cursor:pointer;">সেভ করুন</button>
+      </div>
     </div>
   </div>
 
@@ -125,11 +407,22 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    // Cloudinary Config
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dwyxep1kq/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'sctc_unsigned';
+
     // Check Admin Auth
     auth.onAuthStateChanged(user => {
       if(user) {
         if(user.uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') {
           loadApplications();
+          loadStudentsData();
+          loadFormSettings();
+          
+          // Load Logo
+          db.ref('sabuj/general/logo').on('value', snap => {
+            if(snap.val()) document.getElementById('adminLogo').src = snap.val();
+          });
         } else {
           auth.signOut(); window.location.href = 'portal.html';
         }
@@ -148,41 +441,173 @@
 
     // Load Applications
     function loadApplications() {
-      db.ref('sabuj/applications').orderByChild('status').equalTo('pending').on('value', snap => {
+      db.ref('sabuj/applications').on('value', snap => {
         const data = snap.val();
         const tbody = document.getElementById('appTbody');
         const badge = document.getElementById('appBadge');
-        const overviewCount = document.getElementById('overviewPending');
+        const overviewPending = document.getElementById('overviewPending');
+        const overviewTotal = document.getElementById('overviewTotal');
         
         if(!data) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো নতুন আবেদন নেই</td></tr>';
-          badge.textContent = '0'; overviewCount.textContent = '০'; return;
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো আবেদন নেই</td></tr>';
+          badge.textContent = '0'; overviewPending.textContent = '০'; overviewTotal.textContent = '০'; return;
         }
 
         const apps = Object.values(data);
-        badge.textContent = apps.length;
-        overviewCount.textContent = apps.length;
+        const pendingApps = apps.filter(a => a.status === 'pending');
+        const approvedApps = apps.filter(a => a.status === 'approved');
+        
+        badge.textContent = pendingApps.length;
+        overviewPending.textContent = pendingApps.length;
+        overviewTotal.textContent = approvedApps.length;
 
-        tbody.innerHTML = apps.map(app => `
-          <tr>
-            <td>${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</td>
-            <td>${app.personal?.nameBn || 'অজানা'}</td>
-            <td>${app.personal?.phone || 'অজানা'}</td>
-            <td>${app.enrollment?.courseId || 'অজানা'}</td>
-            <td><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;">Pending</span></td>
-            <td>
-              <button class="btn-sm btn-approve" onclick="approveApp('${app.applicationId}', '${app.uid}')">✅ Approve</button>
-              <button class="btn-sm btn-reject" onclick="rejectApp('${app.applicationId}', '${app.uid}')">❌ Reject</button>
-            </td>
-          </tr>
-        `).join('');
+        if(pendingApps.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো নতুন আবেদন নেই</td></tr>';
+        } else {
+          tbody.innerHTML = pendingApps.map(app => `
+            <tr>
+              <td>${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</td>
+              <td>${app.personal?.nameBn || 'অজানা'}</td>
+              <td>${app.personal?.phone || 'অজানা'}</td>
+              <td>${app.enrollment?.courseId || 'অজানা'}</td>
+              <td><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;">Pending</span></td>
+              <td>
+                <button class="btn-sm btn-save" onclick='viewAppDetails(${JSON.stringify(app).replace(/'/g, "&#39;")})'>👁️ View</button>
+                <button class="btn-sm btn-approve" onclick="approveApp('${app.applicationId}', '${app.uid}')">✅ Approve</button>
+                <button class="btn-sm btn-reject" onclick="rejectApp('${app.applicationId}', '${app.uid}')">❌ Reject</button>
+              </td>
+            </tr>
+          `).join('');
+        }
       });
+    }
+
+    function viewAppDetails(app) {
+      const content = document.getElementById('appDetailsContent');
+      
+      let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;">` : 'ছবি নেই';
+      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a>`) : 'ডকুমেন্ট নেই';
+
+      content.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+          <div>
+            <p style="margin:0;"><strong>Application ID:</strong> ${app.applicationId}</p>
+            <p style="margin:0;"><strong>Date:</strong> ${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</p>
+          </div>
+          <div>${photoHtml}</div>
+        </div>
+        
+        <h4 style="color:var(--g2); margin:10px 0 5px;">ব্যক্তিগত তথ্য</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (বাংলায়):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameBn || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (ইংরেজিতে):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameEn || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পিতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.fatherName || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">মাতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.motherName || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">মোবাইল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.phone || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">লিঙ্গ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.gender || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">NID/জন্ম নিবন্ধন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nid || ''}</td></tr>
+        </table>
+
+        <h4 style="color:var(--g2); margin:10px 0 5px;">শিক্ষাগত যোগ্যতা</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">সর্বোচ্চ শিক্ষা:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.lastExam || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পাশের সাল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.passingYear || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">প্রতিষ্ঠান:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.institute || ''}</td></tr>
+        </table>
+
+        <h4 style="color:var(--g2); margin:10px 0 5px;">কোর্স তথ্য</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">কোর্স:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.courseId || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">ভর্তির কারণ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.reason || ''}</td></tr>
+        </table>
+
+        <h4 style="color:var(--g2); margin:10px 0 5px;">আপলোডকৃত ডকুমেন্ট (NID/Birth Cert)</h4>
+        <div style="margin-bottom:15px;">${nidHtml}</div>
+      `;
+      
+      document.getElementById('appDetailsModal').style.display = 'flex';
+    }
+
+    function closeAppDetailsModal() {
+      document.getElementById('appDetailsModal').style.display = 'none';
+    }
+
+    let DB = { students: [], general: {} };
+
+    // Load Main Website Students Data
+    db.ref('sabuj/students').on('value', snap => {
+      const data = snap.val();
+      DB.students = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+      renderAdminStudents();
+    });
+    db.ref('sabuj/general').on('value', snap => {
+      if(snap.val()) DB.general = snap.val();
+    });
+
+    function saveDB(path, value) {
+      if (path === 'students') {
+        const photoSavePromises = [];
+        const studentsNoPhoto = (value||[]).map(s => {
+          const {photo, ...rest} = s;
+          if (photo && photo.startsWith('data:')) {
+            const safeKey = String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+            if(safeKey) {
+              photoSavePromises.push(
+                db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
+              );
+            }
+            return {...rest, hasPhoto: !!safeKey};
+          }
+          return {...rest, hasPhoto: false};
+        });
+        Promise.all(photoSavePromises).then(() => {
+          return db.ref('sabuj/students').set(studentsNoPhoto);
+        });
+      }
     }
 
     function approveApp(appId, uid) {
       if(confirm('আবেদনটি অনুমোদন করতে চান?')) {
-        db.ref('sabuj/applications/' + appId).update({ status: 'approved' });
-        db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
+        db.ref('sabuj/applications/' + appId).once('value').then(snap => {
+          const app = snap.val();
+          if(app) {
+            db.ref('sabuj/applications/' + appId).update({ status: 'approved' });
+            db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
+            
+            // Sync to main website's students list
+            db.ref('sabuj/students').once('value').then(sSnap => {
+              let students = sSnap.val() || [];
+              if (!Array.isArray(students)) students = Object.values(students);
+              
+              const exists = students.some(s => s.phone === app.personal?.phone);
+              if(!exists) {
+                const newStudent = {
+                  name: app.personal?.nameBn || app.personal?.nameEn || '',
+                  reg: app.applicationId,
+                  phone: app.personal?.phone || '',
+                  fatherName: app.personal?.fatherName || '',
+                  motherName: app.personal?.motherName || '',
+                  gender: app.personal?.gender || '',
+                  session: '',
+                  year: new Date().getFullYear().toString(),
+                  address: '',
+                  course: app.enrollment?.courseId || '',
+                  result: '',
+                  feeTotal: 0,
+                  feePaid: 0,
+                  feeDue: 0,
+                  feeStatus: 'Due',
+                  photo: app.personal?.photo || null
+                };
+                students.push(newStudent);
+                db.ref('sabuj/students').set(students);
+                alert('✅ আবেদন অনুমোদিত এবং মূল ওয়েবসাইটে সিঙ্ক করা হয়েছে!');
+              } else {
+                alert('✅ আবেদন অনুমোদিত হয়েছে!');
+              }
+            });
+          }
+        });
       }
     }
 
@@ -191,6 +616,597 @@
         db.ref('sabuj/applications/' + appId).update({ status: 'rejected' });
         db.ref('sabuj/students_auth/' + uid).update({ status: 'rejected' });
       }
+    }
+
+    // Load Students Data for all tabs
+    function loadStudentsData() {
+      db.ref('sabuj/applications').orderByChild('status').equalTo('approved').on('value', snap => {
+        const data = snap.val();
+        if(!data) return;
+        const students = Object.values(data);
+        
+        // 1. Students Tab (Old code removed, now handled by renderAdminStudents)
+        
+        // 2. Attendance Tab
+        document.getElementById('attendanceTbody').innerHTML = students.map(s => `
+          <tr>
+            <td>${s.personal?.nameBn}</td>
+            <td>${s.enrollment?.courseId}</td>
+            <td><input type="number" id="att_total_${s.applicationId}" value="${s.attendance?.total || 0}" style="width:60px;"></td>
+            <td><input type="number" id="att_present_${s.applicationId}" value="${s.attendance?.present || 0}" style="width:60px;"></td>
+            <td><button class="btn-sm btn-save" onclick="saveData('${s.applicationId}', 'attendance')">Save</button></td>
+          </tr>
+        `).join('');
+
+        // 3. Exams Tab
+        document.getElementById('examsTbody').innerHTML = students.map(s => `
+          <tr>
+            <td>${s.personal?.nameBn}</td>
+            <td>${s.enrollment?.courseId}</td>
+            <td><input type="text" id="exam_result_${s.applicationId}" value="${s.exam?.result || ''}" placeholder="A+ / 80%"></td>
+            <td><button class="btn-sm btn-save" onclick="saveData('${s.applicationId}', 'exam')">Save</button></td>
+          </tr>
+        `).join('');
+
+        // 4. Payments Tab
+        document.getElementById('paymentsTbody').innerHTML = students.map(s => `
+          <tr>
+            <td>${s.personal?.nameBn}</td>
+            <td>${s.enrollment?.courseId}</td>
+            <td><input type="number" id="pay_total_${s.applicationId}" value="${s.payment?.total || 0}" style="width:80px;"></td>
+            <td><input type="number" id="pay_paid_${s.applicationId}" value="${s.payment?.paid || 0}" style="width:80px;"></td>
+            <td><input type="number" id="pay_due_${s.applicationId}" value="${s.payment?.due || 0}" style="width:80px;"></td>
+            <td><input type="date" id="pay_next_${s.applicationId}" value="${s.payment?.nextDate || ''}" style="width:120px;"></td>
+            <td><button class="btn-sm btn-save" onclick="saveData('${s.applicationId}', 'payment')">Save</button></td>
+          </tr>
+        `).join('');
+
+        // 5. Certificates Tab
+        document.getElementById('certificatesTbody').innerHTML = students.map(s => `
+          <tr>
+            <td>${s.personal?.nameBn}</td>
+            <td>${s.enrollment?.courseId}</td>
+            <td><input type="text" id="cert_no_${s.applicationId}" value="${s.certificate?.sonodNo || ''}" placeholder="সনদ নম্বর"></td>
+            <td><input type="date" id="cert_date_${s.applicationId}" value="${s.certificate?.issueDate || ''}"></td>
+            <td><button class="btn-sm btn-save" onclick="saveData('${s.applicationId}', 'certificate')">Save</button></td>
+          </tr>
+        `).join('');
+
+        // 6. Reports Tab
+        document.getElementById('reportsTbody').innerHTML = students.map(s => `
+          <tr>
+            <td>${s.personal?.nameBn}</td>
+            <td>${s.enrollment?.courseId}</td>
+            <td><textarea id="report_text_${s.applicationId}" rows="2" placeholder="প্রোগ্রেস রিপোর্ট...">${s.report?.text || ''}</textarea></td>
+            <td><button class="btn-sm btn-save" onclick="saveData('${s.applicationId}', 'report')">Save</button></td>
+          </tr>
+        `).join('');
+      });
+    }
+
+    // Advanced Student Management Functions
+    function gradeStyle(g){
+      if(!g||g.trim()==='')return{bg:'#f3f4f6',fg:'#6b7280'};
+      const m={'A+':['#d1fae5','#065f46'],'A':['#dcfce7','#166534'],'A-':['#ecfdf5','#047857'],
+        'B+':['#dbeafe','#1e3a8a'],'B':['#dbeafe','#1e40af'],'B-':['#eff6ff','#1d4ed8'],
+        'C':['#fef9c3','#854d0e'],'D':['#ffedd5','#9a3412'],'F':['#fee2e2','#991b1b']};
+      const c=m[g]||['#f3f4f6','#374151'];return{bg:c[0],fg:c[1]};
+    }
+
+    function renderAdminStudents(){
+      const yearSel=document.getElementById('studFilterYear');
+      if(yearSel){
+        const years=[...new Set((DB.students||[]).map(s=>s.year).filter(Boolean))].sort((a,b)=>b-a);
+        const curYear=yearSel.value;
+        yearSel.innerHTML='<option value="">সব বছর</option>'+years.map(y=>`<option value="${y}"${y===curYear?' selected':''}>${y}</option>`).join('');
+      }
+      const ftxt=(document.getElementById('studFilterText')||{}).value||'';
+      const fres=(document.getElementById('studFilterResult')||{}).value||'';
+      const fcrs=(document.getElementById('studFilterCourse')||{}).value||'';
+      const fyr=(document.getElementById('studFilterYear')||{}).value||'';
+
+      const filtered=(DB.students||[]).map((s,i)=>({s,i})).filter(({s})=>{
+        if(ftxt){
+          const q=ftxt.toLowerCase();
+          if(!(s.name||'').toLowerCase().includes(q)&&!(s.reg||'').includes(ftxt))return false;
+        }
+        if(fres==='PENDING'){if(s.result&&s.result.trim()!=='')return false;}
+        else if(fres){if(s.result!==fres)return false;}
+        if(fcrs&&s.course!==fcrs)return false;
+        if(fyr&&s.year!==fyr)return false;
+        return true;
+      });
+
+      const fc=document.getElementById('studFilterCount');
+      if(fc){
+        const total=DB.students.length;
+        const pending=(DB.students||[]).filter(s=>!s.result||s.result.trim()==='').length;
+        fc.innerHTML=`<strong>${filtered.length}</strong> / ${total} জন &nbsp;|&nbsp; ⏳ <strong>${pending}</strong> ফলাফল বাকি`;
+      }
+
+      if(!filtered.length){
+        document.getElementById('adminStudTbody').innerHTML=`<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:24px">কোনো শিক্ষার্থী পাওয়া যায়নি</td></tr>`;
+        return;
+      }
+
+      document.getElementById('adminStudTbody').innerHTML=filtered.map(({s,i},rowNum)=>{
+        const _es=v=>String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return \`
+        <tr id="strow-\${i}">
+          <td>\${rowNum+1}</td>
+          <td>\${s.photo?\`<img src="\${s.photo}" alt="\${_es(s.name)}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;margin-right:6px;vertical-align:middle">\`:''}\${_es(s.name)||'—'}</td>
+          <td style="font-size:12px">\${_es(s.reg)}</td>
+          <td>\${_es(s.session)||''}<br><small style="color:#9ca3af">\${_es(s.year)||''}</small></td>
+          <td>\${s.feeStatus==='Paid'?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">✅ Paid</span>':s.feeStatus==='Partial'?'<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🟡 Partial</span>':s.feeStatus==='Due'?'<span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px">🔴 Due</span>':''}</td>
+          <td>
+            <div class="quick-result-wrap">
+              \${s.result&&s.result.trim()
+                ?\`<span style="background:\${gradeStyle(s.result).bg};color:\${gradeStyle(s.result).fg};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">\${_es(s.result)}</span>\`
+                :\`<span class="badge-pending">⏳ বাকি</span>\`}
+              <select class="quick-result-select" id="qr-\${i}">
+                <option value="">—</option>
+                <option value="A+">A+</option><option value="A">A</option>
+                <option value="A-">A-</option><option value="B+">B+</option>
+                <option value="B">B</option><option value="B-">B-</option>
+                <option value="C">C</option><option value="D">D</option>
+                <option value="F">F</option>
+              </select>
+              <button class="btn-quick-save" onclick="quickSaveResult(\${i})">✓</button>
+            </div>
+          </td>
+          <td><span style="font-size:12px">\${s.course==='BTEB'?'BTEB':'ফাউন্ডেশন'}</span></td>
+          <td>
+            <button class="badge-edit" aria-label="সম্পাদনা করুন" title="সম্পাদনা" onclick="editStudent(\${i})">✏️</button>
+            <button class="badge-del" aria-label="মুছে ফেলুন" title="মুছুন" onclick="deleteStudent(\${i})">🗑️</button>
+          </td>
+        </tr>\`;
+      }).join('');
+    }
+
+    function quickSaveResult(i){
+      if(!DB.students[i]){alert('❌ শিক্ষার্থী খুঁজে পাওয়া যায়নি');return;}
+      const sel=document.getElementById('qr-'+i);
+      if(!sel)return;
+      const val=sel.value;
+      if(!val){alert('❌ একটি গ্রেড বাছুন');return;}
+      DB.students[i].result=val;
+      saveDB('students',DB.students);
+      
+      // Sync to student portal if it's an application ID
+      if(DB.students[i].reg && DB.students[i].reg.startsWith('SCTC-APP-')) {
+        db.ref('sabuj/applications/' + DB.students[i].reg + '/exam').update({ result: val });
+      }
+      
+      renderAdminStudents();
+    }
+
+    function handleCourseSelect(){
+      const s=document.getElementById('s-course-select');
+      const h=document.getElementById('s-course');
+      const o=document.getElementById('s-course-other');
+      if(!s||!h)return;
+      if(s.value==='OTHER'){
+        if(o){o.style.display='block';o.focus();}
+        h.value=(o&&o.value.trim())||'';
+      } else {
+        if(o){o.style.display='none';}
+        h.value=s.value;
+      }
+    }
+
+    function calcFeeDue(){
+      const total=parseInt(document.getElementById('s-fee-total').value)||0;
+      const paid=parseInt(document.getElementById('s-fee-paid').value)||0;
+      const due=Math.max(0,total-paid);
+      const preview=document.getElementById('feeDuePreview');
+      const dueAmt=document.getElementById('feeDueAmt');
+      if(preview){preview.style.display=(due>0&&total>0)?'block':'none';}
+      if(dueAmt){dueAmt.textContent=due;}
+      const sel=document.getElementById('s-fee-status');
+      if(sel&&total>0){
+        if(due<=0)sel.value='Paid';
+        else if(paid>0)sel.value='Partial';
+        else sel.value='Due';
+      }
+    }
+
+    function saveStudent(){
+      handleCourseSelect();
+      const idx=document.getElementById('s-edit-idx').value;
+      const pf=document.getElementById('s-photo').files[0];
+      const doSave=photo=>{
+        const existing=idx!==''?DB.students[+idx]:null;
+        const obj={
+          name:document.getElementById('s-name').value.trim(),
+          reg:document.getElementById('s-reg').value.trim(),
+          phone:document.getElementById('s-phone').value.trim(),
+          fatherName:document.getElementById('s-father').value.trim(),
+          motherName:document.getElementById('s-mother').value.trim(),
+          gender:document.getElementById('s-gender').value,
+          session:document.getElementById('s-session').value.trim(),
+          year:document.getElementById('s-year').value.trim(),
+          address:document.getElementById('s-addr').value.trim(),
+          result:document.getElementById('s-result').value,
+          course:document.getElementById('s-course').value,
+          feeTotal:parseInt(document.getElementById('s-fee-total').value)||0,
+          feePaid:parseInt(document.getElementById('s-fee-paid').value)||0,
+          feeDue:Math.max(0,(parseInt(document.getElementById('s-fee-total').value)||0)-(parseInt(document.getElementById('s-fee-paid').value)||0)),
+          feeStatus:document.getElementById('s-fee-status').value||'',
+          photo:photo||(existing?existing.photo:null)
+        };
+        if(!obj.name||!obj.reg){alert('❌ নাম ও রেজিস্ট্রেশন আবশ্যক');return;}
+        if(!obj.course){alert('❌ কোর্স বাছুন (FOUNDATION বা BTEB)');return;}
+        const _dup=DB.students.findIndex((st,_i)=>st.reg===obj.reg&&(idx===''||_i!==+idx));
+        if(_dup>=0){alert('❌ এই রেজিস্ট্রেশন নম্বর ব্যবহৃত: '+DB.students[_dup].name);return;}
+        if(idx!=='')DB.students[+idx]=obj;
+        else DB.students.push(obj);
+        saveDB('students',DB.students);
+        
+        // Sync to student portal if it's an application ID
+        if(obj.reg && obj.reg.startsWith('SCTC-APP-')) {
+          db.ref('sabuj/applications/' + obj.reg + '/exam').update({ result: obj.result });
+          db.ref('sabuj/applications/' + obj.reg + '/payment').update({ total: obj.feeTotal, paid: obj.feePaid, due: obj.feeDue, status: obj.feeStatus });
+          db.ref('sabuj/applications/' + obj.reg + '/personal').update({ nameBn: obj.name, phone: obj.phone });
+          db.ref('sabuj/applications/' + obj.reg + '/enrollment').update({ courseId: obj.course });
+        }
+        
+        renderAdminStudents();
+        clearStudentForm();alert(idx!==''?'✅ শিক্ষার্থীর তথ্য আপডেট হয়েছে!':'✅ নতুন শিক্ষার্থী সংরক্ষিত হয়েছে!');
+      };
+      if(pf){
+        if(pf.size > 5 * 1024 * 1024){alert('❌ ছবির আকার ৫MB-এর বেশি হওয়া যাবে না');return;}
+        const r = new FileReader();
+        r.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const maxW = 600, maxH = 800;
+            let w = img.width, h = img.height;
+            if(w > maxW || h > maxH){
+              const sc = Math.min(maxW/w, maxH/h);
+              w = Math.round(w*sc); h = Math.round(h*sc);
+            }
+            const cv = document.createElement('canvas');
+            cv.width = w; cv.height = h;
+            cv.getContext('2d').drawImage(img, 0, 0, w, h);
+            const base64Image = cv.toDataURL('image/jpeg', 0.95);
+            let formData = new FormData();
+            formData.append("file", base64Image);
+            formData.append("upload_preset", "eopkol2t");
+            fetch("https://api.cloudinary.com/v1_1/dblafxhgc/image/upload", { method: "POST", body: formData })
+            .then(response => response.json())
+            .then(result => {
+              if(result.secure_url) doSave(result.secure_url);
+              else { alert('❌ ছবি আপলোডে সমস্যা হয়েছে'); doSave(null); }
+            }).catch(err => { alert('❌ ইন্টারনেট সমস্যা'); doSave(null); });
+          };
+          img.src = e.target.result;
+        };
+        r.readAsDataURL(pf);
+      } else doSave(null);
+    }
+
+    function editStudent(i){
+      const s=DB.students[i];
+      document.getElementById('s-edit-idx').value=i;
+      document.getElementById('s-name').value=s.name||'';
+      document.getElementById('s-reg').value=s.reg||'';
+      document.getElementById('s-phone').value=s.phone||'';
+      document.getElementById('s-father').value=s.fatherName||'';
+      document.getElementById('s-mother').value=s.motherName||'';
+      document.getElementById('s-gender').value=s.gender||'';
+      document.getElementById('s-session').value=s.session||'';
+      document.getElementById('s-year').value=s.year||'';
+      document.getElementById('s-addr').value=s.address||'';
+      document.getElementById('s-result').value=s.result||'';
+      const _ecs=document.getElementById('s-course-select');
+      const _eco=document.getElementById('s-course-other');
+      const _ech=document.getElementById('s-course');
+      if(s.course==='FOUNDATION'||s.course==='BTEB'){if(_ecs)_ecs.value=s.course;if(_eco)_eco.style.display='none';}
+      else if(s.course){if(_ecs)_ecs.value='OTHER';if(_eco){_eco.style.display='block';_eco.value=s.course;}}
+      else{if(_ecs)_ecs.value='';if(_eco)_eco.style.display='none';}
+      if(_ech)_ech.value=s.course||'';
+      document.getElementById('s-fee-total').value=s.feeTotal||'';
+      document.getElementById('s-fee-paid').value=s.feePaid||'';
+      const fss2=document.getElementById('s-fee-status');if(fss2)fss2.value=s.feeStatus||'';
+      calcFeeDue();
+      document.querySelector('.student-add-form').scrollIntoView({behavior:'smooth'});
+    }
+
+    function deleteStudent(i){
+      if(!confirm('এই শিক্ষার্থীকে মুছে ফেলবেন?'))return;
+      const s=DB.students[i];
+      if(s&&s.reg){
+        const safeKey=String(s.reg).replace(/[^a-zA-Z0-9]/g,'_');
+        db.ref('sabuj/photos/'+safeKey).remove().catch(()=>{});
+      }
+      DB.students.splice(i,1);saveDB('students',DB.students);renderAdminStudents();
+    }
+
+    function clearStudentForm(){
+      document.getElementById('s-edit-idx').value='';
+      ['s-name','s-reg','s-phone','s-father','s-mother','s-session','s-year','s-addr'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('s-gender').value='';
+      document.getElementById('s-result').value='';
+      const _cs=document.getElementById('s-course-select');
+      const _co=document.getElementById('s-course-other');
+      const _ch=document.getElementById('s-course');
+      if(_cs)_cs.value=''; if(_co){_co.style.display='none';_co.value='';} if(_ch)_ch.value='';
+      document.getElementById('s-photo').value='';
+      ['s-fee-total','s-fee-paid'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+      const fss=document.getElementById('s-fee-status');if(fss)fss.value='';
+      const fdp=document.getElementById('feeDuePreview');if(fdp)fdp.style.display='none';
+    }
+
+    // Bulk Upload
+    function downloadExcelTemplate() {
+      const ws_data = [
+        ["Name", "Registration No", "Phone", "Father Name", "Mother Name", "Gender", "Session", "Year", "Address", "Course", "Result", "Fee Total", "Fee Paid", "Fee Status"],
+        ["Abdur Rahman", "500101", "01700000000", "Karim", "Rahima", "Male", "January - June", "2024", "Natore", "BTEB", "A+", "3000", "3000", "Paid"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Students");
+      XLSX.writeFile(wb, "Student_Upload_Template.xlsx");
+    }
+
+    function handleBulkUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+          if (jsonData.length === 0) { alert('❌ ফাইলে কোনো ডেটা নেই!'); return; }
+
+          let addedCount = 0, duplicateCount = 0;
+          jsonData.forEach(row => {
+            const name = String(row["Name"] || "").trim();
+            const reg = String(row["Registration No"] || "").trim();
+            if (!name || !reg) return;
+            if (DB.students.some(s => s.reg === reg)) { duplicateCount++; return; }
+
+            const feeTotal = parseInt(row["Fee Total"]) || 0;
+            const feePaid = parseInt(row["Fee Paid"]) || 0;
+            const feeDue = Math.max(0, feeTotal - feePaid);
+            let feeStatus = String(row["Fee Status"] || "").trim();
+            if(!feeStatus && feeTotal > 0) feeStatus = feeDue <= 0 ? 'Paid' : (feePaid > 0 ? 'Partial' : 'Due');
+
+            DB.students.push({
+              name, reg, phone: String(row["Phone"] || "").trim(),
+              fatherName: String(row["Father Name"] || "").trim(),
+              motherName: String(row["Mother Name"] || "").trim(),
+              gender: String(row["Gender"] || "").trim(),
+              session: String(row["Session"] || "").trim(),
+              year: String(row["Year"] || "").trim(),
+              address: String(row["Address"] || "").trim(),
+              course: String(row["Course"] || "").trim().toUpperCase(),
+              result: String(row["Result"] || "").trim(),
+              feeTotal, feePaid, feeDue, feeStatus, photo: null
+            });
+            addedCount++;
+          });
+
+          if (addedCount > 0) {
+            saveDB('students', DB.students); renderAdminStudents();
+            alert(`✅ সফলভাবে ${addedCount} জন শিক্ষার্থী যোগ করা হয়েছে! (${duplicateCount} টি ডুপ্লিকেট বাদ দেওয়া হয়েছে)`);
+          } else if (duplicateCount > 0) {
+            alert(`⚠️ সব ডেটা ডুপ্লিকেট! নতুন কিছু যোগ করা হয়নি।`);
+          }
+        } catch (error) { alert('❌ ফাইল পড়তে সমস্যা হয়েছে!'); }
+        event.target.value = '';
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function getSelectedStudents() {
+      const input = document.getElementById('studentSelection').value.trim();
+      const validStudents = DB.students.filter(s => s.name && s.reg);
+      const max = validStudents.length;
+      if (!input || input.toLowerCase() === 'all') return validStudents;
+
+      let selectedIndices = new Set();
+      let parts = input.split(',');
+      for (let part of parts) {
+        part = part.trim();
+        if (part.includes('-')) {
+          let [start, end] = part.split('-').map(Number);
+          if (!isNaN(start) && !isNaN(end)) {
+            for (let i = start; i <= end; i++) {
+              if (i > 0 && i <= max) selectedIndices.add(i - 1);
+            }
+          }
+        } else {
+          let num = Number(part);
+          if (!isNaN(num) && num > 0 && num <= max) selectedIndices.add(num - 1);
+        }
+      }
+      return Array.from(selectedIndices).sort((a, b) => a - b).map(index => validStudents[index]);
+    }
+
+    function printStudentList() {
+      const selectedStudents = getSelectedStudents();
+      if (selectedStudents.length === 0) { alert('❌ প্রিন্ট করার মতো কোনো ডেটা নেই বা সিরিয়াল ভুল!'); return; }
+      const w = window.open('', '_blank');
+      let html = `
+      <html><head><title>Student Details Report</title><style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #222; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #888; padding: 8px 10px; text-align: left; font-size: 13px; }
+        th { background-color: #e8f4ee; }
+        .photo { width: 50px; height: 60px; object-fit: cover; border-radius: 4px; }
+      </style></head><body>
+        <h2 style="text-align:center;">SABUJ COMPUTER TRAINING CENTER</h2>
+        <p style="text-align:center;">Selected Students: ${selectedStudents.length}</p>
+        <table>
+          <thead><tr><th>Sl</th><th>Photo</th><th>Name & Reg</th><th>Course & Session</th><th>Contact</th><th>Result</th></tr></thead>
+          <tbody>
+      `;
+      selectedStudents.forEach((s, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${s.photo ? \`<img src="\${s.photo}" class="photo">\` : 'No Photo'}</td>
+          <td><strong>${s.name}</strong><br>Reg: ${s.reg}</td>
+          <td>${s.course}<br>${s.session} ${s.year}</td>
+          <td>${s.phone}<br>${s.address}</td>
+          <td><strong>${s.result || 'Pending'}</strong></td>
+        </tr>`;
+      });
+      html += `</tbody></table><script>window.onload=function(){setTimeout(()=>window.print(),500);}<\/script></body></html>`;
+      w.document.write(html); w.document.close();
+    }
+
+    function filterStudents() {
+      // Handled by renderAdminStudents now
+    }
+
+    function openEditStudentModal(student) {
+      // Replaced by editStudent(i)
+    }
+
+    function closeEditStudentModal() {
+      // Replaced by clearStudentForm()
+    }
+
+    function saveStudentEdit() {
+      // Replaced by saveStudent()
+    }
+
+    function saveData(appId, type) {
+      let data = {};
+      if(type === 'attendance') {
+        data = { total: document.getElementById(`att_total_${appId}`).value, present: document.getElementById(`att_present_${appId}`).value };
+      } else if(type === 'exam') {
+        data = { result: document.getElementById(`exam_result_${appId}`).value };
+      } else if(type === 'payment') {
+        data = { total: document.getElementById(`pay_total_${appId}`).value, paid: document.getElementById(`pay_paid_${appId}`).value, due: document.getElementById(`pay_due_${appId}`).value, nextDate: document.getElementById(`pay_next_${appId}`).value };
+      } else if(type === 'certificate') {
+        data = { sonodNo: document.getElementById(`cert_no_${appId}`).value, issueDate: document.getElementById(`cert_date_${appId}`).value };
+      } else if(type === 'report') {
+        data = { text: document.getElementById(`report_text_${appId}`).value };
+      }
+      
+      db.ref(`sabuj/applications/${appId}/${type}`).update(data).then(() => {
+        // Sync to main website's students list
+        const idx = DB.students.findIndex(s => s.reg === appId);
+        if(idx >= 0) {
+          if(type === 'exam' && data.result) DB.students[idx].result = data.result;
+          if(type === 'payment') {
+            DB.students[idx].feeTotal = parseInt(data.total) || 0;
+            DB.students[idx].feePaid = parseInt(data.paid) || 0;
+            DB.students[idx].feeDue = parseInt(data.due) || 0;
+            if(DB.students[idx].feeDue <= 0 && DB.students[idx].feeTotal > 0) DB.students[idx].feeStatus = 'Paid';
+            else if(DB.students[idx].feePaid > 0) DB.students[idx].feeStatus = 'Partial';
+            else DB.students[idx].feeStatus = 'Due';
+          }
+          saveDB('students', DB.students);
+          renderAdminStudents();
+        }
+        alert('✅ সফলভাবে সেভ হয়েছে!');
+      });
+    }
+
+    function exportStudentsCSV() {
+      db.ref('sabuj/applications').orderByChild('status').equalTo('approved').once('value').then(snap => {
+        const data = snap.val();
+        if(!data) return alert('কোনো ডাটা নেই!');
+        const students = Object.values(data);
+        let csv = 'Application ID,Name (BN),Name (EN),Phone,Course,Total Fee,Paid,Due\\n';
+        students.forEach(s => {
+          csv += `"${s.applicationId}","${s.personal?.nameBn || ''}","${s.personal?.nameEn || ''}","${s.personal?.phone || ''}","${s.enrollment?.courseId || ''}","${s.payment?.total || 0}","${s.payment?.paid || 0}","${s.payment?.due || 0}"\\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "students_data.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+
+    // Cloudinary Upload Helper
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    async function uploadAdminLogo(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+      alert('লোগো আপলোড হচ্ছে, দয়া করে অপেক্ষা করুন...');
+      const url = await uploadToCloudinary(file);
+      db.ref('sabuj/general/logo').set(url).then(() => {
+        alert('লোগো সফলভাবে আপডেট হয়েছে!');
+      });
+    }
+
+    async function saveNotice() {
+      const title = document.getElementById('noticeTitle').value;
+      const desc = document.getElementById('noticeDesc').value;
+      const fileInput = document.getElementById('noticeFile');
+      const isAnnouncement = document.getElementById('isAnnouncement').checked;
+      
+      if(!title) return alert('শিরোনাম দিন!');
+      
+      let fileUrl = '';
+      if(fileInput.files[0]) {
+        alert('ফাইল আপলোড হচ্ছে...');
+        fileUrl = await uploadToCloudinary(fileInput.files[0]);
+      }
+      
+      const noticeData = {
+        title, desc, fileUrl, isAnnouncement,
+        date: new Date().toLocaleDateString('bn-BD'),
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+      
+      db.ref('sabuj/notices').push(noticeData).then(() => {
+        alert('✅ নোটিশ সফলভাবে পাবলিশ হয়েছে!');
+        document.getElementById('noticeTitle').value = '';
+        document.getElementById('noticeDesc').value = '';
+        document.getElementById('noticeFile').value = '';
+        document.getElementById('isAnnouncement').checked = false;
+      });
+    }
+
+    // Form Settings
+    const defaultSettings = {
+      bloodGroup: true, religion: true, nationality: true,
+      fatherName: true, motherName: true,
+      presentAddress: true, permanentAddress: true,
+      education: true
+    };
+
+    function loadFormSettings() {
+      db.ref('sabuj/formSettings').on('value', snap => {
+        const settings = snap.val() || defaultSettings;
+        const div = document.getElementById('formSettingsDiv');
+        div.innerHTML = Object.keys(settings).map(key => `
+          <div style="margin-bottom:10px;">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+              <input type="checkbox" id="fs_${key}" ${settings[key] ? 'checked' : ''}>
+              ${key} ফিল্ড দেখান
+            </label>
+          </div>
+        `).join('');
+      });
+    }
+
+    function saveFormSettings() {
+      const settings = {};
+      Object.keys(defaultSettings).forEach(key => {
+        settings[key] = document.getElementById(`fs_${key}`).checked;
+      });
+      db.ref('sabuj/formSettings').set(settings).then(() => alert('✅ ফর্ম সেটিংস সেভ হয়েছে!'));
     }
   </script>
 </body>
