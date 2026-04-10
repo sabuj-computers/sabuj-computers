@@ -529,7 +529,7 @@ header.nav-glass{
 }
 
 /* ===== SCROLL REVEAL ANIMATION ===== */
-.reveal{opacity:1;transform:none;transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 .reveal-delay-1{transition-delay:.1s}
 .reveal-delay-2{transition-delay:.2s}
@@ -2197,7 +2197,7 @@ function buildFeeReceipt(s){
     ['COURSE / কোর্স', courseName, false, '#1f2937'],
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false, '#1f2937'],
     ["FATHER'S NAME", s.fatherName||'N/A', false, '#374151'],
-    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):'N/A', false, '#374151'],
   ];
   infoRows.forEach(([lbl,val,bold,vc],i)=>{
     const rY=TABLE_TOP+i*ROW_H;
@@ -2364,7 +2364,7 @@ function buildResultCard(s){
     ['SESSION / সেশন', (s.session||'')+(s.year?' ('+s.year+')':''), false],
     ["FATHER'S NAME", s.fatherName, false],
     ["MOTHER'S NAME", s.motherName, false],
-    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\\d/g,'*')+s.phone.slice(-4):null, false],
+    ['MOBILE', s.phone?s.phone.slice(0,-4).replace(/\d/g,'*')+s.phone.slice(-4):null, false],
     ['GRADE / GPA', s.result+(gpaVal!=='N/A'?' (GPA '+gpaVal+')':''), true],
   ].filter(r=>r[1]&&String(r[1]).trim()&&r[1]!=='N/A');
 
