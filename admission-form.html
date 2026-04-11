@@ -7,6 +7,8 @@
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
   
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -148,25 +150,176 @@
         <!-- STEP 2: Education -->
         <div class="form-step" id="step2">
           <div class="section-title"><span>🎓</span> শিক্ষাগত যোগ্যতা (ধাপ ২/৫)</div>
-          <div class="form-grid">
-            <div class="input-group">
-              <label>সর্বোচ্চ শিক্ষাগত যোগ্যতা *</label>
-              <select id="lastExam" required>
-                <option value="">— নির্বাচন করুন —</option>
-                <option value="JSC">JSC/JDC</option><option value="SSC">SSC/Dakhil</option><option value="HSC">HSC/Alim</option><option value="Degree">Degree/Honours</option><option value="Masters">Masters</option><option value="Other">অন্যান্য</option>
-              </select>
+
+          <!-- SSC/Dakhil - Mandatory -->
+          <div class="edu-block" style="background:#f0f8f4; border:1.5px solid #c6e9d0; border-radius:12px; padding:20px; margin-bottom:20px;">
+            <h4 style="margin:0 0 15px; color:var(--g1); font-size:16px; display:flex; align-items:center; gap:8px;">
+              <span style="background:var(--g2); color:white; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;">১</span>
+              SSC / দাখিল <span style="color:red;">*</span>
+            </h4>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>পরীক্ষার নাম *</label>
+                <select id="sscExamName" required>
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="SSC">SSC</option>
+                  <option value="Dakhil">দাখিল</option>
+                  <option value="SSC Vocational">SSC (ভোকেশনাল)</option>
+                  <option value="O Level">O Level</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>বোর্ড *</label>
+                <select id="sscBoard" required>
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Rajshahi">রাজশাহী</option>
+                  <option value="Dhaka">ঢাকা</option>
+                  <option value="Chittagong">চট্টগ্রাম</option>
+                  <option value="Comilla">কুমিল্লা</option>
+                  <option value="Jessore">যশোর</option>
+                  <option value="Sylhet">সিলেট</option>
+                  <option value="Dinajpur">দিনাজপুর</option>
+                  <option value="Barishal">বরিশাল</option>
+                  <option value="Mymensingh">ময়মনসিংহ</option>
+                  <option value="Madrasah">মাদ্রাসা</option>
+                  <option value="Technical">কারিগরি</option>
+                </select>
+              </div>
+              <div class="input-group"><label>রোল নম্বর *</label><input type="text" id="sscRoll" required placeholder="রোল নম্বর লিখুন"></div>
+              <div class="input-group"><label>রেজিস্ট্রেশন নম্বর</label><input type="text" id="sscReg" placeholder="রেজিস্ট্রেশন নম্বর লিখুন"></div>
+              <div class="input-group"><label>পাশের সাল *</label><input type="number" id="sscYear" required placeholder="যেমন: 2022"></div>
+              <div class="input-group">
+                <label>বিভাগ *</label>
+                <select id="sscGroup" required>
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Science">বিজ্ঞান</option>
+                  <option value="Arts">মানবিক</option>
+                  <option value="Commerce">বাণিজ্য</option>
+                  <option value="Vocational">ভোকেশনাল</option>
+                </select>
+              </div>
+              <div class="input-group"><label>GPA / CGPA *</label><input type="text" id="sscGpa" required placeholder="যেমন: 4.50"></div>
+              <div class="input-group"><label>শিক্ষা প্রতিষ্ঠানের নাম *</label><input type="text" id="sscInstitute" required placeholder="প্রতিষ্ঠানের নাম লিখুন"></div>
             </div>
-            <div class="input-group"><label>পাশের সাল *</label><input type="number" id="passingYear" required></div>
-            <div class="input-group"><label>শিক্ষা প্রতিষ্ঠানের নাম *</label><input type="text" id="institute" required></div>
-            <div class="input-group">
-              <label>বিভাগ</label>
-              <select id="group">
-                <option value="">— নির্বাচন করুন —</option>
-                <option value="Science">বিজ্ঞান</option><option value="Arts">মানবিক</option><option value="Commerce">বাণিজ্য</option><option value="N/A">প্রযোজ্য নয়</option>
-              </select>
-            </div>
-            <div class="input-group"><label>GPA / CGPA</label><input type="text" id="gpa"></div>
           </div>
+
+          <!-- Additional Education Checkboxes -->
+          <div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:12px; padding:15px 20px; margin-bottom:20px;">
+            <p style="margin:0 0 12px; font-weight:600; color:#9a3412; font-size:14px;">📌 অতিরিক্ত শিক্ষাগত যোগ্যতা থাকলে টিক দিন:</p>
+            <div style="display:flex; flex-wrap:wrap; gap:15px;">
+              <div class="checkbox-group" style="margin:0;"><input type="checkbox" id="hasHSC" onchange="toggleEduBlock('hsc')"><label for="hasHSC" style="margin:0; font-weight:500; cursor:pointer;">HSC / আলিম</label></div>
+              <div class="checkbox-group" style="margin:0;"><input type="checkbox" id="hasHonours" onchange="toggleEduBlock('honours')"><label for="hasHonours" style="margin:0; font-weight:500; cursor:pointer;">ডিগ্রি / অনার্স</label></div>
+              <div class="checkbox-group" style="margin:0;"><input type="checkbox" id="hasMasters" onchange="toggleEduBlock('masters')"><label for="hasMasters" style="margin:0; font-weight:500; cursor:pointer;">মাস্টার্স</label></div>
+            </div>
+          </div>
+
+          <!-- HSC/Alim - Optional -->
+          <div class="edu-block" id="hscBlock" style="display:none; background:#f8f9ff; border:1.5px solid #c7d2fe; border-radius:12px; padding:20px; margin-bottom:20px;">
+            <h4 style="margin:0 0 15px; color:#312e81; font-size:16px; display:flex; align-items:center; gap:8px;">
+              <span style="background:#4f46e5; color:white; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;">২</span>
+              HSC / আলিম
+            </h4>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>পরীক্ষার নাম</label>
+                <select id="hscExamName">
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="HSC">HSC</option>
+                  <option value="Alim">আলিম</option>
+                  <option value="HSC Vocational">HSC (ভোকেশনাল)</option>
+                  <option value="A Level">A Level</option>
+                  <option value="Diploma">ডিপ্লোমা</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>বোর্ড</label>
+                <select id="hscBoard">
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Rajshahi">রাজশাহী</option>
+                  <option value="Dhaka">ঢাকা</option>
+                  <option value="Chittagong">চট্টগ্রাম</option>
+                  <option value="Comilla">কুমিল্লা</option>
+                  <option value="Jessore">যশোর</option>
+                  <option value="Sylhet">সিলেট</option>
+                  <option value="Dinajpur">দিনাজপুর</option>
+                  <option value="Barishal">বরিশাল</option>
+                  <option value="Mymensingh">ময়মনসিংহ</option>
+                  <option value="Madrasah">মাদ্রাসা</option>
+                  <option value="Technical">কারিগরি</option>
+                </select>
+              </div>
+              <div class="input-group"><label>রোল নম্বর</label><input type="text" id="hscRoll" placeholder="রোল নম্বর লিখুন"></div>
+              <div class="input-group"><label>রেজিস্ট্রেশন নম্বর</label><input type="text" id="hscReg" placeholder="রেজিস্ট্রেশন নম্বর লিখুন"></div>
+              <div class="input-group"><label>পাশের সাল</label><input type="number" id="hscYear" placeholder="যেমন: 2024"></div>
+              <div class="input-group">
+                <label>বিভাগ</label>
+                <select id="hscGroup">
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Science">বিজ্ঞান</option>
+                  <option value="Arts">মানবিক</option>
+                  <option value="Commerce">বাণিজ্য</option>
+                  <option value="Vocational">ভোকেশনাল</option>
+                </select>
+              </div>
+              <div class="input-group"><label>GPA / CGPA</label><input type="text" id="hscGpa" placeholder="যেমন: 5.00"></div>
+              <div class="input-group"><label>শিক্ষা প্রতিষ্ঠানের নাম</label><input type="text" id="hscInstitute" placeholder="প্রতিষ্ঠানের নাম লিখুন"></div>
+            </div>
+          </div>
+
+          <!-- Honours/Degree - Optional -->
+          <div class="edu-block" id="honoursBlock" style="display:none; background:#fef9f0; border:1.5px solid #fde68a; border-radius:12px; padding:20px; margin-bottom:20px;">
+            <h4 style="margin:0 0 15px; color:#78350f; font-size:16px; display:flex; align-items:center; gap:8px;">
+              <span style="background:#d97706; color:white; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;">৩</span>
+              ডিগ্রি / অনার্স
+            </h4>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>পরীক্ষার নাম</label>
+                <select id="honoursExamName">
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Degree Pass">ডিগ্রি (পাস)</option>
+                  <option value="Honours">অনার্স</option>
+                  <option value="BBA">BBA</option>
+                  <option value="BSc">BSc</option>
+                </select>
+              </div>
+              <div class="input-group"><label>বিশ্ববিদ্যালয় / বোর্ড</label><input type="text" id="honoursUniversity" placeholder="বিশ্ববিদ্যালয়ের নাম"></div>
+              <div class="input-group"><label>রোল / আইডি নম্বর</label><input type="text" id="honoursRoll" placeholder="রোল / আইডি নম্বর"></div>
+              <div class="input-group"><label>রেজিস্ট্রেশন নম্বর</label><input type="text" id="honoursReg" placeholder="রেজিস্ট্রেশন নম্বর"></div>
+              <div class="input-group"><label>পাশের সাল</label><input type="number" id="honoursYear" placeholder="যেমন: 2025"></div>
+              <div class="input-group"><label>বিষয়</label><input type="text" id="honoursSubject" placeholder="বিষয়ের নাম"></div>
+              <div class="input-group"><label>CGPA / শ্রেণি</label><input type="text" id="honoursGpa" placeholder="যেমন: 3.50"></div>
+              <div class="input-group"><label>শিক্ষা প্রতিষ্ঠানের নাম</label><input type="text" id="honoursInstitute" placeholder="কলেজ / প্রতিষ্ঠানের নাম"></div>
+            </div>
+          </div>
+
+          <!-- Masters - Optional -->
+          <div class="edu-block" id="mastersBlock" style="display:none; background:#fdf2f8; border:1.5px solid #f9a8d4; border-radius:12px; padding:20px; margin-bottom:20px;">
+            <h4 style="margin:0 0 15px; color:#831843; font-size:16px; display:flex; align-items:center; gap:8px;">
+              <span style="background:#db2777; color:white; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;">৪</span>
+              মাস্টার্স
+            </h4>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>পরীক্ষার নাম</label>
+                <select id="mastersExamName">
+                  <option value="">— নির্বাচন করুন —</option>
+                  <option value="Masters">মাস্টার্স</option>
+                  <option value="MBA">MBA</option>
+                  <option value="MSc">MSc</option>
+                  <option value="MA">MA</option>
+                </select>
+              </div>
+              <div class="input-group"><label>বিশ্ববিদ্যালয়</label><input type="text" id="mastersUniversity" placeholder="বিশ্ববিদ্যালয়ের নাম"></div>
+              <div class="input-group"><label>রোল / আইডি নম্বর</label><input type="text" id="mastersRoll" placeholder="রোল / আইডি নম্বর"></div>
+              <div class="input-group"><label>রেজিস্ট্রেশন নম্বর</label><input type="text" id="mastersReg" placeholder="রেজিস্ট্রেশন নম্বর"></div>
+              <div class="input-group"><label>পাশের সাল</label><input type="number" id="mastersYear" placeholder="যেমন: 2026"></div>
+              <div class="input-group"><label>বিষয়</label><input type="text" id="mastersSubject" placeholder="বিষয়ের নাম"></div>
+              <div class="input-group"><label>CGPA / শ্রেণি</label><input type="text" id="mastersGpa" placeholder="যেমন: 3.80"></div>
+              <div class="input-group"><label>শিক্ষা প্রতিষ্ঠানের নাম</label><input type="text" id="mastersInstitute" placeholder="প্রতিষ্ঠানের নাম"></div>
+            </div>
+          </div>
+
           <div class="btn-group">
             <button type="button" class="btn-prev" onclick="prevStep(1)">← পূর্ববর্তী</button>
             <button type="button" class="btn-next" onclick="nextStep(3)">পরবর্তী ধাপ →</button>
@@ -247,22 +400,49 @@
 
         <!-- STEP 5: Documents -->
         <div class="form-step" id="step5">
-          <div class="section-title"><span>📂</span> ডকুমেন্ট আপলোড ও ঘোষণা (ধাপ ৫/৫)</div>
-          <div class="form-grid">
-            <div class="input-group">
-              <label>পাসপোর্ট সাইজ ছবি * (Max 2MB)</label>
-              <label class="file-upload">
-                <input type="file" id="photoUpload" accept="image/*" required>
-                <span id="photoLabel">📷 ছবি নির্বাচন করুন</span>
-              </label>
+          <div class="section-title"><span>📂</span> ডকুমেন্ট আপলোড (ধাপ ৫/৫)</div>
+          
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:13px; color:#166534;">
+            ⚠️ সকল ফাইল অবশ্যই পরিষ্কার ও স্পষ্ট হতে হবে। সর্বোচ্চ সাইজ: ছবি ২MB, ডকুমেন্ট ৫MB
+          </div>
+
+          <!-- Photo Upload -->
+          <div class="doc-upload-card" style="background:#fff; border:1.5px solid #e4ece7; border-radius:12px; padding:20px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <span style="background:var(--g2); color:white; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">📷</span>
+              <div><strong style="color:var(--g1);">পাসপোর্ট সাইজ ছবি</strong> <span style="color:red;">*</span><br><small style="color:var(--muted);">সাদা ব্যাকগ্রাউন্ড, ফরমাল ছবি (Max 2MB)</small></div>
             </div>
-            <div class="input-group">
-              <label>জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন (Max 5MB)</label>
-              <label class="file-upload">
-                <input type="file" id="nidUpload" accept="image/*,.pdf">
-                <span id="nidLabel">📄 ডকুমেন্ট নির্বাচন করুন</span>
-              </label>
+            <label class="file-upload" style="position:relative;">
+              <input type="file" id="photoUpload" accept="image/*" required onchange="handleFilePreview(this, 'photoPreviewImg', 'photoLabel', 2)">
+              <span id="photoLabel">📷 ছবি নির্বাচন করুন</span>
+            </label>
+            <img id="photoPreviewImg" src="" alt="" style="display:none; width:100px; height:120px; object-fit:cover; border-radius:8px; border:2px solid #c6e9d0; margin-top:10px;">
+          </div>
+
+          <!-- NID / Birth Certificate -->
+          <div class="doc-upload-card" style="background:#fff; border:1.5px solid #e4ece7; border-radius:12px; padding:20px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <span style="background:#4f46e5; color:white; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">🪪</span>
+              <div><strong style="color:var(--g1);">জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন</strong><br><small style="color:var(--muted);">NID কার্ডের সামনে ও পিছনে / জন্ম সনদ (Max 5MB)</small></div>
             </div>
+            <label class="file-upload">
+              <input type="file" id="nidUpload" accept="image/*,.pdf" onchange="handleFilePreview(this, 'nidPreviewImg', 'nidLabel', 5)">
+              <span id="nidLabel">📄 ডকুমেন্ট নির্বাচন করুন</span>
+            </label>
+            <img id="nidPreviewImg" src="" alt="" style="display:none; max-width:200px; max-height:140px; object-fit:contain; border-radius:8px; border:2px solid #c7d2fe; margin-top:10px;">
+          </div>
+
+          <!-- SSC Marksheet -->
+          <div class="doc-upload-card" style="background:#fff; border:1.5px solid #e4ece7; border-radius:12px; padding:20px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <span style="background:#d97706; color:white; width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">📜</span>
+              <div><strong style="color:var(--g1);">SSC/সমমান মার্কশিট / সার্টিফিকেট</strong><br><small style="color:var(--muted);">মার্কশিট বা সনদপত্রের স্ক্যান কপি (Max 5MB)</small></div>
+            </div>
+            <label class="file-upload">
+              <input type="file" id="sscCertUpload" accept="image/*,.pdf" onchange="handleFilePreview(this, 'sscCertPreviewImg', 'sscCertLabel', 5)">
+              <span id="sscCertLabel">📜 মার্কশিট নির্বাচন করুন</span>
+            </label>
+            <img id="sscCertPreviewImg" src="" alt="" style="display:none; max-width:200px; max-height:140px; object-fit:contain; border-radius:8px; border:2px solid #fde68a; margin-top:10px;">
           </div>
 
           <div class="btn-group">
@@ -345,7 +525,11 @@
       const currentDiv = document.getElementById('step' + currentStep);
       const inputs = currentDiv.querySelectorAll('input[required], select[required]');
       let isValid = true;
-      inputs.forEach(inp => { if(!inp.value) { inp.style.borderColor = 'red'; isValid = false; } else { inp.style.borderColor = '#dde8e0'; } });
+      inputs.forEach(inp => {
+        // Skip validation for hidden education blocks
+        if (inp.closest('.edu-block') && inp.closest('.edu-block').style.display === 'none') return;
+        if(!inp.value) { inp.style.borderColor = 'red'; isValid = false; } else { inp.style.borderColor = '#dde8e0'; }
+      });
       if(!isValid) { alert('অনুগ্রহ করে লাল চিহ্নিত ফিল্ডগুলো পূরণ করুন।'); return; }
 
       if (step === 6) {
@@ -368,25 +552,98 @@
       document.getElementById('progressFill').style.width = ((step-1) * 20) + '%';
     }
 
+    function toggleEduBlock(level) {
+      const map = { hsc: 'hscBlock', honours: 'honoursBlock', masters: 'mastersBlock' };
+      const checkMap = { hsc: 'hasHSC', honours: 'hasHonours', masters: 'hasMasters' };
+      const block = document.getElementById(map[level]);
+      const checked = document.getElementById(checkMap[level]).checked;
+      block.style.display = checked ? 'block' : 'none';
+      if (!checked) {
+        block.querySelectorAll('input, select').forEach(el => { el.value = ''; });
+      }
+    }
+
+    function getEduData(prefix) {
+      const data = {};
+      const fields = ['ExamName','Board','Roll','Reg','Year','Group','Gpa','Institute','University','Subject'];
+      fields.forEach(f => {
+        const el = document.getElementById(prefix + f);
+        if (el && el.value) data[f.charAt(0).toLowerCase() + f.slice(1)] = el.value;
+      });
+      return Object.keys(data).length > 0 ? data : null;
+    }
+
     function generatePreview() {
       const p = document.getElementById('previewContent');
       const courseSelect = document.getElementById('courseSelect');
       const courseName = courseSelect.options[courseSelect.selectedIndex]?.text || '';
-      p.innerHTML = `
-        <h4 style="margin:0 0 10px; color:var(--g1);">ব্যক্তিগত তথ্য</h4>
-        <p><strong>নাম (বাংলায়):</strong> ${document.getElementById('nameBn').value}</p>
-        <p><strong>নাম (ইংরেজিতে):</strong> ${document.getElementById('nameEn').value}</p>
-        <p><strong>পিতার নাম:</strong> ${document.getElementById('fatherName').value}</p>
-        <p><strong>মাতার নাম:</strong> ${document.getElementById('motherName').value}</p>
-        <p><strong>মোবাইল:</strong> ${document.getElementById('phone').value}</p>
-        <hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">
-        <h4 style="margin:0 0 10px; color:var(--g1);">কোর্স তথ্য</h4>
-        <p><strong>কোর্স:</strong> ${courseName}</p>
-        <p><strong>কোর্সের মেয়াদ:</strong> ৬ মাস</p>
-        <hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">
-        <h4 style="margin:0 0 10px; color:var(--g1);">ঠিকানা</h4>
-        <p><strong>বর্তমান:</strong> ${document.getElementById('preVillage').value}, ${document.getElementById('preUpazila').value}, ${document.getElementById('preDistrict').value}</p>
-      `;
+      
+      let eduHtml = '<p><strong>SSC/দাখিল:</strong> ' + (document.getElementById('sscExamName').value || '') + ' | বোর্ড: ' + (document.getElementById('sscBoard').value || '') + ' | রোল: ' + (document.getElementById('sscRoll').value || '') + ' | সাল: ' + (document.getElementById('sscYear').value || '') + ' | GPA: ' + (document.getElementById('sscGpa').value || '') + '</p>';
+      if (document.getElementById('hasHSC').checked) {
+        eduHtml += '<p><strong>HSC/আলিম:</strong> ' + (document.getElementById('hscExamName').value || '') + ' | বোর্ড: ' + (document.getElementById('hscBoard').value || '') + ' | রোল: ' + (document.getElementById('hscRoll').value || '') + ' | সাল: ' + (document.getElementById('hscYear').value || '') + ' | GPA: ' + (document.getElementById('hscGpa').value || '') + '</p>';
+      }
+      if (document.getElementById('hasHonours').checked) {
+        eduHtml += '<p><strong>ডিগ্রি/অনার্স:</strong> ' + (document.getElementById('honoursExamName').value || '') + ' | বিষয়: ' + (document.getElementById('honoursSubject').value || '') + ' | সাল: ' + (document.getElementById('honoursYear').value || '') + ' | CGPA: ' + (document.getElementById('honoursGpa').value || '') + '</p>';
+      }
+      if (document.getElementById('hasMasters').checked) {
+        eduHtml += '<p><strong>মাস্টার্স:</strong> ' + (document.getElementById('mastersExamName').value || '') + ' | বিষয়: ' + (document.getElementById('mastersSubject').value || '') + ' | সাল: ' + (document.getElementById('mastersYear').value || '') + ' | CGPA: ' + (document.getElementById('mastersGpa').value || '') + '</p>';
+      }
+
+      // Photo preview
+      let photoPreview = '';
+      const photoFile = document.getElementById('photoUpload').files[0];
+      if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          document.getElementById('previewPhoto').src = ev.target.result;
+          document.getElementById('previewPhoto').style.display = 'block';
+        };
+        reader.readAsDataURL(photoFile);
+        photoPreview = '<img id="previewPhoto" src="" alt="ছবি" style="display:none; width:120px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #c6e9d0; margin-bottom:10px;">';
+      }
+
+      const genderVal = document.getElementById('gender');
+      const genderText = genderVal.options[genderVal.selectedIndex]?.text || '';
+      const religionVal = document.getElementById('religion');
+      const religionText = religionVal.options[religionVal.selectedIndex]?.text || '';
+      const courseSelect = document.getElementById('courseSelect');
+      const courseName = courseSelect.options[courseSelect.selectedIndex]?.text || '';
+      const sourceVal = document.getElementById('source');
+      const sourceText = sourceVal.options[sourceVal.selectedIndex]?.text || '';
+
+      p.innerHTML = '<div style="text-align:center; margin-bottom:15px;">' + photoPreview + '</div>' +
+        '<h4 style="margin:0 0 10px; color:var(--g1);">👤 ব্যক্তিগত তথ্য</h4>' +
+        '<p><strong>নাম (বাংলায়):</strong> ' + document.getElementById('nameBn').value + '</p>' +
+        '<p><strong>নাম (ইংরেজিতে):</strong> ' + document.getElementById('nameEn').value + '</p>' +
+        '<p><strong>পিতার নাম:</strong> ' + document.getElementById('fatherName').value + '</p>' +
+        '<p><strong>মাতার নাম:</strong> ' + document.getElementById('motherName').value + '</p>' +
+        '<p><strong>জন্ম তারিখ:</strong> ' + document.getElementById('dob').value + '</p>' +
+        '<p><strong>লিঙ্গ:</strong> ' + genderText + ' | <strong>ধর্ম:</strong> ' + religionText + '</p>' +
+        '<p><strong>রক্তের গ্রুপ:</strong> ' + (document.getElementById('bloodGroup').value || 'N/A') + '</p>' +
+        '<p><strong>NID/জন্ম নিবন্ধন:</strong> ' + (document.getElementById('nid').value || 'N/A') + '</p>' +
+        '<p><strong>মোবাইল:</strong> ' + document.getElementById('phone').value + ' | <strong>অভিভাবক:</strong> ' + document.getElementById('guardianPhone').value + '</p>' +
+        '<hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">' +
+        '<h4 style="margin:0 0 10px; color:var(--g1);">🎓 শিক্ষাগত যোগ্যতা</h4>' +
+        eduHtml +
+        '<hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">' +
+        '<h4 style="margin:0 0 10px; color:var(--g1);">📍 ঠিকানা</h4>' +
+        '<p><strong>বর্তমান:</strong> ' + document.getElementById('preVillage').value + ', ' + document.getElementById('prePO').value + ', ' + document.getElementById('preUpazila').value + ', ' + document.getElementById('preDistrict').value + '</p>' +
+        '<p><strong>স্থায়ী:</strong> ' + document.getElementById('perVillage').value + ', ' + document.getElementById('perPO').value + ', ' + document.getElementById('perUpazila').value + ', ' + document.getElementById('perDistrict').value + '</p>' +
+        '<hr style="border:0; border-top:1px solid #e4ece7; margin:15px 0;">' +
+        '<h4 style="margin:0 0 10px; color:var(--g1);">💻 কোর্স তথ্য</h4>' +
+        '<p><strong>কোর্স:</strong> ' + courseName + '</p>' +
+        '<p><strong>কোথা থেকে জানলেন:</strong> ' + sourceText + '</p>' +
+        '<p><strong>কোর্সের মেয়াদ:</strong> ৬ মাস</p>';
+
+      // Trigger photo load after innerHTML set
+      if (photoFile) {
+        const reader2 = new FileReader();
+        reader2.onload = function(ev) {
+          const img = document.getElementById('previewPhoto');
+          if (img) { img.src = ev.target.result; img.style.display = 'block'; }
+        };
+        reader2.readAsDataURL(photoFile);
+      }
     }
 
     function togglePermanentAddress() {
@@ -423,13 +680,27 @@
       }
     }
 
-    // File Upload Labels
-    document.getElementById('photoUpload').addEventListener('change', function(e) {
-      if(e.target.files[0]) document.getElementById('photoLabel').textContent = '✅ ' + e.target.files[0].name;
-    });
-    document.getElementById('nidUpload').addEventListener('change', function(e) {
-      if(e.target.files[0]) document.getElementById('nidLabel').textContent = '✅ ' + e.target.files[0].name;
-    });
+    // File Upload with Preview & Size Validation
+    function handleFilePreview(input, previewId, labelId, maxMB) {
+      const file = input.files[0];
+      if (!file) return;
+      const maxBytes = maxMB * 1024 * 1024;
+      if (file.size > maxBytes) {
+        alert('❌ ফাইল সাইজ ' + maxMB + 'MB এর বেশি! অনুগ্রহ করে ছোট ফাইল নির্বাচন করুন।');
+        input.value = '';
+        document.getElementById(labelId).textContent = document.getElementById(labelId).textContent.replace('✅ ', '');
+        return;
+      }
+      document.getElementById(labelId).textContent = '✅ ' + file.name;
+      const preview = document.getElementById(previewId);
+      if (file.type.startsWith('image/') && preview) {
+        const reader = new FileReader();
+        reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(file);
+      } else if (preview) {
+        preview.style.display = 'none';
+      }
+    }
 
     // Cloudinary Upload Helper
     function uploadToCloudinary(file, callback) {
@@ -454,9 +725,30 @@
 
       const photoFile = document.getElementById('photoUpload').files[0];
       const nidFile = document.getElementById('nidUpload').files[0];
-      
-      const processSubmit = (photoUrl, nidUrl) => {
-        const appId = `SCTC-APP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const sscCertFile = document.getElementById('sscCertUpload').files[0];
+
+      // Upload all files using Promise chain
+      function uploadFile(file) {
+        return new Promise((resolve) => {
+          if (!file) return resolve(null);
+          uploadToCloudinary(file, (url) => resolve(url));
+        });
+      }
+
+      Promise.all([
+        uploadFile(photoFile),
+        uploadFile(nidFile),
+        uploadFile(sscCertFile)
+      ]).then(([photoUrl, nidUrl, sscCertUrl]) => {
+        if (photoFile && !photoUrl) {
+          alert('❌ ছবি আপলোডে সমস্যা হয়েছে');
+          document.getElementById('submitBtn').disabled = false;
+          document.getElementById('submitText').style.display = 'block';
+          document.getElementById('submitLoader').style.display = 'none';
+          return;
+        }
+
+        const appId = 'SCTC-APP-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
         const formData = {
           applicationId: appId, uid: currentUser.uid, status: 'pending',
           submittedAt: firebase.database.ServerValue.TIMESTAMP,
@@ -469,9 +761,14 @@
             phone: document.getElementById('phone').value, hasWhatsApp: document.getElementById('hasWhatsApp').checked,
             guardianPhone: document.getElementById('guardianPhone').value, photo: photoUrl, nidDoc: nidUrl
           },
+          documents: {
+            photo: photoUrl, nidOrBirth: nidUrl, sscCertificate: sscCertUrl
+          },
           education: {
-            lastExam: document.getElementById('lastExam').value, passingYear: document.getElementById('passingYear').value,
-            institute: document.getElementById('institute').value, group: document.getElementById('group').value, gpa: document.getElementById('gpa').value
+            ssc: getEduData('ssc'),
+            hsc: document.getElementById('hasHSC').checked ? getEduData('hsc') : null,
+            honours: document.getElementById('hasHonours').checked ? getEduData('honours') : null,
+            masters: document.getElementById('hasMasters').checked ? getEduData('masters') : null
           },
           address: {
             present: { village: document.getElementById('preVillage').value, po: document.getElementById('prePO').value, upazila: document.getElementById('preUpazila').value, district: document.getElementById('preDistrict').value },
@@ -484,43 +781,165 @@
         };
 
         db.ref('sabuj/applications/' + appId).set(formData)
-          .then(() => db.ref('sabuj/students_auth/' + currentUser.uid).update({ status: 'pending_approval', applicationId: appId }))
-          .then(() => {
-            document.getElementById('step6').innerHTML = `
-              <div style="text-align:center; padding:40px 20px;">
-                <div style="font-size:60px; color:#166534; margin-bottom:20px;">✅</div>
-                <h2 style="color:var(--g1); margin:0 0 10px;">আবেদন সফলভাবে জমা হয়েছে!</h2>
-                <p style="color:var(--muted); margin-bottom:30px;">আপনার আবেদন আইডি: <strong>${appId}</strong></p>
-                <button onclick="window.location.href='student-dashboard.html'" style="background:var(--g2); color:white; border:none; padding:12px 24px; border-radius:8px; font-weight:bold; cursor:pointer; margin-right:10px;">ড্যাশবোর্ডে যান</button>
-              </div>
-            `;
+          .then(function() { return db.ref('sabuj/students_auth/' + currentUser.uid).update({ status: 'pending_approval', applicationId: appId }); })
+          .then(function() {
+            const submitDate = new Date().toLocaleDateString('bn-BD');
+            const courseSel = document.getElementById('courseSelect');
+            const cName = courseSel.options[courseSel.selectedIndex]?.text || '';
+            document.getElementById('step6').innerHTML = '<div style="text-align:center; padding:40px 20px;">' +
+              '<div style="font-size:60px; color:#166534; margin-bottom:20px;">✅</div>' +
+              '<h2 style="color:var(--g1); margin:0 0 10px;">আবেদন সফলভাবে জমা হয়েছে!</h2>' +
+              '<p style="color:var(--muted); margin-bottom:10px;">আপনার আবেদন আইডি: <strong>' + appId + '</strong></p>' +
+              '<div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:12px; padding:15px; margin:15px auto; max-width:400px; text-align:left;">' +
+                '<p style="margin:0 0 8px; font-size:14px; color:#9a3412; font-weight:600;">⚠️ গুরুত্বপূর্ণ নোটিশ:</p>' +
+                '<p style="margin:0; font-size:13px; color:#78350f;">প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করুন। পেমেন্ট সম্পন্ন হলে আপনার কপিতে <strong style="color:#166534;">PAID</strong> স্ট্যাটাস দেখাবে।</p>' +
+              '</div>' +
+              '<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px;">' +
+                '<button onclick="downloadApplicantCopy(\'' + appId + '\',\'' + (document.getElementById('nameBn').value||'').replace(/'/g,"\\'") + '\',\'' + (document.getElementById('nameEn').value||'').replace(/'/g,"\\'") + '\',\'' + (document.getElementById('fatherName').value||'').replace(/'/g,"\\'") + '\',\'' + (document.getElementById('motherName').value||'').replace(/'/g,"\\'") + '\',\'' + (document.getElementById('phone').value||'') + '\',\'' + cName.replace(/'/g,"\\'") + '\',\'' + (document.getElementById('preVillage').value||'').replace(/'/g,"\\'") + ', ' + (document.getElementById('preUpazila').value||'').replace(/'/g,"\\'") + ', ' + (document.getElementById('preDistrict').value||'').replace(/'/g,"\\'") + '\')" style="background:linear-gradient(135deg,var(--g1),var(--g2)); color:white; border:none; padding:14px 28px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:15px; font-family:inherit; display:flex; align-items:center; gap:8px;">📄 আবেদনকারীর কপি ডাউনলোড</button>' +
+                '<button onclick="window.location.href=\'student-dashboard.html\'" style="background:#e4ece7; color:var(--text); border:none; padding:14px 28px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:15px; font-family:inherit;">ড্যাশবোর্ডে যান →</button>' +
+              '</div>' +
+              '</div>';
             document.getElementById('progressFill').style.width = '100%';
             document.getElementById('step6-circle').classList.add('completed');
-          }).catch((err) => {
+          }).catch(function(err) {
             console.error('Form submit error:', err);
             alert('❌ সমস্যা হয়েছে: ' + (err.message || err.code || 'অজানা ত্রুটি') + '\nআবার চেষ্টা করুন।');
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('submitText').style.display = 'block';
             document.getElementById('submitLoader').style.display = 'none';
           });
-      };
+      });
+    // ═══════════════════════════════════════════════════════════════
+    // APPLICANT COPY — Canvas PNG Generator (Post-Submission)
+    // ═══════════════════════════════════════════════════════════════
+    function downloadApplicantCopy(appId, nameBn, nameEn, father, mother, phone, course, address) {
+      const W=900, M=50, HDR=160;
+      const rows = [
+        ['APPLICATION ID', appId, true, '#1d4ed8'],
+        ['NAME (BANGLA) / নাম', nameBn, true, '#0d3d1f'],
+        ['NAME (ENGLISH)', nameEn, false, '#1f2937'],
+        ["FATHER'S NAME / পিতা", father, false, '#1f2937'],
+        ["MOTHER'S NAME / মাতা", mother, false, '#1f2937'],
+        ['MOBILE / মোবাইল', phone, false, '#374151'],
+        ['COURSE / কোর্স', course, false, '#1f2937'],
+        ['ADDRESS / ঠিকানা', address, false, '#374151'],
+        ['PAYMENT STATUS', 'UNPAID / অপরিশোধিত', true, '#991b1b'],
+        ['APPLICATION DATE', new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), false, '#374151'],
+      ];
+      const ROW_H=46, BAN_H=52, NOTE_H=100, SIG_H=80, FTR=44;
+      const H = HDR + BAN_H + 14 + rows.length*ROW_H + 20 + NOTE_H + SIG_H + FTR;
 
-      if(photoFile) {
-        uploadToCloudinary(photoFile, (photoUrl) => {
-          if(photoUrl) {
-            if(nidFile) {
-              uploadToCloudinary(nidFile, (nidUrl) => {
-                processSubmit(photoUrl, nidUrl);
-              });
-            } else {
-              processSubmit(photoUrl, null);
-            }
-          }
-          else { alert('❌ ছবি আপলোডে সমস্যা হয়েছে'); document.getElementById('submitBtn').disabled = false; document.getElementById('submitText').style.display = 'block'; document.getElementById('submitLoader').style.display = 'none'; }
-        });
-      } else {
-        processSubmit(null, null);
-      }
+      const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c = cv.getContext('2d');
+
+      // Background
+      c.fillStyle='#f7fbf9'; c.fillRect(0,0,W,H);
+      c.fillStyle='rgba(13,61,31,0.03)';
+      for(let gx=20;gx<W;gx+=20) for(let gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
+
+      // Header
+      var hg=c.createLinearGradient(0,0,W,0);
+      hg.addColorStop(0,'#031e09'); hg.addColorStop(0.45,'#155e2b'); hg.addColorStop(1,'#031e09');
+      c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+      c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
+      c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
+
+      // Logo placeholder
+      c.fillStyle='#0d3d1f'; c.beginPath(); c.arc(M+40,HDR/2,38,0,Math.PI*2); c.fill();
+      c.font='bold 40px Arial'; c.fillStyle='#fff'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText('স',M+40,HDR/2); c.textBaseline='alphabetic'; c.textAlign='left';
+
+      var iX = M+95;
+      c.fillStyle='#ffffff'; c.font='bold 32px "Hind Siliguri",sans-serif';
+      c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', iX, 55);
+      c.font='14px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+      c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 78);
+      c.font='12px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+      c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', iX, 98);
+      c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(iX,108); c.lineTo(W-M,108); c.stroke();
+      c.fillStyle='#f0d060'; c.font='bold 20px Arial';
+      c.fillText("APPLICANT'S COPY", iX, 132);
+      c.fillStyle='rgba(255,255,255,0.62)'; c.font='13px "Hind Siliguri",sans-serif';
+      c.fillText('আবেদনকারীর কপি', iX, 152);
+
+      // UNPAID Banner
+      var banY = HDR + 10;
+      c.fillStyle='#fee2e2';
+      c.beginPath(); c.moveTo(M,banY); c.lineTo(W-M,banY); c.lineTo(W-M,banY+BAN_H);
+      c.lineTo(M,banY+BAN_H); c.closePath(); c.fill();
+      c.strokeStyle='#f87171'; c.lineWidth=2;
+      c.beginPath(); c.moveTo(M,banY); c.lineTo(W-M,banY); c.lineTo(W-M,banY+BAN_H);
+      c.lineTo(M,banY+BAN_H); c.closePath(); c.stroke();
+      c.fillStyle='#991b1b'; c.font='bold 18px "Hind Siliguri",Arial'; c.textAlign='center';
+      c.fillText('⚠️  UNPAID — প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করুন', W/2, banY+33);
+      c.textAlign='left';
+
+      // Table
+      var tY = banY + BAN_H + 14;
+      c.fillStyle='#0d3d1f'; c.fillRect(M,tY,W-M*2,2.5);
+      c.font='bold 11px Arial'; c.fillStyle='#0d3d1f'; c.fillText('APPLICATION DETAILS / আবেদনের তথ্য', M, tY-7);
+
+      rows.forEach(function(row,i){
+        var rY = tY + i*ROW_H;
+        c.fillStyle = i%2===0 ? '#f0faf4' : '#ffffff';
+        c.fillRect(M, rY, W-M*2, ROW_H);
+        c.strokeStyle='#d1fae5'; c.lineWidth=0.5; c.strokeRect(M, rY, W-M*2, ROW_H);
+        c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(row[0], M+12, rY+15);
+        c.fillStyle = row[3] || '#1f2937';
+        c.font = (row[2] ? 'bold ' : '') + '14px "Hind Siliguri",Arial';
+        var v = String(row[1]||'N/A');
+        while(c.measureText(v).width > W-M*2-30 && v.length>4) v=v.slice(0,-1)+'..';
+        c.fillText(v, M+12, rY+37);
+      });
+
+      var afterTable = tY + rows.length*ROW_H;
+      c.strokeStyle='#86efac'; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(M,afterTable); c.lineTo(W-M,afterTable); c.stroke();
+
+      // Note
+      var noteY = afterTable + 16;
+      c.fillStyle='#f9fbfa';
+      c.fillRect(M, noteY, W-M*2, NOTE_H);
+      c.strokeStyle='#d1fae5'; c.lineWidth=1; c.strokeRect(M, noteY, W-M*2, NOTE_H);
+      c.fillStyle='#374151'; c.font='13px "Hind Siliguri",Arial';
+      c.fillText('📌 এই কপিটি প্রমাণ করে যে আপনি সবুজ কম্পিউটার ট্রেনিং সেন্টারে ভর্তির জন্য আবেদন করেছেন।', M+12, noteY+22);
+      c.fillText('📌 প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করলে এই কপিতে "PAID" স্ট্যাটাস আপডেট হবে।', M+12, noteY+44);
+      c.fillText('📌 যেকোনো প্রশ্নে যোগাযোগ: 01724084350 | sabujcomputers.pro.bd', M+12, noteY+66);
+      c.fillStyle='#9ca3af'; c.font='11px Arial';
+      c.fillText('Generated: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+12, noteY+88);
+
+      // Signatures
+      var sigY = noteY + NOTE_H + 14;
+      var sigW = 160;
+      [[M+30,sigY],[W/2-sigW/2,sigY],[W-M-sigW-30,sigY]].forEach(function(pos,i){
+        c.strokeStyle='#9ca3af'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(pos[0],pos[1]); c.lineTo(pos[0]+sigW,pos[1]); c.stroke();
+        c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+        c.fillText(['Applicant Signature','Accounts Officer','Proprietor'][i], pos[0]+sigW/2, pos[1]+17);
+        if(i===2){c.font='12px "Hind Siliguri",Arial';c.fillStyle='#6b7280';c.fillText('Md. Sabuj Ali',pos[0]+sigW/2,pos[1]+33);}
+      });
+      c.textAlign='left';
+
+      // Footer
+      var ftY = sigY + SIG_H;
+      c.fillStyle='#031e09'; c.fillRect(0,ftY,W,FTR);
+      c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+      c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+      c.fillText(appId + ' | Status: UNPAID | Computer Generated — No Signature Required', W/2, ftY+27);
+      c.textAlign='left';
+
+      // Convert Canvas to PDF
+      var imgData = cv.toDataURL('image/png', 1.0);
+      var pdfW = W * 0.264583; // px to mm (72dpi approx)
+      var pdfH = H * 0.264583;
+      var { jsPDF } = window.jspdf;
+      var doc = new jsPDF({ orientation: pdfW > pdfH ? 'l' : 'p', unit: 'mm', format: [pdfW, pdfH] });
+      doc.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+      doc.save('ApplicantCopy_' + (nameBn||'Student').replace(/\s+/g,'_') + '_' + appId + '.pdf');
+      alert('✅ আবেদনকারীর কপি (PDF) ডাউনলোড হয়েছে!');
+    }
+
     });
   </script>
 </body>

@@ -14,6 +14,8 @@
   
   <!-- QR Code Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --gold: #c8a847; --muted: #6b8c76; }
@@ -557,14 +559,19 @@
               statusEl.textContent = '⏳ আবেদন পর্যালোচনাধীন';
               statusEl.className = 'badge badge-pending';
               document.getElementById('studentCourse').textContent = 'আবেদন আইডি: ' + (authData.applicationId || 'জানা নেই');
-              
               tabsContainer.style.display = 'none';
               editPhotoBtn.style.display = 'none';
               statusMsgContainer.style.display = 'block';
               statusMsgIcon.textContent = '⏳';
-              statusMsgTitle.textContent = 'আবেদন পেন্ডিং অবস্থায় আছে';
+              statusMsgTitle.textContent = 'আবেদন পেন্ডিং অবস্থায় আছে';
               statusMsgTitle.style.color = '#854d0e';
-              statusMsgText.textContent = 'অ্যাডমিন আপনার আবেদনটি অ্যাপ্রুভ করার পর আপনি ড্যাশবোর্ডের সকল ফিচার ব্যবহার করতে পারবেন।';
+              statusMsgText.innerHTML = 'অ্যাডমিন আপনার আবেদনটি অ্যাপ্রুভ করার পর আপনি ড্যাশবোর্ডের সকল ফিচার ব্যবহার করতে পারবেন।<br><br><button onclick="downloadPendingApplicantCopy()" style="background:linear-gradient(135deg,#0d3d1f,#1a6b35); color:white; border:none; padding:12px 24px; border-radius:10px; font-weight:bold; cursor:pointer; font-family:inherit; font-size:14px;">📄 আবেদনকারীর কপি ডাউনলোড</button>';
+              if(authData.applicationId) {
+                db.ref('sabuj/applications/' + authData.applicationId).once('value', function(snap) {
+                  if(snap.val()) { currentAppData = snap.val(); currentAppId = authData.applicationId; }
+                });
+              }
+
             } else if (authData.status === 'rejected') {
               statusEl.textContent = '❌ আবেদন বাতিল';
               statusEl.className = 'badge';
@@ -695,15 +702,10 @@
         buildPortalRegCard(app, courseName); return;
       }
 
-      // Applicant copy — HTML print
-      const docTitle = "Applicant's Copy / আবেদনকারীর কপি";
-      const docBody = '<div style="display:flex;justify-content:space-between;margin-bottom:20px"><div><p><strong>Application ID:</strong> '+currentAppId+'</p><p><strong>তারিখ:</strong> '+new Date(app.submittedAt).toLocaleDateString('bn-BD')+'</p></div><div><img src="'+(app.personal?.photo||'')+'" style="width:100px;height:100px;border:1px solid #ccc;border-radius:8px;object-fit:cover" crossorigin="anonymous"></div></div>'+
-        '<table style="width:100%;border-collapse:collapse;margin-bottom:20px">'+
-        [['নাম (বাংলায়)',app.personal?.nameBn],['নাম (ইংরেজিতে)',app.personal?.nameEn],['পিতার নাম',app.personal?.fatherName],['মাতার নাম',app.personal?.motherName],['মোবাইল',app.personal?.phone],['কোর্স',courseName],['সেশন',app.enrollment?.session],['পেমেন্ট',_payStatus]].map(r=>'<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;width:40%">'+r[0]+':</td><td style="padding:8px;border:1px solid #ccc">'+(r[1]||'—')+'</td></tr>').join('')+
-        '</table><p style="text-align:center;font-size:12px;color:#666;margin-top:40px">* কম্পিউটার জেনারেটেড কপি</p>';
-      const w = window.open('','_blank','width=800,height=600');
-      w.document.write('<html><head><title>'+docTitle+'</title><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"><style>body{font-family:"Hind Siliguri",sans-serif;padding:40px;background:#fff;color:#000}.hdr{text-align:center;border-bottom:3px double #0d3d1f;padding-bottom:20px;margin-bottom:25px}.hdr h1{margin:0;color:#0d3d1f;font-size:22px}.hdr p{margin:5px 0 0;color:#555;font-size:14px}h2{text-align:center;text-decoration:underline;color:#0d3d1f;font-size:18px}</style></head><body><div class="hdr"><h1>সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1><p>বাগাতিপাড়া, নাটোর | ☎ 01724084350</p></div><h2>'+docTitle+'</h2>'+docBody+'<script>window.onload=function(){setTimeout(function(){window.print()},500)};<\/script></body></html>');
-      w.document.close();
+      // Applicant copy — Professional Canvas PNG
+      buildApplicantCopyPNG(app, courseName, _payStatus, _totalFee, _paidFee, _dueFee); return;
+
+
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1252,11 +1254,24 @@
     }
 
     function _dlCanvas(cv,s,prefix){
-      const lnk=document.createElement('a');
-      lnk.download=(prefix||'Card')+'_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'')+'.png';
-      lnk.href=cv.toDataURL('image/png',1.0);
-      lnk.click();
-      alert('✅ '+(prefix==='ResultCard'?'ফলাফল কার্ড':prefix==='RegCard'?'রেজিস্ট্রেশন কার্ড':'কার্ড')+' ডাউনলোড হয়েছে!');
+      var fileName = (prefix||'Card')+'_'+(s.name||'Student').replace(/\s+/g,'_')+'_'+(s.reg||'');
+      if(prefix === 'ApplicantCopy') {
+        // PDF for Applicant Copy
+        var imgData = cv.toDataURL('image/png', 1.0);
+        var pdfW = cv.width * 0.264583;
+        var pdfH = cv.height * 0.264583;
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF({ orientation: pdfW > pdfH ? 'l' : 'p', unit: 'mm', format: [pdfW, pdfH] });
+        doc.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+        doc.save(fileName + '.pdf');
+      } else {
+        // PNG for other cards
+        var lnk = document.createElement('a');
+        lnk.download = fileName + '.png';
+        lnk.href = cv.toDataURL('image/png', 1.0);
+        lnk.click();
+      }
+      alert('✅ '+(prefix==='ResultCard'?'ফলাফল কার্ড':prefix==='RegCard'?'রেজিস্ট্রেশন কার্ড':prefix==='ApplicantCopy'?'আবেদনকারীর কপি (PDF)':'কার্ড')+' ডাউনলোড হয়েছে!');
     }
 
     // Dynamic Library Loading
@@ -1285,6 +1300,207 @@
       alert('ID Card প্রিন্ট মোডে ওপেন হচ্ছে। প্রিন্ট ডায়ালগ থেকে "Save as PDF" সিলেক্ট করে ডাউনলোড করুন।');
       printDiv('printAreaIdCard');
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // APPLICANT COPY — Professional Canvas PNG with Payment Status
+    // ═══════════════════════════════════════════════════════════════
+    function buildApplicantCopyPNG(app, courseName, payStatus, totalFee, paidFee, dueFee) {
+      const W=900, M=50, HDR=160;
+      const isPaid = payStatus === 'Paid';
+      const isPartial = payStatus === 'Partial';
+      const statusLabel = isPaid ? 'PAID / সম্পূর্ণ পরিশোধিত' : isPartial ? 'PARTIALLY PAID / আংশিক পরিশোধিত' : 'UNPAID / অপরিশোধিত';
+      const statusBg = isPaid ? '#dcfce7' : isPartial ? '#fef9c3' : '#fee2e2';
+      const statusBrd = isPaid ? '#34d399' : isPartial ? '#fbbf24' : '#f87171';
+      const statusFg = isPaid ? '#065f46' : isPartial ? '#92400e' : '#991b1b';
+
+      const address = (app.address?.present?.village||'') + ', ' + (app.address?.present?.upazila||'') + ', ' + (app.address?.present?.district||'');
+      const rows = [
+        ['APPLICATION ID', currentAppId, true, '#1d4ed8'],
+        ['NAME (BANGLA) / নাম', app.personal?.nameBn, true, '#0d3d1f'],
+        ['NAME (ENGLISH)', app.personal?.nameEn, false, '#1f2937'],
+        ["FATHER'S NAME / পিতা", app.personal?.fatherName, false, '#1f2937'],
+        ["MOTHER'S NAME / মাতা", app.personal?.motherName, false, '#1f2937'],
+        ['MOBILE / মোবাইল', app.personal?.phone, false, '#374151'],
+        ['COURSE / কোর্স', courseName, false, '#1f2937'],
+        ['SESSION / সেশন', app.enrollment?.session || '', false, '#374151'],
+        ['ADDRESS / ঠিকানা', address, false, '#374151'],
+        ['REGISTRATION NO.', app.regNo || 'Pending', false, app.regNo ? '#1d4ed8' : '#9ca3af'],
+        ['PAYMENT STATUS', statusLabel, true, statusFg],
+        ['APPLICATION DATE', new Date(app.submittedAt).toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), false, '#374151'],
+      ];
+
+      const ROW_H=46, BAN_H=52, phW=132, phH=168, NOTE_H=100, SIG_H=80, FTR=44;
+      const tableRows = rows.length;
+      const tableH = Math.max(tableRows*ROW_H, phH+60);
+      const H = HDR + BAN_H + 14 + tableH + 20 + NOTE_H + SIG_H + FTR;
+
+      const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+      const c = cv.getContext('2d');
+
+      // Background
+      c.fillStyle='#f7fbf9'; c.fillRect(0,0,W,H);
+      c.fillStyle='rgba(13,61,31,0.03)';
+      for(var gx=20;gx<W;gx+=20) for(var gy=20;gy<H;gy+=20){c.beginPath();c.arc(gx,gy,0.8,0,Math.PI*2);c.fill();}
+
+      // Header
+      var hg=c.createLinearGradient(0,0,W,0);
+      hg.addColorStop(0,'#031e09'); hg.addColorStop(0.45,'#155e2b'); hg.addColorStop(1,'#031e09');
+      c.fillStyle=hg; c.fillRect(0,0,W,HDR);
+      c.fillStyle='#c8a847'; c.fillRect(0,0,W,5);
+      c.fillStyle='rgba(200,168,71,0.4)'; c.fillRect(0,HDR-3,W,3);
+
+      // Logo
+      var logoImg=canvasLogoImg;
+      var lSz=120, lX=M, lY=(HDR-lSz)/2;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,14); c.clip();
+      if(logoImg&&logoImg.complete&&logoImg.naturalWidth>0){try{c.drawImage(logoImg,lX,lY,lSz,lSz);}catch(e){_fbLogo2(c,lX,lY,lSz,'#166534');}}
+      else _fbLogo2(c,lX,lY,lSz,'#166534');
+      c.restore();
+      c.strokeStyle='rgba(200,168,71,0.7)'; c.lineWidth=2;
+      c.save(); c.beginPath(); _roundClip(c,lX,lY,lSz,lSz,14); c.stroke(); c.restore();
+
+      var iX = lX+lSz+18;
+      c.textAlign='left';
+      c.fillStyle='#ffffff'; c.font='bold 32px "Hind Siliguri",sans-serif';
+      c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', iX, 55);
+      c.font='14px "Hind Siliguri",sans-serif'; c.fillStyle='rgba(255,255,255,0.75)';
+      c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', iX, 78);
+      c.font='12px Arial'; c.fillStyle='rgba(255,255,255,0.6)';
+      c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', iX, 98);
+      c.strokeStyle='rgba(200,168,71,0.3)'; c.lineWidth=1;
+      c.beginPath(); c.moveTo(iX,108); c.lineTo(W-M,108); c.stroke();
+      c.fillStyle='#f0d060'; c.font='bold 20px Arial';
+      c.fillText("APPLICANT'S COPY", iX, 130);
+      c.fillStyle='rgba(255,255,255,0.62)'; c.font='13px "Hind Siliguri",sans-serif';
+      c.fillText('আবেদনকারীর কপি', iX, 150);
+
+      // Status Banner
+      var banY = HDR + 10;
+      c.fillStyle=statusBg;
+      _roundRect(c,M,banY,W-M*2,BAN_H,8); c.fill();
+      c.strokeStyle=statusBrd; c.lineWidth=2;
+      _roundRect(c,M,banY,W-M*2,BAN_H,8); c.stroke();
+      c.fillStyle=statusFg; c.font='bold 18px "Hind Siliguri",Arial'; c.textAlign='center';
+      var banIcon = isPaid ? '✅' : isPartial ? '⏳' : '⚠️';
+      c.fillText(banIcon + '  ' + statusLabel, W/2, banY+33);
+      c.textAlign='left';
+
+      // Table with photo
+      var tY = banY + BAN_H + 14;
+      var phX = W-M-phW;
+      var tW = phX - M - 14;
+      c.fillStyle='#0d3d1f'; c.fillRect(M,tY,tW,2.5);
+      c.font='bold 11px Arial'; c.fillStyle='#0d3d1f'; c.fillText('APPLICATION DETAILS', M, tY-7);
+
+      rows.forEach(function(row,i){
+        var rY = tY + i*ROW_H;
+        c.fillStyle = i%2===0 ? '#f0faf4' : '#ffffff';
+        c.fillRect(M, rY, tW, ROW_H);
+        c.strokeStyle='#d1fae5'; c.lineWidth=0.5; c.strokeRect(M, rY, tW, ROW_H);
+        c.fillStyle='#9ca3af'; c.font='10px Arial'; c.fillText(row[0], M+12, rY+15);
+        c.fillStyle = row[3] || '#1f2937';
+        c.font = (row[2] ? 'bold ' : '') + '14px "Hind Siliguri",Arial';
+        var v = String(row[1]||'N/A');
+        while(c.measureText(v).width > tW-30 && v.length>4) v=v.slice(0,-1)+'..';
+        c.fillText(v, M+12, rY+37);
+      });
+
+      var afterTable = tY + rows.length*ROW_H;
+      c.strokeStyle='#86efac'; c.lineWidth=1.5;
+      c.beginPath(); c.moveTo(M,afterTable); c.lineTo(M+tW,afterTable); c.stroke();
+
+      // Photo box
+      var phY = tY;
+      c.fillStyle='#f0faf4'; c.fillRect(phX,phY,phW,phH);
+      c.strokeStyle='#86efac'; c.lineWidth=2; c.strokeRect(phX,phY,phW,phH);
+      c.fillStyle='#9ca3af'; c.font='10px Arial'; c.textAlign='center';
+      c.fillText('PHOTO', phX+phW/2, phY-7); c.textAlign='left';
+
+      // QR under photo
+      var qrY = phY + phH + 12;
+      _drawQR(c, phX+16, qrY, 100, window.location.origin+'/verify.html?cert='+currentAppId);
+
+      // Note
+      if(!isPaid) {
+        var noteY = afterTable + 16;
+        c.fillStyle='#fff7ed';
+        _roundRect(c,M,noteY,W-M*2,NOTE_H,8); c.fill();
+        c.strokeStyle='#fed7aa'; c.lineWidth=1;
+        _roundRect(c,M,noteY,W-M*2,NOTE_H,8); c.stroke();
+        c.fillStyle='#9a3412'; c.font='bold 14px "Hind Siliguri",Arial';
+        c.fillText('⚠️ গুরুত্বপূর্ণ নোটিশ:', M+12, noteY+22);
+        c.fillStyle='#78350f'; c.font='13px "Hind Siliguri",Arial';
+        c.fillText('এই কপিটি প্রমাণ করে যে আপনি ভর্তির জন্য আবেদন করেছেন।', M+12, noteY+44);
+        c.fillText('প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করুন। পেমেন্ট সম্পন্ন হলে এই কপিতে PAID স্ট্যাটাস আপডেট হবে।', M+12, noteY+66);
+        c.fillStyle='#9ca3af'; c.font='11px Arial';
+        c.fillText('Contact: 01724084350 | Generated: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+12, noteY+88);
+      } else {
+        var noteY = afterTable + 16;
+        c.fillStyle='#f0fdf4';
+        _roundRect(c,M,noteY,W-M*2,NOTE_H,8); c.fill();
+        c.strokeStyle='#bbf7d0'; c.lineWidth=1;
+        _roundRect(c,M,noteY,W-M*2,NOTE_H,8); c.stroke();
+        c.fillStyle='#166534'; c.font='bold 14px "Hind Siliguri",Arial';
+        c.fillText('✅ পেমেন্ট সম্পন্ন হয়েছে', M+12, noteY+22);
+        c.fillStyle='#15803d'; c.font='13px "Hind Siliguri",Arial';
+        c.fillText('মোট ফি: BDT ' + totalFee + ' | পরিশোধিত: BDT ' + paidFee + ' | বকেয়া: BDT ' + dueFee, M+12, noteY+44);
+        c.fillText('এই কপিটি আপনার ভর্তির অফিসিয়াল প্রমাণপত্র।', M+12, noteY+66);
+        c.fillStyle='#9ca3af'; c.font='11px Arial';
+        c.fillText('Contact: 01724084350 | Generated: '+new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+12, noteY+88);
+      }
+
+      // Signatures
+      var sigY = noteY + NOTE_H + 14;
+      var sigW = 160;
+      [[M+30,sigY],[W/2-sigW/2,sigY],[W-M-sigW-30,sigY]].forEach(function(pos,i){
+        c.strokeStyle='#9ca3af'; c.lineWidth=1;
+        c.beginPath(); c.moveTo(pos[0],pos[1]); c.lineTo(pos[0]+sigW,pos[1]); c.stroke();
+        c.fillStyle='#374151'; c.font='12px Arial'; c.textAlign='center';
+        c.fillText(['Applicant Signature','Accounts Officer','Proprietor'][i], pos[0]+sigW/2, pos[1]+17);
+        if(i===2){c.font='12px "Hind Siliguri",Arial';c.fillStyle='#6b7280';c.fillText('Md. Sabuj Ali',pos[0]+sigW/2,pos[1]+33);}
+      });
+      c.textAlign='left';
+
+      // Footer
+      var ftY = sigY + SIG_H;
+      c.fillStyle='#031e09'; c.fillRect(0,ftY,W,FTR);
+      c.fillStyle='#c8a847'; c.fillRect(0,ftY,W,3);
+      c.fillStyle='#ffffff'; c.font='12px Arial'; c.textAlign='center';
+      c.fillText(currentAppId + ' | Reg: '+(app.regNo||'Pending')+' | Status: ' + payStatus.toUpperCase() + ' | Computer Generated', W/2, ftY+27);
+      c.textAlign='left';
+
+      // Draw photo async
+      if(app.personal?.photo) {
+        var img = new Image(); img.crossOrigin='Anonymous';
+        img.onload = function() {
+          c.drawImage(img, phX+3, phY+3, phW-6, phH-6);
+          c.strokeStyle='#86efac'; c.lineWidth=2; c.strokeRect(phX,phY,phW,phH);
+          _dlCanvas(cv, {name:app.personal?.nameBn,reg:currentAppId}, 'ApplicantCopy');
+        };
+        img.onerror = function() {
+          _drawPhotoFB(c, phX, phY, phW, phH, app.personal?.nameBn);
+          _dlCanvas(cv, {name:app.personal?.nameBn,reg:currentAppId}, 'ApplicantCopy');
+        };
+        img.src = app.personal.photo + (app.personal.photo.includes('?')?'&':'?') + '_cv=1';
+      } else {
+        _drawPhotoFB(c, phX, phY, phW, phH, app.personal?.nameBn);
+        _dlCanvas(cv, {name:app.personal?.nameBn,reg:currentAppId}, 'ApplicantCopy');
+      }
+    }
+
+    function downloadPendingApplicantCopy() {
+      if(!currentAppData) return alert('ডেটা লোড হচ্ছে, একটু অপেক্ষা করুন...');
+      var app = currentAppData;
+      var courseName = app.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
+      var tot = parseInt(app.payment?.total || 0);
+      var paid = parseInt(app.payment?.paid || 0);
+      var due = parseInt(app.payment?.due || 0);
+      var sts = 'Unpaid';
+      if(tot > 0 && paid >= tot) sts = 'Paid';
+      else if(paid > 0) sts = 'Partial';
+      buildApplicantCopyPNG(app, courseName, sts, tot, paid, due);
+    }
+
   </script>
 </body>
 </html>
