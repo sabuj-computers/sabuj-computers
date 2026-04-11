@@ -9,6 +9,8 @@
   
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -826,257 +828,193 @@
     // APPLICANT COPY — Professional Canvas PDF Generator
     // ═══════════════════════════════════════════════════════════════
     function downloadApplicantCopy(appId, nameBn, nameEn, father, mother, phone, course, address, photoUrl) {
-      var W = 1000, M = 55, HDR = 150;
-      var PHOTO_W = 110, PHOTO_H = 135;
-      var LBL_H = 16, VAL_H = 20, ROW_PAD = 12, ROW_GAP = 4;
-      var dataRows = [
-        { label: 'APPLICATION ID / আবেদন নং', value: appId, bold: true, color: '#1d4ed8' },
-        { label: 'NAME (BANGLA) / নাম', value: nameBn, bold: true, color: '#0d3d1f' },
-        { label: 'NAME (ENGLISH)', value: nameEn, bold: false, color: '#1f2937' },
-        { label: "FATHER'S NAME / পিতার নাম", value: father, bold: false, color: '#1f2937' },
-        { label: "MOTHER'S NAME / মাতার নাম", value: mother, bold: false, color: '#1f2937' },
-        { label: 'MOBILE / মোবাইল', value: phone, bold: false, color: '#374151' },
-        { label: 'COURSE / কোর্স', value: course, bold: false, color: '#1f2937' },
-        { label: 'SESSION / সেশন', value: 'N/A', bold: false, color: '#374151' },
-        { label: 'ADDRESS / ঠিকানা', value: address, bold: false, color: '#374151' },
-        { label: 'REGISTRATION NO', value: 'Pending', bold: false, color: '#6b7280' },
-        { label: 'PAYMENT STATUS / পেমেন্ট', value: 'UNPAID / অপরিশোধিত', bold: true, color: '#dc2626' },
-        { label: 'APPLICATION DATE / তারিখ', value: new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'}), bold: false, color: '#374151' },
-      ];
-      var singleRowH = LBL_H + VAL_H + ROW_PAD;
-      var tableH = dataRows.length * singleRowH + ROW_GAP * (dataRows.length - 1);
-      var photoAreaH = PHOTO_H + 100 + 20; // photo + QR + gap
-      var contentH = Math.max(tableH, photoAreaH);
-      var BAN_H = 44;
-      var NOTE_H = 90;
-      var SIG_H = 90;
-      var FTR_H = 40;
-      var H = HDR + BAN_H + 20 + contentH + 24 + NOTE_H + SIG_H + FTR_H + 20;
+      var W = 1190, H = 1684, M = 60;
+      var logoUrl = 'https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png';
+      var verifyUrl = window.location.origin + '/verify.html?cert=' + appId;
 
-      function renderPDF(photoImg) {
+      function loadImage(url) {
+        return new Promise(function(resolve) {
+          if (!url) return resolve(null);
+          var img = new Image(); img.crossOrigin = 'anonymous';
+          img.onload = function() { resolve(img); };
+          img.onerror = function() { resolve(null); };
+          img.src = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+        });
+      }
+
+      function generateQRCanvas() {
+        return new Promise(function(resolve) {
+          try {
+            var d = document.createElement('div');
+            d.style.cssText = 'position:absolute;left:-9999px';
+            document.body.appendChild(d);
+            new QRCode(d, { text: verifyUrl, width: 200, height: 200, colorDark: '#0d3d1f', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            setTimeout(function() { var qc = d.querySelector('canvas'); resolve(qc || null); document.body.removeChild(d); }, 300);
+          } catch(e) { resolve(null); }
+        });
+      }
+
+      Promise.all([loadImage(logoUrl), loadImage(photoUrl), generateQRCanvas()]).then(function(res) {
+        var logoImg = res[0], photoImg = res[1], qrCanvas = res[2];
         var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
         var c = cv.getContext('2d');
 
-        // — Background
         c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+        c.strokeStyle = '#0d3d1f'; c.lineWidth = 4; c.strokeRect(10, 10, W-20, H-20);
+        c.strokeStyle = '#c8a847'; c.lineWidth = 2; c.strokeRect(16, 16, W-32, H-32);
 
-        // — Outer border
-        c.strokeStyle = '#0d3d1f'; c.lineWidth = 3;
-        c.strokeRect(8, 8, W - 16, H - 16);
-        c.strokeStyle = '#c8a847'; c.lineWidth = 1.5;
-        c.strokeRect(12, 12, W - 24, H - 24);
-
-        // — Header gradient
-        var hg = c.createLinearGradient(0, 0, W, 0);
+        // HEADER
+        var HDR_H = 160;
+        var hg = c.createLinearGradient(0, 18, W, 18);
         hg.addColorStop(0, '#021a07'); hg.addColorStop(0.5, '#155e2b'); hg.addColorStop(1, '#021a07');
-        c.fillStyle = hg; c.fillRect(14, 14, W - 28, HDR);
-        // Gold top accent
-        c.fillStyle = '#c8a847'; c.fillRect(14, 14, W - 28, 4);
-        c.fillStyle = 'rgba(200,168,71,0.35)'; c.fillRect(14, HDR + 10, W - 28, 2);
+        c.fillStyle = hg; c.fillRect(18, 18, W-36, HDR_H);
+        c.fillStyle = '#c8a847'; c.fillRect(18, 18, W-36, 5);
 
-        // Logo circle
-        var logoX = M + 38, logoY = 14 + HDR / 2;
-        c.fillStyle = 'rgba(255,255,255,0.12)'; c.beginPath(); c.arc(logoX, logoY, 40, 0, Math.PI * 2); c.fill();
-        c.fillStyle = '#0d3d1f'; c.beginPath(); c.arc(logoX, logoY, 36, 0, Math.PI * 2); c.fill();
-        c.font = 'bold 38px Arial'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle';
-        c.fillText('স', logoX, logoY);
-        c.textBaseline = 'alphabetic'; c.textAlign = 'left';
-
-        // Header text
-        var tX = M + 90;
-        c.fillStyle = '#ffffff'; c.font = 'bold 28px "Hind Siliguri",sans-serif';
-        c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', tX, 58);
-        c.font = '13px "Hind Siliguri",sans-serif'; c.fillStyle = 'rgba(255,255,255,0.7)';
-        c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', tX, 78);
-        c.font = '11px Arial'; c.fillStyle = 'rgba(255,255,255,0.55)';
-        c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', tX, 96);
-        // Divider line
-        c.strokeStyle = 'rgba(200,168,71,0.3)'; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(tX, 104); c.lineTo(W - M - 10, 104); c.stroke();
-        c.fillStyle = '#f0d060'; c.font = 'bold 18px Arial';
-        c.fillText("APPLICANT'S COPY", tX, 126);
-        c.fillStyle = 'rgba(255,255,255,0.55)'; c.font = '12px "Hind Siliguri",sans-serif';
-        c.fillText('আবেদনকারীর কপি', tX, 144);
-
-        // — UNPAID Banner
-        var banY = HDR + 22;
-        c.fillStyle = '#fef2f2';
-        roundRect(c, M, banY, W - M * 2, BAN_H, 6); c.fill();
-        c.strokeStyle = '#fca5a5'; c.lineWidth = 1.5;
-        roundRect(c, M, banY, W - M * 2, BAN_H, 6); c.stroke();
-        c.fillStyle = '#dc2626'; c.font = 'bold 15px "Hind Siliguri",Arial'; c.textAlign = 'center';
-        c.fillText('⚠  UNPAID / অপরিশোধিত', W / 2, banY + 28);
-        c.textAlign = 'left';
-
-        // — Content area
-        var contentY = banY + BAN_H + 18;
-        // Section title
-        c.fillStyle = '#0d3d1f'; c.font = 'bold 11px Arial';
-        c.fillText('APPLICATION DETAILS', M + 2, contentY - 5);
-        c.strokeStyle = '#0d3d1f'; c.lineWidth = 2;
-        c.beginPath(); c.moveTo(M, contentY); c.lineTo(W - M, contentY); c.stroke();
-
-        // Data rows (left side — leave space for photo on right)
-        var textAreaW = W - M * 2 - PHOTO_W - 60;
-        var rY = contentY + 8;
-        dataRows.forEach(function(row, i) {
-          // Alternate row bg
-          if (i % 2 === 0) {
-            c.fillStyle = '#f8fdf9';
-            c.fillRect(M, rY - 2, textAreaW + 10, singleRowH);
-          }
-          // Label
-          c.fillStyle = '#9ca3af'; c.font = '9px Arial';
-          c.fillText(row.label, M + 10, rY + LBL_H - 4);
-          // Value
-          c.fillStyle = row.color;
-          c.font = (row.bold ? 'bold ' : '') + '14px "Hind Siliguri",Arial';
-          var val = String(row.value || 'N/A');
-          while (c.measureText(val).width > textAreaW - 20 && val.length > 4) val = val.slice(0, -1) + '…';
-          c.fillText(val, M + 10, rY + LBL_H + VAL_H - 6);
-          rY += singleRowH + ROW_GAP;
-        });
-
-        // — Photo (right side)
-        var photoX = W - M - PHOTO_W - 15;
-        var photoY = contentY + 14;
-        // Photo border
-        c.strokeStyle = '#c8a847'; c.lineWidth = 2;
-        c.strokeRect(photoX - 3, photoY - 3, PHOTO_W + 6, PHOTO_H + 6);
-        c.fillStyle = '#f1f5f9';
-        c.fillRect(photoX, photoY, PHOTO_W, PHOTO_H);
-        if (photoImg) {
-          c.drawImage(photoImg, photoX, photoY, PHOTO_W, PHOTO_H);
+        var logoSize = 90, logoX = M + 10, logoY = 18 + (HDR_H - logoSize) / 2;
+        if (logoImg) {
+          c.fillStyle = '#fff'; c.beginPath(); c.arc(logoX+logoSize/2, logoY+logoSize/2, logoSize/2+4, 0, Math.PI*2); c.fill();
+          c.save(); c.beginPath(); c.arc(logoX+logoSize/2, logoY+logoSize/2, logoSize/2, 0, Math.PI*2); c.clip();
+          c.drawImage(logoImg, logoX, logoY, logoSize, logoSize); c.restore();
         } else {
-          c.fillStyle = '#9ca3af'; c.font = '11px Arial'; c.textAlign = 'center';
-          c.fillText('PHOTO', photoX + PHOTO_W / 2, photoY + PHOTO_H / 2 + 4);
-          c.textAlign = 'left';
+          c.fillStyle = '#fff'; c.beginPath(); c.arc(logoX+logoSize/2, logoY+logoSize/2, logoSize/2, 0, Math.PI*2); c.fill();
+          c.fillStyle = '#0d3d1f'; c.font = 'bold 50px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText('স', logoX+logoSize/2, logoY+logoSize/2); c.textBaseline = 'alphabetic'; c.textAlign = 'left';
         }
-        // Label under photo
-        c.fillStyle = '#6b7280'; c.font = '9px Arial'; c.textAlign = 'center';
-        c.fillText('PHOTO', photoX + PHOTO_W / 2, photoY + PHOTO_H + 14);
-        c.textAlign = 'left';
 
-        // QR code placeholder below photo
-        var qrY = photoY + PHOTO_H + 24;
-        var qrSize = 90;
-        var qrX = photoX + (PHOTO_W - qrSize) / 2;
-        c.strokeStyle = '#d1d5db'; c.lineWidth = 1;
-        c.strokeRect(qrX, qrY, qrSize, qrSize);
-        // Generate QR using canvas pattern
-        var verifyUrl = 'https://sabujcomputers.pro.bd/verify.html?id=' + appId;
-        generateMiniQR(c, qrX, qrY, qrSize, verifyUrl);
-        c.fillStyle = '#6b7280'; c.font = '8px Arial'; c.textAlign = 'center';
-        c.fillText('Scan to Verify', qrX + qrSize / 2, qrY + qrSize + 12);
-        c.textAlign = 'left';
+        var tX = logoX + logoSize + 25;
+        c.fillStyle = '#fff'; c.font = 'bold 32px "Hind Siliguri",sans-serif';
+        c.fillText('সবুজ কম্পিউটার ট্রেনিং সেন্টার', tX, logoY + 30);
+        c.font = '15px "Hind Siliguri",sans-serif'; c.fillStyle = 'rgba(255,255,255,0.75)';
+        c.fillText('তমালতলা বাজার, বাগাতিপাড়া, নাটোর', tX, logoY + 52);
+        c.font = '13px Arial'; c.fillStyle = 'rgba(255,255,255,0.55)';
+        c.fillText('Ph: 01724084350 | sabujcomputers.pro.bd', tX, logoY + 72);
+        c.strokeStyle = 'rgba(200,168,71,0.4)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(tX, logoY+82); c.lineTo(W-M-20, logoY+82); c.stroke();
+        c.fillStyle = '#f0d060'; c.font = 'bold 20px Arial'; c.fillText("APPLICANT'S COPY", tX, logoY + 106);
+        c.fillStyle = 'rgba(255,255,255,0.55)'; c.font = '14px "Hind Siliguri",sans-serif';
+        c.fillText('আবেদনকারীর কপি', tX + 210, logoY + 106);
+        c.fillStyle = '#c8a847'; c.fillRect(18, 18+HDR_H-4, W-36, 4);
 
-        // — Bottom divider
-        var divY = contentY + contentH + 10;
-        c.strokeStyle = '#86efac'; c.lineWidth = 1.5;
-        c.beginPath(); c.moveTo(M, divY); c.lineTo(W - M, divY); c.stroke();
+        // PAYMENT BANNER
+        var banY = 18 + HDR_H + 20, banH = 48;
+        c.fillStyle = '#fef2f2'; roundRect(c, M, banY, W-M*2, banH, 8); c.fill();
+        c.strokeStyle = '#fca5a5'; c.lineWidth = 1.5; roundRect(c, M, banY, W-M*2, banH, 8); c.stroke();
+        c.fillStyle = '#dc2626'; c.font = 'bold 18px "Hind Siliguri",Arial'; c.textAlign = 'center';
+        c.fillText('⚠  UNPAID / অপরিশোধিত', W/2, banY+32); c.textAlign = 'left';
 
-        // — Important Notice
-        var noteY = divY + 10;
-        c.fillStyle = '#fffbeb';
-        roundRect(c, M, noteY, W - M * 2, NOTE_H, 5); c.fill();
-        c.strokeStyle = '#fcd34d'; c.lineWidth = 1;
-        roundRect(c, M, noteY, W - M * 2, NOTE_H, 5); c.stroke();
-        c.fillStyle = '#92400e'; c.font = 'bold 11px "Hind Siliguri",Arial';
-        c.fillText('⚠ গুরুত্বপূর্ণ নোটিশ:', M + 14, noteY + 20);
-        c.fillStyle = '#78350f'; c.font = '11px "Hind Siliguri",Arial';
-        c.fillText('এই কপিটি প্রমাণ করে যে আপনি ভর্তির জন্য আবেদন করেছেন।', M + 14, noteY + 38);
-        c.fillText('প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করলে এই কপিতে PAID স্ট্যাটাস আপডেট হবে।', M + 14, noteY + 55);
-        c.fillStyle = '#9ca3af'; c.font = '10px Arial';
-        c.fillText('Contact: 01724084350 | Generated: ' + new Date().toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M + 14, noteY + 78);
+        // DATA TABLE
+        var tblY = banY + banH + 25;
+        c.fillStyle = '#0d3d1f'; c.font = 'bold 14px Arial'; c.fillText('APPLICATION DETAILS', M+5, tblY);
+        c.strokeStyle = '#0d3d1f'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(M, tblY+6); c.lineTo(W-M, tblY+6); c.stroke();
+        tblY += 18;
 
-        // — Signature area
-        var sigY = noteY + NOTE_H + 20;
-        var sigW = 180;
-        var sigPositions = [
-          { x: M + 40, label: 'Applicant Signature', sub: '' },
-          { x: W / 2 - sigW / 2, label: 'Accounts Officer', sub: '' },
-          { x: W - M - sigW - 40, label: 'Proprietor', sub: 'Md. Sabuj Ali' }
+        var PHOTO_W = 140, PHOTO_H = 170, QR_SIZE = 120;
+        var rightColX = W - M - PHOTO_W - 20;
+        var leftW = rightColX - M - 30;
+
+        // Photo
+        var photoX = rightColX, photoY2 = tblY + 5;
+        c.strokeStyle = '#c8a847'; c.lineWidth = 2.5;
+        c.strokeRect(photoX-4, photoY2-4, PHOTO_W+8, PHOTO_H+8);
+        c.fillStyle = '#f9fafb'; c.fillRect(photoX, photoY2, PHOTO_W, PHOTO_H);
+        if (photoImg) { c.drawImage(photoImg, photoX, photoY2, PHOTO_W, PHOTO_H); }
+        else { c.fillStyle = '#9ca3af'; c.font = '14px Arial'; c.textAlign = 'center'; c.fillText('PHOTO', photoX+PHOTO_W/2, photoY2+PHOTO_H/2); c.textAlign = 'left'; }
+        c.fillStyle = '#6b7280'; c.font = '10px Arial'; c.textAlign = 'center';
+        c.fillText('PHOTO', photoX+PHOTO_W/2, photoY2+PHOTO_H+16); c.textAlign = 'left';
+
+        // QR
+        var qrX = photoX + (PHOTO_W - QR_SIZE)/2, qrY = photoY2 + PHOTO_H + 30;
+        if (qrCanvas) { c.drawImage(qrCanvas, qrX, qrY, QR_SIZE, QR_SIZE); }
+        else { c.strokeStyle = '#d1d5db'; c.lineWidth = 1; c.strokeRect(qrX, qrY, QR_SIZE, QR_SIZE); }
+        c.fillStyle = '#374151'; c.font = '10px Arial'; c.textAlign = 'center';
+        c.fillText('Scan to Verify', qrX+QR_SIZE/2, qrY+QR_SIZE+14); c.textAlign = 'left';
+
+        // Rows
+        var rows = [
+          { label: 'Application ID / আবেদন নং', value: appId },
+          { label: 'Name (Bangla) / নাম (বাংলা)', value: nameBn },
+          { label: 'Name (English) / নাম (ইংরেজি)', value: nameEn },
+          { label: "Father's Name / পিতার নাম", value: father },
+          { label: "Mother's Name / মাতার নাম", value: mother },
+          { label: 'Mobile / মোবাইল', value: phone },
+          { label: 'Course / কোর্স', value: course },
+          { label: 'Session / সেশন', value: 'N/A' },
+          { label: 'Address / ঠিকানা', value: address },
+          { label: 'Registration No / রেজিস্ট্রেশন নং', value: 'Pending' },
+          { label: 'Payment Status / পেমেন্ট', value: 'UNPAID / অপরিশোধিত' },
+          { label: 'Application Date / তারিখ', value: new Date().toLocaleDateString('en-GB', {year:'numeric',month:'long',day:'numeric'}) }
         ];
-        sigPositions.forEach(function(s) {
-          c.strokeStyle = '#6b7280'; c.lineWidth = 0.8;
-          c.beginPath(); c.moveTo(s.x, sigY + 40); c.lineTo(s.x + sigW, sigY + 40); c.stroke();
-          c.fillStyle = '#374151'; c.font = '11px Arial'; c.textAlign = 'center';
-          c.fillText(s.label, s.x + sigW / 2, sigY + 56);
-          if (s.sub) {
-            c.fillStyle = '#6b7280'; c.font = '11px "Hind Siliguri",Arial';
-            c.fillText(s.sub, s.x + sigW / 2, sigY + 72);
-          }
+        var rowH = 52;
+        rows.forEach(function(row, i) {
+          var ry = tblY + i * rowH;
+          if (i % 2 === 0) { c.fillStyle = '#f0fdf4'; c.fillRect(M, ry, leftW+15, rowH); }
+          c.strokeStyle = '#e5e7eb'; c.lineWidth = 0.5;
+          c.beginPath(); c.moveTo(M, ry+rowH); c.lineTo(M+leftW+15, ry+rowH); c.stroke();
+          c.fillStyle = '#6b7280'; c.font = '11px "Hind Siliguri",Arial'; c.fillText(row.label, M+12, ry+18);
+          var isPay = row.label.indexOf('Payment') > -1;
+          var isId = row.label.indexOf('Application ID') > -1;
+          c.fillStyle = isPay ? '#dc2626' : (isId ? '#1d4ed8' : '#111827');
+          c.font = (isPay || isId ? 'bold ' : '') + '16px "Hind Siliguri",Arial';
+          var val = String(row.value || 'N/A');
+          var maxW = leftW - 20;
+          while (c.measureText(val).width > maxW && val.length > 3) val = val.slice(0,-1) + '…';
+          c.fillText(val, M+12, ry+40);
+        });
+
+        // NOTICE BOX
+        var noticeY = tblY + rows.length * rowH + 35, noticeH = 100;
+        c.fillStyle = '#fffbeb'; roundRect(c, M, noticeY, W-M*2, noticeH, 8); c.fill();
+        c.strokeStyle = '#fbbf24'; c.lineWidth = 1.5; roundRect(c, M, noticeY, W-M*2, noticeH, 8); c.stroke();
+        c.fillStyle = '#92400e'; c.font = 'bold 14px "Hind Siliguri",Arial';
+        c.fillText('⚠ গুরুত্বপূর্ণ নোটিশ:', M+20, noticeY+26);
+        c.fillStyle = '#78350f'; c.font = '13px "Hind Siliguri",Arial';
+        c.fillText('এই কপিটি প্রমাণ করে যে আপনি ভর্তির জন্য আবেদন করেছেন।', M+20, noticeY+48);
+        c.fillText('প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করলে এই কপিতে PAID স্ট্যাটাস আপডেট হবে।', M+20, noticeY+68);
+        c.fillStyle = '#9ca3af'; c.font = '11px Arial';
+        c.fillText('Contact: 01724084350 | Generated: ' + new Date().toLocaleString('en-GB', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}), M+20, noticeY+90);
+
+        // SIGNATURE
+        var sigY = noticeY + noticeH + 60, sigW = 200;
+        var sigs = [
+          { x: M+60, label: 'আবেদনকারীর স্বাক্ষর', sub: 'Applicant Signature' },
+          { x: W/2-sigW/2, label: 'হিসাব কর্মকর্তা', sub: 'Accounts Officer' },
+          { x: W-M-sigW-60, label: 'স্বত্বাধিকারী', sub: 'Md. Sabuj Ali' }
+        ];
+        sigs.forEach(function(s) {
+          c.strokeStyle = '#374151'; c.lineWidth = 1;
+          c.beginPath(); c.moveTo(s.x, sigY); c.lineTo(s.x+sigW, sigY); c.stroke();
+          c.fillStyle = '#111827'; c.font = '13px "Hind Siliguri",Arial'; c.textAlign = 'center';
+          c.fillText(s.label, s.x+sigW/2, sigY+20);
+          c.fillStyle = '#6b7280'; c.font = '11px Arial';
+          c.fillText(s.sub, s.x+sigW/2, sigY+36);
           c.textAlign = 'left';
         });
 
-        // — Footer
-        var ftY = H - FTR_H - 14;
-        c.fillStyle = '#021a07'; c.fillRect(14, ftY, W - 28, FTR_H);
-        c.fillStyle = '#c8a847'; c.fillRect(14, ftY, W - 28, 2);
-        c.fillStyle = '#ffffff'; c.font = '11px Arial'; c.textAlign = 'center';
-        c.fillText(appId + ' | Status: UNPAID | Computer Generated', W / 2, ftY + 25);
+        // FOOTER
+        var ftrH = 40, ftrY = H - 18 - ftrH;
+        c.fillStyle = '#021a07'; c.fillRect(18, ftrY, W-36, ftrH);
+        c.fillStyle = '#c8a847'; c.fillRect(18, ftrY, W-36, 3);
+        c.fillStyle = '#fff'; c.font = '12px Arial'; c.textAlign = 'center';
+        c.fillText(appId + ' | Status: UNPAID | Computer Generated', W/2, ftrY+26);
         c.textAlign = 'left';
 
-        // — Convert to PDF
-        var imgData = cv.toDataURL('image/png', 1.0);
-        var pdfW = W * 0.264583;
-        var pdfH = H * 0.264583;
+        // EXPORT PDF
+        var imgData = cv.toDataURL('image/jpeg', 0.95);
         var { jsPDF } = window.jspdf;
-        var doc = new jsPDF({ orientation: pdfW > pdfH ? 'l' : 'p', unit: 'mm', format: [pdfW, pdfH] });
-        doc.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+        var doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
         doc.save('ApplicantCopy_' + (nameBn || 'Student').replace(/\s+/g, '_') + '_' + appId + '.pdf');
-        alert('✅ আবেদনকারীর কপি (PDF) ডাউনলোড হয়েছে!');
-      }
-
-      // Helper: rounded rectangle
-      function roundRect(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
-      }
-
-      // Helper: simple QR-like pattern
-      function generateMiniQR(ctx, x, y, size, text) {
-        var cells = 15, cellSize = size / cells;
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(x, y, size, size);
-        // Generate deterministic pattern from text
-        var hash = 0;
-        for (var i = 0; i < text.length; i++) hash = ((hash << 5) - hash) + text.charCodeAt(i);
-        ctx.fillStyle = '#000000';
-        // Corner patterns (QR-like)
-        [[0,0],[0,cells-7],[cells-7,0]].forEach(function(corner){
-          for(var r=0;r<7;r++) for(var cc=0;cc<7;cc++){
-            if(r===0||r===6||cc===0||cc===6||(r>=2&&r<=4&&cc>=2&&cc<=4))
-              ctx.fillRect(x+(corner[0]+cc)*cellSize, y+(corner[1]+r)*cellSize, cellSize, cellSize);
-          }
-        });
-        // Data area
-        for(var r=0;r<cells;r++) for(var cc=0;cc<cells;cc++){
-          if((r<7&&cc<7)||(r<7&&cc>=cells-7)||(r>=cells-7&&cc<7)) continue;
-          var seed = (hash + r*31 + cc*17) & 0xFFFFFFFF;
-          if((seed % 3) === 0) ctx.fillRect(x+cc*cellSize, y+r*cellSize, cellSize, cellSize);
-        }
-      }
-
-      // Load photo then render
-      if (photoUrl) {
-        var img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function() { renderPDF(img); };
-        img.onerror = function() { console.warn('Photo load failed'); renderPDF(null); };
-        img.src = photoUrl + '?_cv=' + Date.now();
-      } else {
-        renderPDF(null);
-      }
+        alert('✅ আবেদনকারীর কপি ডাউনলোড হয়েছে!');
+      });
     }
 
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+      ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+      ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+    }
   </script>
 </body>
 </html>

@@ -602,54 +602,104 @@
       const content = document.getElementById('appDetailsContent');
       
       let photoHtml = app.personal?.photo ? `<img src="${app.personal.photo}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #e4ece7;"><br><button onclick="downloadCrossOriginFile('${app.personal.photo}','Photo_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#dcfce7;color:#166534;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ছবি ডাউনলোড</button>` : 'ছবি নেই';
-      let nidHtml = app.personal?.nidDoc ? (app.personal.nidDoc.endsWith('.pdf') ? `<a href="${app.personal.nidDoc}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate (PDF) দেখুন</a> <button onclick="downloadCrossOriginFile('${app.personal.nidDoc}','NID_${app.applicationId}.pdf')" style="display:inline-block;margin-left:8px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>` : `<a href="${app.personal.nidDoc}" target="_blank"><img src="${app.personal.nidDoc}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7; margin-top:10px;"></a><br><button onclick="downloadCrossOriginFile('${app.personal.nidDoc}','NID_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডকুমেন্ট ডাউনলোড</button>`) : 'ডকুমেন্ট নেই';
+      
+      let nidHtml = '';
+      var nidUrl = app.documents?.nidOrBirth || app.personal?.nidDoc;
+      if (nidUrl) {
+        if (nidUrl.match(/\.pdf$/i)) {
+          nidHtml = `<a href="${nidUrl}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 NID/Birth Certificate দেখুন</a> <button onclick="downloadCrossOriginFile('${nidUrl}','NID_${app.applicationId}.pdf')" style="display:inline-block;margin-left:8px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>`;
+        } else {
+          nidHtml = `<a href="${nidUrl}" target="_blank"><img src="${nidUrl}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7;"></a><br><button onclick="downloadCrossOriginFile('${nidUrl}','NID_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#dbeafe;color:#1e3a8a;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>`;
+        }
+      } else { nidHtml = '<span style="color:#9ca3af;">ডকুমেন্ট নেই</span>'; }
+
+      // SSC Marksheet
+      let sscHtml = '';
+      var sscUrl = app.documents?.sscCertificate;
+      if (sscUrl) {
+        if (sscUrl.match(/\.pdf$/i)) {
+          sscHtml = `<a href="${sscUrl}" target="_blank" style="color:var(--g2); font-weight:bold;">📄 SSC মার্কশিট দেখুন</a> <button onclick="downloadCrossOriginFile('${sscUrl}','SSC_Marksheet_${app.applicationId}.pdf')" style="display:inline-block;margin-left:8px;background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>`;
+        } else {
+          sscHtml = `<a href="${sscUrl}" target="_blank"><img src="${sscUrl}" style="max-width:200px; border-radius:8px; border:2px solid #e4ece7;"></a><br><button onclick="downloadCrossOriginFile('${sscUrl}','SSC_Marksheet_${app.applicationId}.jpg')" style="display:inline-block;margin-top:6px;background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:bold;border:none;cursor:pointer;">📥 ডাউনলোড</button>`;
+        }
+      } else { sscHtml = '<span style="color:#9ca3af;">মার্কশিট আপলোড হয়নি</span>'; }
+
+      // Education details (new nested structure)
+      function eduRow(label, edu) {
+        if (!edu) return '';
+        return `<tr><td style="padding:5px; border:1px solid #e4ece7;font-weight:600;background:#f0fdf4;" colspan="2">${label}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পরীক্ষা:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.exam || edu.lastExam || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">বোর্ড/বিশ্ববিদ্যালয়:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.board || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">প্রতিষ্ঠান:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.institute || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পাশের সাল:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.passingYear || edu.year || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">ফলাফল/GPA:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.result || edu.gpa || ''}</td></tr>`;
+      }
+
+      let eduHtml = '';
+      if (app.education?.ssc) { eduHtml += eduRow('📘 SSC / সমমান', app.education.ssc); }
+      if (app.education?.hsc) { eduHtml += eduRow('📗 HSC / সমমান', app.education.hsc); }
+      if (app.education?.honours) { eduHtml += eduRow('📕 অনার্স / ডিগ্রি', app.education.honours); }
+      if (app.education?.masters) { eduHtml += eduRow('📙 মাস্টার্স', app.education.masters); }
+      // Fallback for old flat format
+      if (!app.education?.ssc && (app.education?.lastExam || app.education?.institute)) {
+        eduHtml += `<tr><td style="padding:5px; border:1px solid #e4ece7;">সর্বোচ্চ শিক্ষা:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.lastExam || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পাশের সাল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.passingYear || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">প্রতিষ্ঠান:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.institute || ''}</td></tr>`;
+      }
 
       content.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
           <div>
             <p style="margin:0;"><strong>Application ID:</strong> ${app.applicationId}</p>
-            <p style="margin:0;"><strong>Date:</strong> ${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</p>
+            <p style="margin:0;"><strong>Date:</strong> ${app.submittedAt ? new Date(app.submittedAt).toLocaleDateString('bn-BD') : '—'}</p>
             <p style="margin:0;"><strong>Status:</strong> <span style="background:${app.status==='approved'?'#dcfce7':'#fef9c3'};color:${app.status==='approved'?'#166534':'#854d0e'};padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700;">${app.status}</span></p>
           </div>
           <div>${photoHtml}</div>
         </div>
         
-        <h4 style="color:var(--g2); margin:10px 0 5px;">ব্যক্তিগত তথ্য</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">📋 ব্যক্তিগত তথ্য</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
           <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (বাংলায়):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameBn || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">নাম (ইংরেজিতে):</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nameEn || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">পিতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.fatherName || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">মাতার নাম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.motherName || ''}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">মোবাইল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.phone || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">জন্ম তারিখ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.dob || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">জন্মস্থান:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.birthPlace || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">মোবাইল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.phone || ''} ${app.personal?.hasWhatsApp ? '(WhatsApp ✅)' : ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">অভিভাবকের মোবাইল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.guardianPhone || '—'}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">লিঙ্গ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.gender || ''}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">NID/জন্ম নিবন্ধন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nid || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">ধর্ম:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.religion || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">NID/জন্ম নিবন্ধন নং:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.nid || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">রক্তের গ্রুপ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.personal?.bloodGroup || ''}</td></tr>
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">ঠিকানা</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">🏠 ঠিকানা</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">বর্তমান ঠিকানা:</td><td style="padding:5px; border:1px solid #e4ece7;">${(app.address?.present?.village||'') + ', ' + (app.address?.present?.upazila||'') + ', ' + (app.address?.present?.district||'')}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">স্থায়ী ঠিকানা:</td><td style="padding:5px; border:1px solid #e4ece7;">${(app.address?.permanent?.village||'') + ', ' + (app.address?.permanent?.upazila||'') + ', ' + (app.address?.permanent?.district||'')}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">বর্তমান:</td><td style="padding:5px; border:1px solid #e4ece7;">${[app.address?.present?.village, app.address?.present?.po, app.address?.present?.upazila, app.address?.present?.district].filter(Boolean).join(', ') || '—'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">স্থায়ী:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.address?.permanent?.sameAsPresent ? 'বর্তমান ঠিকানার সাথে একই' : [app.address?.permanent?.village, app.address?.permanent?.po, app.address?.permanent?.upazila, app.address?.permanent?.district].filter(Boolean).join(', ') || '—'}</td></tr>
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">শিক্ষাগত যোগ্যতা</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">📚 শিক্ষাগত যোগ্যতা</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">সর্বোচ্চ শিক্ষা:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.lastExam || ''}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">পাশের সাল:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.passingYear || ''}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">প্রতিষ্ঠান:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.education?.institute || ''}</td></tr>
+          ${eduHtml || '<tr><td style="padding:5px; border:1px solid #e4ece7; color:#9ca3af;">তথ্য দেওয়া হয়নি</td></tr>'}
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">কোর্স তথ্য</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">💼 কোর্স তথ্য</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
           <tr><td style="padding:5px; border:1px solid #e4ece7;">কোর্স:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.courseId || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">সেশন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.session || ''}</td></tr>
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">ভর্তির কারণ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.reason || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পূর্ব অভিজ্ঞতা:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.priorKnowledge || '—'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">কোথায় থেকে জানলেন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.source || '—'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">ভর্তির কারণ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.reason || '—'}</td></tr>
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">আপলোডকৃত ডকুমেন্ট</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">📎 আপলোডকৃত ডকুমেন্ট</h4>
         <div style="margin-bottom:15px; background:#f7faf8; padding:15px; border-radius:10px; border:1px solid #e4ece7;">
-          <p><strong>ছবি:</strong></p>${photoHtml}
-          <p style="margin-top:10px;"><strong>NID/Birth Certificate:</strong></p>${nidHtml}
+          <p style="margin:0 0 8px;"><strong>📷 ছবি:</strong></p>${photoHtml}
+          <hr style="border:none; border-top:1px solid #e4ece7; margin:12px 0;">
+          <p style="margin:0 0 8px;"><strong>🪪 NID/Birth Certificate:</strong></p>${nidHtml}
+          <hr style="border:none; border-top:1px solid #e4ece7; margin:12px 0;">
+          <p style="margin:0 0 8px;"><strong>📜 SSC মার্কশিট/সার্টিফিকেট:</strong></p>${sscHtml}
         </div>
       `;
       
