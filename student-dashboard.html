@@ -573,6 +573,10 @@
               }
 
             } else if (authData.status === 'rejected') {
+              var appCount = authData.applicationCount || 1;
+              var maxAttempts = 3;
+              var remaining = maxAttempts - appCount;
+              
               statusEl.textContent = '❌ আবেদন বাতিল';
               statusEl.className = 'badge';
               statusEl.style.background = '#fee2e2';
@@ -583,9 +587,16 @@
               editPhotoBtn.style.display = 'none';
               statusMsgContainer.style.display = 'block';
               statusMsgIcon.textContent = '❌';
-              statusMsgTitle.textContent = 'আবেদন বাতিল করা হয়েছে';
+              statusMsgTitle.textContent = 'আবেদন বাতিল করা হয়েছে';
               statusMsgTitle.style.color = '#991b1b';
-              statusMsgText.textContent = 'দুঃখিত, আপনার আবেদনটি বাতিল করা হয়েছে। বিস্তারিত জানতে কর্তৃপক্ষের সাথে যোগাযোগ করুন।';
+              
+              if (remaining > 0) {
+                statusMsgText.innerHTML = 'দুঃখিত, আপনার আবেদনটি বাতিল করা হয়েছে।<br><strong style="color:#166534;">আপনি আরও ' + remaining + ' বার পুনরায় আবেদন করতে পারবেন।</strong>' +
+                  '<br><br><button onclick="window.location.href=\\\'admission-form.html\\\'" style="background:linear-gradient(135deg,#0d3d1f,#1a6b35); color:white; border:none; padding:12px 28px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:15px; font-family:inherit;">🔄 পুনরায় আবেদন করুন</button>';
+              } else {
+                statusMsgText.textContent = 'দুঃখিত, আপনার আবেদনটি বাতিল করা হয়েছে। আপনি সর্বোচ্চ ৩ বার আবেদন করেছেন, আর আবেদন করা সম্ভব নয়। বিস্তারিত জানতে কর্তৃপক্ষের সাথে যোগাযোগ করুন।';
+              }
+
             } else {
               window.location.href = 'admission-form.html';
             }

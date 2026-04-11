@@ -503,8 +503,15 @@
           if (data) {
             document.getElementById('nameBn').value = data.name || '';
             document.getElementById('phone').value = data.phone || '';
-            if (data.status === 'active' || data.status === 'pending_approval' || data.status === 'pending' || data.status === 'rejected') {
+            if (data.status === 'active' || data.status === 'pending_approval' || data.status === 'pending') {
               window.location.href = 'student-dashboard.html';
+            }
+            if (data.status === 'rejected') {
+              var appCount = data.applicationCount || 1;
+              if (appCount >= 3) {
+                window.location.href = 'student-dashboard.html';
+              }
+              // else: allow re-apply, stay on form
             }
           }
         });
@@ -779,8 +786,13 @@
           }
         };
 
-        db.ref('sabuj/applications/' + appId).set(formData)
-          .then(function() { return db.ref('sabuj/students_auth/' + currentUser.uid).update({ status: 'pending_approval', applicationId: appId }); })
+        // Get current application count and increment
+        db.ref('sabuj/students_auth/' + currentUser.uid).once('value').then(function(authSnap) {
+          var authVal = authSnap.val() || {};
+          var newCount = (authVal.applicationCount || 0) + 1;
+          return db.ref('sabuj/applications/' + appId).set(formData)
+            .then(function() { return db.ref('sabuj/students_auth/' + currentUser.uid).update({ status: 'pending_approval', applicationId: appId, applicationCount: newCount }); });
+        })
           .then(function() {
             const submitDate = new Date().toLocaleDateString('bn-BD');
             const courseSel = document.getElementById('courseSelect');
