@@ -392,9 +392,12 @@
     // Preload logo for canvas (avoids tainted canvas)
     let canvasLogoImg = null;
     function preloadLogoForCanvas(url) {
+      if(!url) { canvasLogoImg = null; return; }
       canvasLogoImg = new Image();
       canvasLogoImg.crossOrigin = 'Anonymous';
-      canvasLogoImg.src = url + (url.includes('?') ? '&' : '?') + '_cv=1';
+      canvasLogoImg.referrerPolicy = 'no-referrer';
+      canvasLogoImg.onerror = function(){ canvasLogoImg = null; };
+      canvasLogoImg.src = url;
     }
 
     // Load Logo

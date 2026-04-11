@@ -76,7 +76,7 @@
 
   <header>
     <div class="logo-area">
-      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" style="width:50px;height:50px;border-radius:12px;background:white;padding:3px;">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:50px;height:50px;border-radius:12px;background:white;padding:3px;">
       <h1 class="brand-title">সবুজ কম্পিউটার্স</h1>
     </div>
     <button class="logout-btn" id="logoutBtn">লগআউট</button>
@@ -491,9 +491,31 @@
     const db = firebase.database();
     let currentUser = null;
 
+    let currentLogoUrl = document.getElementById('headerLogo').getAttribute('src') || '';
+    let canvasLogoImg = null;
+
+    function preloadLogoForCanvas(url) {
+      if (!url) {
+        canvasLogoImg = null;
+        return;
+      }
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.referrerPolicy = 'no-referrer';
+      img.onload = function() { canvasLogoImg = img; };
+      img.onerror = function() { canvasLogoImg = null; };
+      img.src = url;
+    }
+
+    preloadLogoForCanvas(currentLogoUrl);
+
     // Load Logo
     db.ref('sabuj/general/logo').on('value', snap => {
-      if(snap.val()) document.getElementById('headerLogo').src = snap.val();
+      if (snap.val()) {
+        currentLogoUrl = snap.val();
+        document.getElementById('headerLogo').src = currentLogoUrl;
+        preloadLogoForCanvas(currentLogoUrl);
+      }
     });
 
     let intentionalLogout = false;
@@ -829,24 +851,21 @@
     // ═══════════════════════════════════════════════════════════════
     function downloadApplicantCopy(appId, nameBn, nameEn, father, mother, phone, course, address, photoUrl) {
       var W = 1190, H = 1684, M = 60;
-      var logoUrl = 'https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png';
+      var logoUrl = currentLogoUrl || ((document.getElementById('headerLogo') || {}).src) || '';
       var verifyUrl = window.location.origin + '/verify.html?cert=' + appId;
 
       function loadImage(url) {
         return new Promise(function(resolve) {
           if (!url) return resolve(null);
-          var img = new Image(); img.crossOrigin = 'anonymous';
+          var img = new Image(); img.crossOrigin = 'anonymous'; img.referrerPolicy = 'no-referrer';
           img.onload = function() { resolve(img); };
           img.onerror = function() {
-            // Retry: Cloudinary supports CORS, try without cache-buster
-            var img2 = new Image(); img2.crossOrigin = 'anonymous';
+            var img2 = new Image(); img2.crossOrigin = 'anonymous'; img2.referrerPolicy = 'no-referrer';
             img2.onload = function() { resolve(img2); };
             img2.onerror = function() { resolve(null); };
             img2.src = url;
           };
-          // Don't add cache-buster to cloudinary URLs (they already have version)
-          if (url.indexOf('cloudinary') > -1) { img.src = url; }
-          else { img.src = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); }
+          img.src = url;
         });
       }
 
@@ -862,7 +881,7 @@
         });
       }
 
-      Promise.all([loadImage(logoUrl), loadImage(photoUrl), generateQRCanvas()]).then(function(res) {
+      Promise.all([canvasLogoImg && canvasLogoImg.complete ? Promise.resolve(canvasLogoImg) : loadImage(logoUrl), loadImage(photoUrl), generateQRCanvas()]).then(function(res) {
         var logoImg = res[0], photoImg = res[1], qrCanvas = res[2];
         var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
         var c = cv.getContext('2d');
