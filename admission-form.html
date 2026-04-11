@@ -837,8 +837,16 @@
           if (!url) return resolve(null);
           var img = new Image(); img.crossOrigin = 'anonymous';
           img.onload = function() { resolve(img); };
-          img.onerror = function() { resolve(null); };
-          img.src = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+          img.onerror = function() {
+            // Retry: Cloudinary supports CORS, try without cache-buster
+            var img2 = new Image(); img2.crossOrigin = 'anonymous';
+            img2.onload = function() { resolve(img2); };
+            img2.onerror = function() { resolve(null); };
+            img2.src = url;
+          };
+          // Don't add cache-buster to cloudinary URLs (they already have version)
+          if (url.indexOf('cloudinary') > -1) { img.src = url; }
+          else { img.src = url + (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now(); }
         });
       }
 

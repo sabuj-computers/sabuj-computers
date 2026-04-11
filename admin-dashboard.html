@@ -631,6 +631,8 @@
           <tr><td style="padding:5px; border:1px solid #e4ece7;">পরীক্ষা:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.exam || edu.lastExam || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">বোর্ড/বিশ্ববিদ্যালয়:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.board || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">প্রতিষ্ঠান:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.institute || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">রোল নং:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.roll || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">রেজি. নং:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.reg || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">পাশের সাল:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.passingYear || edu.year || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">ফলাফল/GPA:</td><td style="padding:5px; border:1px solid #e4ece7;">${edu.result || edu.gpa || ''}</td></tr>`;
       }
@@ -684,13 +686,23 @@
           ${eduHtml || '<tr><td style="padding:5px; border:1px solid #e4ece7; color:#9ca3af;">তথ্য দেওয়া হয়নি</td></tr>'}
         </table>
 
-        <h4 style="color:var(--g2); margin:10px 0 5px;">💼 কোর্স তথ্য</h4>
+        <h4 style="color:var(--g2); margin:10px 0 5px;">💼 কোর্স ও রেজিস্ট্রেশন তথ্য</h4>
         <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-          <tr><td style="padding:5px; border:1px solid #e4ece7;">কোর্স:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.courseId || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">কোর্স:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.courseId || app.courseName || ''}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">সেশন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.session || ''}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">রেজিস্ট্রেশন নং:</td><td style="padding:5px; border:1px solid #e4ece7;font-weight:bold;color:#1d4ed8;">${app.regNo || '—'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">রোল নং:</td><td style="padding:5px; border:1px solid #e4ece7;font-weight:bold;color:#1d4ed8;">${app.rollNo || '—'}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">পূর্ব অভিজ্ঞতা:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.priorKnowledge || '—'}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">কোথায় থেকে জানলেন:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.source || '—'}</td></tr>
           <tr><td style="padding:5px; border:1px solid #e4ece7;">ভর্তির কারণ:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.enrollment?.reason || '—'}</td></tr>
+        </table>
+
+        <h4 style="color:var(--g2); margin:10px 0 5px;">💰 পেমেন্ট তথ্য</h4>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পেমেন্ট স্ট্যাটাস:</td><td style="padding:5px; border:1px solid #e4ece7;font-weight:bold;color:${(app.paymentStatus||'UNPAID')==='PAID'?'#166534':'#dc2626'};">${app.paymentStatus || 'UNPAID'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">মোট ফি:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.totalFee || '—'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">পরিশোধিত:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.paidAmount || app.paidFee || '0'}</td></tr>
+          <tr><td style="padding:5px; border:1px solid #e4ece7;">বকেয়া:</td><td style="padding:5px; border:1px solid #e4ece7;">${app.dueAmount || app.dueFee || '—'}</td></tr>
         </table>
 
         <h4 style="color:var(--g2); margin:10px 0 5px;">📎 আপলোডকৃত ডকুমেন্ট</h4>
