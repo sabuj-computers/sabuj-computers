@@ -312,20 +312,23 @@
           <div class="id-card-back">
             <h4 class="id-back-title">📋 শর্তাবলী ও তথ্য</h4>
             <div class="id-back-info">
-              <p style="margin:0 0 5px;"><strong>ঠিকানা:</strong> <span id="idAddress">—</span></p>
-              <p style="margin:0 0 5px;"><strong>রক্তের গ্রুপ:</strong> <span id="idBlood">—</span></p>
-              <p style="margin:0 0 5px;"><strong>জরুরি যোগাযোগ:</strong> <span id="idGuardianPhone">—</span></p>
-              <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
-              <ol style="padding-left:18px; margin:0; font-size:11px; line-height:1.6; color:#555;">
+              <p style="margin:0 0 4px;"><strong>ঠিকানা:</strong> <span id="idAddress">—</span></p>
+              <p style="margin:0 0 4px;"><strong>রক্তের গ্রুপ:</strong> <span id="idBlood">—</span></p>
+              <p style="margin:0 0 4px;"><strong>জরুরি যোগাযোগ:</strong> <span id="idEmergencyPhone">+8801724084350</span></p>
+              <hr style="border:0; border-top:1px dashed #ccc; margin:8px 0;">
+              <ol style="padding-left:16px; margin:0; font-size:10.5px; line-height:1.7; color:#555;">
                 <li>এই কার্ড শুধুমাত্র প্রতিষ্ঠানের শিক্ষার্থীদের জন্য প্রযোজ্য।</li>
                 <li>কার্ডটি হস্তান্তরযোগ্য নয়।</li>
                 <li>হারিয়ে গেলে কর্তৃপক্ষকে জানান।</li>
                 <li>কোর্স শেষে কার্ড জমা দিতে হবে।</li>
               </ol>
             </div>
-            <div style="margin-top:15px; padding-top:10px; border-top:2px solid var(--gold);">
+            <div style="margin-top:12px; padding-top:10px; border-top:2px solid var(--gold); text-align:center;">
+              <div id="idSignatureContainer" style="min-height:45px; display:flex; align-items:center; justify-content:center; margin-bottom:6px;">
+                <img id="idSignatureImg" src="" alt="" style="max-width:160px; max-height:45px; display:none;">
+              </div>
               <p style="margin:0; font-size:11px; color:var(--g1); font-weight:700;">অনুমোদিত স্বাক্ষর</p>
-              <p style="margin:3px 0 0; font-size:10px; color:var(--muted);">পরিচালক, সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
+              <p style="margin:2px 0 0; font-size:10px; color:var(--muted);">পরিচালক, সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
             </div>
           </div>
         </div>
@@ -405,6 +408,23 @@
       if(snap.val()) {
         document.getElementById('headerLogo').src = snap.val();
         preloadLogoForCanvas(snap.val());
+      }
+    });
+
+    // Load ID Card Settings (Emergency Phone + Signature)
+    db.ref('sabuj/general/idCardSettings').on('value', snap => {
+      const settings = snap.val() || {};
+      if(settings.emergencyPhone) {
+        var el = document.getElementById('idEmergencyPhone');
+        if(el) el.textContent = settings.emergencyPhone;
+      }
+      if(settings.signatureUrl) {
+        var sigImg = document.getElementById('idSignatureImg');
+        if(sigImg) {
+          sigImg.src = settings.signatureUrl;
+          sigImg.style.display = 'block';
+          sigImg.crossOrigin = 'anonymous';
+        }
       }
     });
 
@@ -536,7 +556,7 @@
                   document.getElementById('idSession').textContent = appData.enrollment?.session || new Date(appData.submittedAt).getFullYear();
                   document.getElementById('idAddress').textContent = (appData.address?.present?.village || '') + ', ' + (appData.address?.present?.upazila || '') + ', ' + (appData.address?.present?.district || '');
                   document.getElementById('idBlood').textContent = appData.personal?.bloodGroup || '—';
-                  document.getElementById('idGuardianPhone').textContent = appData.personal?.guardianPhone || '—';
+                  // Guardian phone removed from here - emergency phone loaded from idCardSettings
                   
                   if(appData.personal?.photo) {
                     document.getElementById('profileImg').innerHTML = `<img src="${appData.personal.photo}" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;">`;

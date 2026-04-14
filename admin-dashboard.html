@@ -408,6 +408,19 @@
           </div>
         </div>
         <div class="card">
+          <h3 style="margin-top:0;">🆔 ID Card সেটিংস</h3>
+          <div class="form-group">
+            <label>জরুরি যোগাযোগ নম্বর (ID Card-এ দেখাবে)</label>
+            <input type="text" id="idCardEmergencyPhone" placeholder="+8801724084350" style="padding:10px; border:1px solid #ccc; border-radius:8px; width:100%; font-size:14px;">
+          </div>
+          <div class="form-group">
+            <label>অনুমোদিত স্বাক্ষর আপলোড (প্রতিষ্ঠান মালিক/পরিচালকের স্বাক্ষর)</label>
+            <input type="file" id="adminSignatureUpload" accept="image/*" onchange="uploadAdminSignature(event)">
+            <div id="signaturePreview" style="margin-top:10px;"></div>
+          </div>
+          <button class="btn-sm btn-save" style="margin-top:10px;" onclick="saveIdCardSettings()">💾 ID Card সেটিংস সেভ করুন</button>
+        </div>
+        <div class="card">
           <h3 style="margin-top:0;">ভর্তি ফর্ম সেটিংস (ফিল্ড দেখান/লুকান)</h3>
           <div id="formSettingsDiv">লোড হচ্ছে...</div>
           <button class="btn-sm btn-save" style="margin-top:15px;" onclick="saveFormSettings()">সেটিংস সেভ করুন</button>
@@ -496,6 +509,7 @@
     let _appDataMap = {};
 
     // Check Admin Auth
+    let intentionalLogout = false;
     auth.onAuthStateChanged(user => {
       if(user) {
         if(user.uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') {
@@ -508,12 +522,18 @@
             if(snap.val()) document.getElementById('adminLogo').src = snap.val();
           });
         } else {
+          intentionalLogout = true;
           auth.signOut(); window.location.href = 'portal.html';
         }
-      } else { window.location.href = 'portal.html'; }
+      } else {
+        if(intentionalLogout) window.location.href = 'portal.html';
+      }
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      intentionalLogout = true;
+      auth.signOut().then(() => window.location.href = 'portal.html');
+    });
 
     function switchTab(tabId) {
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -1594,6 +1614,43 @@
       const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
       const data = await res.json();
       return data.secure_url;
+    }
+
+    // ID Card Settings (Emergency Phone + Signature)
+    db.ref('sabuj/general/idCardSettings').on('value', snap => {
+      const data = snap.val() || {};
+      if(data.emergencyPhone) document.getElementById('idCardEmergencyPhone').value = data.emergencyPhone;
+      if(data.signatureUrl) {
+        document.getElementById('signaturePreview').innerHTML = '<p style="margin:0 0 5px; font-size:12px; color:#6b8c76;">বর্তমান স্বাক্ষর:</p><img src="'+data.signatureUrl+'" style="max-width:200px; max-height:80px; border:1px solid #e4ece7; border-radius:8px; padding:5px; background:#fff;">';
+      }
+    });
+
+    let _pendingSignatureUrl = '';
+    async function uploadAdminSignature(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+      alert('স্বাক্ষর আপলোড হচ্ছে, দয়া করে অপেক্ষা করুন...');
+      try {
+        const url = await uploadToCloudinary(file);
+        _pendingSignatureUrl = url;
+        document.getElementById('signaturePreview').innerHTML = '<p style="margin:0 0 5px; font-size:12px; color:#166534;">✅ স্বাক্ষর আপলোড সফল! সেভ করুন।</p><img src="'+url+'" style="max-width:200px; max-height:80px; border:1px solid #e4ece7; border-radius:8px; padding:5px; background:#fff;">';
+      } catch(err) { alert('স্বাক্ষর আপলোডে সমস্যা!'); }
+    }
+
+    function saveIdCardSettings() {
+      const phone = document.getElementById('idCardEmergencyPhone').value.trim();
+      const updates = {};
+      if(phone) updates.emergencyPhone = phone;
+      if(_pendingSignatureUrl) updates.signatureUrl = _pendingSignatureUrl;
+      // Preserve existing values
+      db.ref('sabuj/general/idCardSettings').once('value').then(snap => {
+        const existing = snap.val() || {};
+        const merged = Object.assign({}, existing, updates);
+        return db.ref('sabuj/general/idCardSettings').set(merged);
+      }).then(() => {
+        _pendingSignatureUrl = '';
+        alert('✅ ID Card সেটিংস সফলভাবে সেভ হয়েছে!');
+      });
     }
 
     async function uploadAdminLogo(e) {

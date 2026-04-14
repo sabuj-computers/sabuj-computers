@@ -197,7 +197,7 @@
       <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" id="headerLogo" alt="Logo">
       <h2>সবুজ কম্পিউটার্স</h2>
     </div>
-    <a href="index.html" class="back-link">← হোম</a>
+    <a href="home.html" class="back-link">← হোম</a>
   </header>
 
   <div class="main-container">
@@ -429,7 +429,7 @@
       setLoading('loginBtn', true);
       document.getElementById('loginError').style.display = 'none';
 
-      const persistence = remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+      const persistence = firebase.auth.Auth.Persistence.SESSION;
       
       auth.setPersistence(persistence).then(() => {
         return auth.signInWithEmailAndPassword(email, password);
