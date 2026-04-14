@@ -642,7 +642,7 @@
                 <h4 style="margin:0 0 5px; color:var(--g1);">${n.title}</h4>
                 <p style="margin:0; font-size:12px; color:var(--muted);">${n.date}</p>
                 <p style="margin:5px 0 10px; font-size:14px; color:#4a6040;">${n.desc || ''}</p>
-                ${n.fileUrl ? (n.fileUrl.endsWith('.pdf') ? `<a href="${n.fileUrl}" target="_blank" style="color:var(--g2); font-weight:bold; text-decoration:none;">📄 PDF ডাউনলোড করুন</a>` : `<img src="${n.fileUrl}" style="max-width:100%; border-radius:8px; margin-top:10px;">`) : ''}
+                ${(n.pdf || n.fileUrl) ? (function(){ var fu = n.pdf || n.fileUrl; var isPdf = fu.match(/\.(pdf)(\?|$)/i) || fu.indexOf('/raw/upload/') !== -1; if(isPdf){ var dl = fu.indexOf('/image/upload/') !== -1 ? fu.replace('/image/upload/','/raw/upload/') : fu; return '<a href="'+dl+'" target="_blank" style="color:var(--g2); font-weight:bold; text-decoration:none;">📄 PDF ডাউনলোড করুন</a>'; } else { return '<img src="'+fu+'" style="max-width:100%; border-radius:8px; margin-top:10px;">'; } })() : ''}
               </div>
             `).join('');
 

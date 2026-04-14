@@ -3918,16 +3918,24 @@ function calcFeeDue(){
 // Universal file download — no CORS dependency
 function forceDownloadFile(url, filename) {
   if (!url) return;
-  // Cloudinary URLs support CORS, try blob download for them
   var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
   if (isCloudinary) {
-    fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+    // Fix broken Cloudinary URLs: image/upload -> raw/upload for PDFs/docs
+    var dlUrl = url;
+    if (dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i) && dlUrl.indexOf('/image/upload/') !== -1) {
+      dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
+    }
+    if (dlUrl.indexOf('/raw/upload/') !== -1 && dlUrl.indexOf('fl_attachment') === -1) {
+      dlUrl = dlUrl.replace('/raw/upload/', '/raw/upload/fl_attachment/');
+    }
+    fetch(dlUrl).then(function(r){ return r.blob(); }).then(function(blob){
+      if (blob.size < 100) { window.open(dlUrl, '_blank'); return; }
       if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
       var b = URL.createObjectURL(blob);
       var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
       document.body.appendChild(a); a.click();
       setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
-    }).catch(function(){ window.open(url, '_blank'); });
+    }).catch(function(){ window.open(dlUrl, '_blank'); });
     return;
   }
   // For Firebase Storage & other cross-origin: open directly (no fetch = no CORS issue)
@@ -4022,7 +4030,7 @@ document.getElementById('n-new').checked=true;
     formData.append("upload_preset", "eopkol2t");
 
     // PDF এর জন্য 'auto' বা 'raw' ব্যবহার করতে হয়
-    fetch("https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload", { 
+    fetch("https://api.cloudinary.com/v1_1/dblafxhgc/raw/upload", { 
       method: "POST",
       body: formData
     })
