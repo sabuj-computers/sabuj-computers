@@ -64,12 +64,21 @@
     .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 14px; }
     
     .btn-group { display: flex; justify-content: space-between; margin-top: 30px; }
-    .btn-prev { padding: 12px 24px; background: #e4ece7; color: var(--text); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
-    .btn-next, .btn-submit { padding: 12px 24px; background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    .btn-submit { background: linear-gradient(135deg, var(--gold), #e8b820); color: #2a1800; }
+    .btn-prev { padding: 12px 24px; background: #e4ece7; color: var(--text); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-prev:hover { background: #d4e0d8; transform: translateX(-2px); }
+    .btn-next, .btn-submit { padding: 12px 24px; background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(26,107,53,0.3); }
+    .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,107,53,0.4); }
+    .btn-next:active, .btn-submit:active { transform: translateY(0); }
+    .btn-submit { background: linear-gradient(135deg, var(--gold), #e8b820); color: #2a1800; box-shadow: 0 4px 15px rgba(200,168,71,0.4); }
+    .btn-submit:hover { box-shadow: 0 6px 20px rgba(200,168,71,0.5); }
     
-    .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top-color: #2a1800; border-radius: 50%; animation: spin 1s linear infinite; }
+    .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top-color: #2a1800; border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Custom scrollbar & selection */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(13,61,31,0.3); border-radius: 99px; }
+    ::selection { background: var(--g3); color: #fff; }
   </style>
 </head>
 <body>

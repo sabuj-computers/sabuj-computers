@@ -1670,10 +1670,17 @@ function showLoading(show) {
 const _adm = (function(){
   // সব sensitive variable এই private scope-এ — console থেকে access নেই
   let _authenticated = false;
-  let _attempts = 0;
-  let _lockUntil = 0;
   let _sessionTimer = null;
   const SESSION_MINUTES = 30; // ৩০ মিনিট পরে auto logout
+  const _RL_KEY = 'sctc_admin_rl';
+  const _MAX_ATTEMPTS = 5;
+  const _LOCK_MS = 15 * 60 * 1000; // ১৫ মিনিট
+
+  function _getRL() {
+    try { var d = JSON.parse(localStorage.getItem(_RL_KEY)||'{}'); if(d.lockUntil && Date.now()>=d.lockUntil){localStorage.removeItem(_RL_KEY);return{a:0,l:0};} return{a:d.a||0,l:d.l||0}; } catch(e){return{a:0,l:0};}
+  }
+  function _setRL(a,l){ localStorage.setItem(_RL_KEY, JSON.stringify({a:a,l:l})); }
+  function _clearRL(){ localStorage.removeItem(_RL_KEY); }
 
   function _getActualPwd(){
     return DB.password || 'sabuj2024';
@@ -1727,35 +1734,37 @@ const _adm = (function(){
 verifyPwd() {
       const inputPass = document.getElementById('pwdInput').value;
       if (!inputPass) {
-        document.getElementById('pwdErr').textContent = '❌ পাসওয়ার্ড দিন';
+        document.getElementById('pwdErr').textContent = '❌ পাসওয়ার্ড দিন';
         document.getElementById('pwdErr').style.display = 'block';
         return;
       }
 
-      if (Date.now() < _lockUntil) {
-        const remaining = Math.ceil((_lockUntil - Date.now()) / 1000);
-        document.getElementById('pwdErr').textContent = `❌ অ্যাকাউন্ট লকড। ${remaining} সেকেন্ড পর চেষ্টা করুন।`;
+      var rl = _getRL();
+      if (rl.l && Date.now() < rl.l) {
+        var rem = Math.ceil((rl.l - Date.now()) / 1000);
+        var min = Math.floor(rem/60), sec = rem%60;
+        document.getElementById('pwdErr').textContent = '🔒 লকড। ' + min + ':' + String(sec).padStart(2,'0') + ' পর চেষ্টা করুন।';
         document.getElementById('pwdErr').style.display = 'block';
         return;
       }
 
-      const ADMIN_EMAIL = 'sssabuj007@gmail.com'; // আপনার অ্যাডমিন ইমেইল
+      const ADMIN_EMAIL = 'sssabuj007@gmail.com';
 
-      // সরাসরি ফায়ারবেস দিয়ে লগইন চেক
       firebase.auth().signInWithEmailAndPassword(ADMIN_EMAIL, inputPass)
         .then((userCredential) => {
-          _attempts = 0;
+          _clearRL();
           this.closePwdModal();
           _openAdmin();
         })
         .catch((error) => {
-          _attempts++;
-          if (_attempts >= 5) {
-            _lockUntil = Date.now() + 30000;
-            _attempts = 0;
-            document.getElementById('pwdErr').textContent = '❌ অনেকবার ভুল চেষ্টা। ৩০ সেকেন্ড পর আবার চেষ্টা করুন।';
+          var rl2 = _getRL();
+          var newA = rl2.a + 1;
+          if (newA >= _MAX_ATTEMPTS) {
+            _setRL(0, Date.now() + _LOCK_MS);
+            document.getElementById('pwdErr').textContent = '🔒 অনেকবার ভুল চেষ্টা। ১৫ মিনিট পর আবার চেষ্টা করুন।';
           } else {
-            document.getElementById('pwdErr').textContent = `❌ পাসওয়ার্ড ভুল (${_attempts}/5)`;
+            _setRL(newA, 0);
+            document.getElementById('pwdErr').textContent = '❌ পাসওয়ার্ড ভুল (' + newA + '/' + _MAX_ATTEMPTS + ')';
           }
           document.getElementById('pwdErr').style.display = 'block';
           document.getElementById('pwdInput').value = '';
@@ -1768,8 +1777,8 @@ verifyPwd() {
     },
     requireAuth(){ return _requireAuth(); },
     isAuthenticated(){ return _authenticated; },
-    // Session reset on any admin activity (keep alive)
     keepAlive(){ if(_authenticated) _startSessionTimer(); }
+
   };
 })();
 
@@ -3915,30 +3924,99 @@ function calcFeeDue(){
 // ═══════════════════════════════════════════════════════
 // NOTICE BOARD
 // ═══════════════════════════════════════════════════════
-// Universal file download — no CORS dependency
+// Universal file download — blocks accidental 401 HTML downloads
+function normalizeCloudinaryDownloadUrl(url) {
+  var dlUrl = String(url || '').trim();
+  if (!dlUrl) return '';
+  if (dlUrl.indexOf('/raw/upload/fl_attachment/') !== -1) {
+    dlUrl = dlUrl.replace('/raw/upload/fl_attachment/', '/raw/upload/');
+  }
+  if (dlUrl.indexOf('/auto/upload/') !== -1 && dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i)) {
+    dlUrl = dlUrl.replace('/auto/upload/', '/raw/upload/');
+  }
+  if (dlUrl.indexOf('/image/upload/') !== -1 && dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i)) {
+    dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
+  }
+  return dlUrl;
+}
+
+function triggerBlobDownload(blob, filename) {
+  if (typeof saveAs === 'function') {
+    saveAs(blob, filename || 'file');
+    return;
+  }
+  var b = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = b;
+  a.download = filename || 'file';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    URL.revokeObjectURL(b);
+    if(a.parentNode) a.parentNode.removeChild(a);
+  }, 3000);
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function uploadFileToCloudinaryRaw(file) {
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'eopkol2t');
+  var isDoc = file.name && file.name.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)$/i);
+  var uploadUrl = isDoc
+    ? 'https://api.cloudinary.com/v1_1/dblafxhgc/raw/upload'
+    : 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
+  return fetch(uploadUrl, { method: 'POST', body: formData })
+    .then(function(res){ return res.json(); })
+    .then(function(data){
+      if(data.error) throw new Error(data.error.message);
+      return {
+        fileUrl: data.secure_url || '',
+        pdf: data.secure_url || null,
+        fileName: file.name || '',
+        fileMimeType: file.type || ''
+      };
+    });
+}
+
+function downloadNoticeSource(url, fileDataKey, filename) {
+  // fileDataKey kept for backward compat but ignored now
+  forceDownloadFile(url, filename);
+}
+
 function forceDownloadFile(url, filename) {
   if (!url) return;
   var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
+  var dlUrl = isCloudinary ? normalizeCloudinaryDownloadUrl(url) : url;
   if (isCloudinary) {
-    var dlUrl = url;
-    if (dlUrl.indexOf('/raw/upload/fl_attachment/') !== -1) {
-      dlUrl = dlUrl.replace('/raw/upload/fl_attachment/', '/raw/upload/');
-    }
-    if (dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i) && dlUrl.indexOf('/image/upload/') !== -1) {
-      dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
-    }
-    fetch(dlUrl).then(function(r){ return r.blob(); }).then(function(blob){
-      if (!blob || blob.size < 100) { window.open(dlUrl, '_blank'); return; }
-      if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
-      var b = URL.createObjectURL(blob);
-      var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
-    }).catch(function(){ window.open(dlUrl, '_blank'); });
+    fetch(dlUrl, { method: 'GET', credentials: 'omit', redirect: 'follow' })
+      .then(function(r){
+        var contentType = String(r.headers.get('content-type') || '').toLowerCase();
+        if (!r.ok) throw new Error('HTTP_' + r.status);
+        if (contentType.indexOf('text/html') !== -1 || contentType.indexOf('application/json') !== -1) {
+          throw new Error('INVALID_FILE_RESPONSE');
+        }
+        return r.blob();
+      })
+      .then(function(blob){
+        if (!blob || blob.size < 100) throw new Error('EMPTY_FILE');
+        triggerBlobDownload(blob, filename || 'file');
+      })
+      .catch(function(err){
+        console.error('Notice download failed:', err, dlUrl);
+        showNotif('❌ ডাউনলোড ব্যর্থ। পুরনো ভুল PDF হলে আবার নতুন করে upload করুন।');
+      });
     return;
   }
-  // For Firebase Storage & other cross-origin: open directly (no fetch = no CORS issue)
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener');
 }
 
 function renderNotices(){
@@ -3953,14 +4031,14 @@ function renderNotices(){
   board.innerHTML=notices.map(n=>{
     const fileUrl = n.pdf || n.fileUrl || '';
     const hasFile = !!fileUrl;
-    const fname = _en(n.title).replace(/\s+/g,'_') + '.pdf';
+    const fname = (n.fileName || (_en(n.title).replace(/\s+/g,'_') + '.pdf'));
     return '<div style="background:#fff;border-radius:16px;padding:22px 24px;border:1px solid #e4ece7;box-shadow:0 2px 12px rgba(13,61,31,.07);display:flex;align-items:flex-start;gap:16px">'
     +'<div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#0d3d1f,#1a6b35);display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>'
     +'<div style="flex:1;min-width:0">'
     +'<div style="font-weight:700;font-size:16px;color:#0d3d1f">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px">নতুন</span>':'')+'</div>'
     +'<div style="font-size:11px;color:#6b8c76;margin:4px 0 8px">📅 '+(n.date||'')+'</div>'
     +(n.desc?'<div style="font-size:13px;color:#4a6040;margin-bottom:10px;line-height:1.6">'+_en(n.desc)+'</div>':'')
-    +(hasFile?'<button onclick="forceDownloadFile(\''+_escUrl(fileUrl)+'\',\''+fname+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;border:none;cursor:pointer">📄 PDF ডাউনলোড করুন</button>':'')
+    +(hasFile?'<button onclick="downloadNoticeSource(\''+_escUrl(fileUrl)+'\',\'\',\''+_escUrl(fname)+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;border:none;cursor:pointer">📄 PDF ডাউনলোড করুন</button>':'')
     +'</div></div>';
   }).join('');
 }
@@ -3993,7 +4071,7 @@ function saveNotice(){
   if(!DB.notices)DB.notices=[];
   if(DB.notices.length>=50){showNotif('❌ সর্বোচ্চ ৫০টি নোটিশ রাখা যায়। আগের নোটিশ মুছুন।');return;}
   const pf=document.getElementById('n-pdf').files[0];
-  const doSave=function(pdfData){
+  const doSave=function(fileMeta){
 var notice={
       title:title,
       date:document.getElementById('n-date').value||new Date().toLocaleDateString('bn-BD'),
@@ -4001,7 +4079,10 @@ var notice={
       isNew:document.getElementById('n-new').checked,
       isAnnouncement:document.getElementById('n-announce').checked,
       announceUntil:document.getElementById('n-announce-until').value||null,
-      pdf:pdfData||null,
+      pdf:fileMeta&&fileMeta.pdf?fileMeta.pdf:null,
+      fileUrl:fileMeta&&fileMeta.fileUrl?fileMeta.fileUrl:'',
+      fileName:fileMeta&&fileMeta.fileName?fileMeta.fileName:'',
+      fileMimeType:fileMeta&&fileMeta.fileMimeType?fileMeta.fileMimeType:'',
       ts:Date.now()
     };
     if(!DB.notices)DB.notices=[];
@@ -4024,28 +4105,14 @@ document.getElementById('n-new').checked=true;
     
     showNotif('⏳ PDF আপলোড হচ্ছে, অপেক্ষা করুন...');
 
-    let formData = new FormData();
-    formData.append("file", pf);
-    formData.append("upload_preset", "eopkol2t");
-
-    // PDF এর জন্য 'auto' বা 'raw' ব্যবহার করতে হয়
-    fetch("https://api.cloudinary.com/v1_1/dblafxhgc/raw/upload", { 
-      method: "POST",
-      body: formData
-    })
-    .then(response => response.json())
-    .then(result => {
-      if(result.secure_url) {
-         doSave(result.secure_url); // Cloudinary এর PDF লিংক Firebase এ সেভ হবে
-      } else {
-         showNotif('❌ PDF আপলোডে সমস্যা হয়েছে');
-         doSave(null);
-      }
-    })
-    .catch(err => {
-      showNotif('❌ ইন্টারনেট সমস্যা');
-      doSave(null);
-    });
+    uploadFileToCloudinaryRaw(pf)
+      .then(function(fileMeta){
+        doSave(fileMeta);
+      })
+      .catch(function(err){
+        console.error('Notice PDF upload failed:', err);
+        showNotif('❌ PDF আপলোডে সমস্যা হয়েছে');
+      });
   } else {
       doSave(null);}
   }
@@ -4114,11 +4181,20 @@ function checkAnnouncements() {
     
     const pdfBox = document.getElementById('annPdfBox');
     const pdfBtn = document.getElementById('annPdfBtn');
-    if(latestAnn.pdf) {
+    const annFileUrl = latestAnn.pdf || latestAnn.fileUrl || '';
+    const annFileName = latestAnn.fileName || (latestAnn.title || 'notice').replace(/\s+/g,'_') + '.pdf';
+    if(annFileUrl) {
         pdfBox.style.display = 'block';
-        pdfBtn.href = latestAnn.pdf;
+        pdfBtn.setAttribute('href', '#');
+        pdfBtn.removeAttribute('target');
+        pdfBtn.onclick = function(e) {
+            if (e) e.preventDefault();
+            downloadNoticeSource(annFileUrl, '', annFileName);
+            return false;
+        };
     } else {
         pdfBox.style.display = 'none';
+        pdfBtn.onclick = null;
     }
 
     const modal = document.getElementById('announceModal');

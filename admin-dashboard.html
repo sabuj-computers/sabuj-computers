@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --sidebar: #0a2e17; --muted: #6b8c76; --text: #1e3028; }
@@ -52,9 +53,31 @@
       table { font-size: 11px; }
       .card { padding: 12px; }
     }
-    .tab-content { display: none; animation: fadeIn 0.3s; }
+    .tab-content { display: none; animation: fadeIn 0.35s ease-out; }
     .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Smooth transitions */
+    .btn-sm { transition: all 0.2s ease; }
+    .btn-sm:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .btn-sm:active { transform: translateY(0); }
+    .card { transition: box-shadow 0.3s ease; }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+    .nav-item { transition: all 0.2s ease; }
+    .badge-edit, .badge-del { transition: all 0.2s ease; }
+    .badge-edit:hover { background: #f0d860; transform: scale(1.05); }
+    .badge-del:hover { background: #dc2626; color: #fff; transform: scale(1.05); }
+    .btn-quick-save { transition: all 0.2s ease; }
+    .btn-quick-save:hover { background: var(--g1); transform: scale(1.05); }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(13,61,31,0.3); border-radius: 99px; }
+    ::selection { background: var(--g2); color: #fff; }
+    
+    /* Loading skeleton */
+    @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+    .skeleton { background: linear-gradient(90deg, #f0f4f1 25%, #e4ece7 50%, #f0f4f1 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 16px; margin-bottom: 8px; }
 
     /* Tables & Cards */
     .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -92,9 +115,11 @@
     .fg input, .fg select { width:100%; padding:10px 14px; border:1.5px solid #dde8e0; border-radius:10px; font-family:'Hind Siliguri'; font-size:14px; }
 
     /* Modal Overlay & Content */
-    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
-    .modal-overlay.show { display:flex; }
-    .modal-content { background:#fff; padding:25px; border-radius:16px; width:90%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.2); }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .modal-overlay.show { display:flex; animation: fadeInBg 0.2s ease; }
+    @keyframes fadeInBg { from { opacity:0; } to { opacity:1; } }
+    .modal-content { background:#fff; padding:25px; border-radius:20px; width:90%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation: modalSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes modalSlideUp { from { transform:translateY(20px) scale(0.97); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
   </style>
 </head>
 <body>
@@ -117,6 +142,7 @@
       <li class="nav-item" onclick="switchTab('notices')">📢 Notices & Announce</li>
       <li class="nav-item" onclick="switchTab('library')">📚 Library</li>
       <li class="nav-item" onclick="switchTab('settings')">⚙️ Settings</li>
+      <li class="nav-item" onclick="switchTab('backup')">💾 Backup</li>
     </ul>
   </div>
 
@@ -427,7 +453,28 @@
         </div>
       </div>
 
+      <!-- 11. Backup -->
+      <div class="tab-content" id="tab-backup">
+        <div class="card">
+          <h3 style="margin-top:0;">💾 ডাটা ব্যাকআপ</h3>
+          <p style="color:var(--muted); font-size:13px; margin-bottom:15px;">Firebase-এর সকল ডাটা (শিক্ষার্থী, আবেদন, নোটিশ, লাইব্রেরি, সেটিংস) একটি JSON ফাইলে ডাউনলোড করুন।</p>
+          <div id="backupStatus" style="display:none; padding:10px; border-radius:8px; margin-bottom:15px; font-size:13px;"></div>
+          <button onclick="downloadFullBackup()" style="background:linear-gradient(135deg,var(--g1),var(--g2)); color:#fff; border:none; padding:14px 28px; border-radius:12px; font-size:15px; font-weight:bold; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:10px;">
+            📥 সম্পূর্ণ ব্যাকআপ ডাউনলোড করুন
+          </button>
+          <p style="color:var(--muted); font-size:11px; margin-top:12px;">⚠️ নিয়মিত ব্যাকআপ নিন। সপ্তাহে অন্তত একবার ব্যাকআপ নেওয়া উচিত।</p>
+        </div>
+      </div>
+
     </div>
+  </div>
+
+  <!-- Floating Backup Button -->
+  <div id="floatingBackup" style="position:fixed; bottom:25px; right:25px; z-index:999;">
+    <div id="floatingBackupStatus" style="display:none; position:absolute; bottom:65px; right:0; width:280px; padding:12px 16px; border-radius:12px; font-size:13px; box-shadow:0 4px 20px rgba(0,0,0,0.15); background:#fff;"></div>
+    <button onclick="downloadFullBackup('floating')" title="সম্পূর্ণ ডাটা ব্যাকআপ" style="width:56px; height:56px; border-radius:50%; border:none; background:linear-gradient(135deg,var(--g1),var(--g2)); color:#fff; font-size:24px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+      💾
+    </button>
   </div>
 
   <!-- Application Details Modal -->
@@ -482,34 +529,89 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Cloudinary Config
+    // EmailJS Config
+    emailjs.init('ndTzsxQcXnkqvdpwv');
+    const EMAILJS_SERVICE = 'service_2mdknti';
+    const EMAILJS_TEMPLATE_ADMISSION = 'template_v1exu1d';
+    const EMAILJS_TEMPLATE_RESULT = 'template_ymrxekc';
+
+    function sendAdmissionEmail(studentEmail, studentName, status, appId, message) {
+      if (!studentEmail) { console.warn('No email for student, skipping email'); return; }
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ADMISSION, {
+        to_email: studentEmail,
+        student_name: studentName || 'Student',
+        status: status,
+        application_id: appId || '',
+        message: message || ''
+      }).then(() => console.log('✅ Admission email sent to ' + studentEmail))
+        .catch(err => console.error('❌ Email send failed:', err));
+    }
+
+    function sendResultEmail(studentEmail, studentName, examName, result) {
+      if (!studentEmail) { console.warn('No email for student, skipping email'); return; }
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_RESULT, {
+        to_email: studentEmail,
+        student_name: studentName || 'Student',
+        exam_name: examName || 'পরীক্ষা',
+        result: result || '',
+        time: new Date().toLocaleString('bn-BD')
+      }).then(() => console.log('✅ Result email sent to ' + studentEmail))
+        .catch(err => console.error('❌ Email send failed:', err));
+    }
+
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
-    // Universal file download — no CORS dependency
+    // (readFileAsDataUrl and saveNoticeAssetToDatabase removed — PDFs now go to Cloudinary raw/upload)
+
+    // Universal file download — blocks accidental 401 HTML downloads
+    function normalizeCloudinaryDownloadUrl(url) {
+      var dlUrl = String(url || '').trim();
+      if (!dlUrl) return '';
+      if (dlUrl.indexOf('/raw/upload/fl_attachment/') !== -1) {
+        dlUrl = dlUrl.replace('/raw/upload/fl_attachment/', '/raw/upload/');
+      }
+      if (dlUrl.indexOf('/auto/upload/') !== -1 && dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i)) {
+        dlUrl = dlUrl.replace('/auto/upload/', '/raw/upload/');
+      }
+      if (dlUrl.indexOf('/image/upload/') !== -1 && dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i)) {
+        dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
+      }
+      return dlUrl;
+    }
+
     function downloadCrossOriginFile(url, filename) {
       if (!url) return;
       var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
+      var dlUrl = isCloudinary ? normalizeCloudinaryDownloadUrl(url) : url;
       if (isCloudinary) {
-        var dlUrl = url;
-        if (dlUrl.indexOf('/raw/upload/fl_attachment/') !== -1) {
-          dlUrl = dlUrl.replace('/raw/upload/fl_attachment/', '/raw/upload/');
-        }
-        if (dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i) && dlUrl.indexOf('/image/upload/') !== -1) {
-          dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
-        }
-        fetch(dlUrl).then(function(r){ return r.blob(); }).then(function(blob){
-          if (!blob || blob.size < 100) { window.open(dlUrl, '_blank'); return; }
-          if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
-          var b = URL.createObjectURL(blob);
-          var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
-          document.body.appendChild(a); a.click();
-          setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
-        }).catch(function(){ window.open(dlUrl, '_blank'); });
+        fetch(dlUrl, { method: 'GET', credentials: 'omit', redirect: 'follow' })
+          .then(function(r){
+            var contentType = String(r.headers.get('content-type') || '').toLowerCase();
+            if (!r.ok) throw new Error('HTTP_' + r.status);
+            if (contentType.indexOf('text/html') !== -1 || contentType.indexOf('application/json') !== -1) {
+              throw new Error('INVALID_FILE_RESPONSE');
+            }
+            return r.blob();
+          })
+          .then(function(blob){
+            if (!blob || blob.size < 100) throw new Error('EMPTY_FILE');
+            if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
+            var b = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = b;
+            a.download = filename || 'file';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
+          })
+          .catch(function(err){
+            console.error('Download failed:', err, dlUrl);
+            alert('❌ ডাউনলোড ব্যর্থ। পুরনো ভুল PDF হলে নতুন করে upload করুন।');
+          });
         return;
       }
-      // For Firebase Storage & other cross-origin: open directly
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener');
     }
 
     // Store app data for modal viewing (avoids JSON.stringify in onclick)
@@ -1035,6 +1137,11 @@
           await saveDB('students', nextStudents);
           DB.students = nextStudents;
           renderAdminStudents();
+          // Send approval email
+          const studentEmail = normalizedApp.personal?.email || '';
+          const studentName = normalizedApp.personal?.nameBn || normalizedApp.personal?.nameEn || '';
+          sendAdmissionEmail(studentEmail, studentName, 'Approved ✅', appId, 'আপনার ভর্তি আবেদন অনুমোদিত হয়েছে। সেশন: ' + selectedSession + '। Student Portal এ লগইন করে বিস্তারিত দেখুন।');
+
           alert(matchIndex >= 0
             ? '✅ আবেদন অনুমোদিত হয়েছে এবং Students সেকশনের তথ্য আপডেট হয়েছে!'
             : '✅ আবেদন অনুমোদিত এবং Students সেকশনে যোগ হয়েছে!');
@@ -1045,10 +1152,19 @@
       }
     }
 
-    function rejectApp(appId, uid) {
+    async function rejectApp(appId, uid) {
       if(confirm('আবেদনটি বাতিল করতে চান?')) {
-        db.ref('sabuj/applications/' + appId).update({ status: 'rejected' });
-        db.ref('sabuj/students_auth/' + uid).update({ status: 'rejected' });
+        const appSnap = await db.ref('sabuj/applications/' + appId).once('value');
+        const app = appSnap.val();
+        await db.ref('sabuj/applications/' + appId).update({ status: 'rejected' });
+        await db.ref('sabuj/students_auth/' + uid).update({ status: 'rejected' });
+        
+        // Send rejection email
+        if (app) {
+          const studentEmail = app.personal?.email || '';
+          const studentName = app.personal?.nameBn || app.personal?.nameEn || '';
+          sendAdmissionEmail(studentEmail, studentName, 'Rejected ❌', appId, 'দুঃখিত, আপনার ভর্তি আবেদন বাতিল করা হয়েছে। বিস্তারিত জানতে প্রতিষ্ঠানে যোগাযোগ করুন।');
+        }
       }
     }
 
@@ -1211,6 +1327,13 @@
       if(appKey) {
         db.ref('sabuj/applications/' + appKey + '/exam').update({ result: val });
       }
+      
+      // Send result email
+      const student = DB.students[i];
+      const studentEmail = student.email || '';
+      const studentName = student.name || student.nameBn || '';
+      const courseName = student.course || '';
+      sendResultEmail(studentEmail, studentName, courseName, val);
       
       renderAdminStudents();
     }
@@ -1572,7 +1695,7 @@
         data = { text: document.getElementById(`report_text_${appId}`).value };
       }
       
-      db.ref(`sabuj/applications/${appId}/${type}`).update(data).then(() => {
+      db.ref(`sabuj/applications/${appId}/${type}`).update(data).then(async () => {
         // Sync to main website's students list
         const idx = DB.students.findIndex(s => s.reg === appId);
         if(idx >= 0) {
@@ -1588,7 +1711,22 @@
           saveDB('students', DB.students);
           renderAdminStudents();
         }
-        alert('✅ সফলভাবে সেভ হয়েছে!');
+
+        // Send result email when exam result is saved
+        if(type === 'exam' && data.result) {
+          try {
+            const appSnap = await db.ref('sabuj/applications/' + appId).once('value');
+            const app = appSnap.val();
+            if(app) {
+              const studentEmail = app.personal?.email || '';
+              const studentName = app.personal?.nameBn || app.personal?.nameEn || '';
+              const courseName = app.enrollment?.courseId || 'পরীক্ষা';
+              sendResultEmail(studentEmail, studentName, courseName, data.result);
+            }
+          } catch(e) { console.error('Email fetch error:', e); }
+        }
+
+        alert('✅ সফলভাবে সেভ হয়েছে!');
       });
     }
 
@@ -1692,15 +1830,34 @@
       
       if(!title) return alert('শিরোনাম দিন!');
       
-      let fileUrl = '';
+      let uploadedFile = { fileUrl: '', pdf: null, fileName: '', fileMimeType: '' };
       if(fileInput.files[0]) {
+        const file = fileInput.files[0];
         alert('ফাইল আপলোড হচ্ছে...');
-        // Notice file upload — use the smart uploadToCloudinary which auto-detects raw vs image
-        fileUrl = await uploadToCloudinary(fileInput.files[0]); 
+        try {
+          const cloudUrl = await uploadToCloudinary(file);
+          if (!cloudUrl) throw new Error('UPLOAD_FAILED');
+          uploadedFile = {
+            fileUrl: cloudUrl,
+            pdf: cloudUrl,
+            fileName: file.name || '',
+            fileMimeType: file.type || ''
+          };
+        } catch (err) {
+          console.error('Notice file upload failed:', err);
+          alert('❌ নোটিশ ফাইল আপলোডে সমস্যা হয়েছে!');
+          return;
+        }
       }
       
       const noticeData = {
-        title, desc, fileUrl, pdf: fileUrl || null, isAnnouncement,
+        title,
+        desc,
+        fileUrl: uploadedFile.fileUrl || '',
+        pdf: uploadedFile.pdf || null,
+        fileName: uploadedFile.fileName || '',
+        fileMimeType: uploadedFile.fileMimeType || '',
+        isAnnouncement,
         isNew: true,
         date: new Date().toLocaleDateString('bn-BD'),
         timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -1858,6 +2015,45 @@
       });
     }
     setTimeout(loadOverviewAnalytics, 1000);
+
+    // ====== DATA BACKUP ======
+    async function downloadFullBackup(source) {
+      const statusEl = source === 'floating' ? document.getElementById('floatingBackupStatus') : document.getElementById('backupStatus');
+      const tabStatus = document.getElementById('backupStatus');
+      const floatStatus = document.getElementById('floatingBackupStatus');
+      // Show both statuses
+      statusEl.style.display = 'block';
+      if (tabStatus) tabStatus.style.display = 'block';
+      if (floatStatus) floatStatus.style.display = 'block';
+      function setStatus(bg, color, text) {
+        [tabStatus, floatStatus].forEach(el => { if(el) { el.style.background = bg; el.style.color = color; el.textContent = text; } });
+      }
+      setStatus('#eff6ff', '#1e40af', '⏳ সকল ডাটা সিঙ্ক ও সংগ্রহ করা হচ্ছে...');
+      try {
+        const snap = await db.ref('sabuj').once('value');
+        const allData = snap.val();
+        if (!allData) {
+          setStatus('#fef9c3', '#854d0e', '⚠️ কোনো ডাটা পাওয়া যায়নি!');
+          return;
+        }
+        const backup = { _meta: { exportedAt: new Date().toISOString(), exportedBy: 'SCTC Admin Dashboard', version: '1.0' }, data: allData };
+        const jsonStr = JSON.stringify(backup, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = new Date().toISOString().split('T')[0];
+        a.href = url; a.download = 'SCTC_Backup_' + dateStr + '.json';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 3000);
+        const sizeKB = Math.round(blob.size / 1024);
+        setStatus('#dcfce7', '#166534', '✅ ব্যাকআপ সম্পন্ন! (' + sizeKB + ' KB)');
+        // Auto-hide floating status after 5s
+        if (floatStatus) setTimeout(() => { floatStatus.style.display = 'none'; }, 5000);
+      } catch (err) {
+        console.error('Backup failed:', err);
+        setStatus('#fee2e2', '#991b1b', '❌ ব্যাকআপ ব্যর্থ: ' + err.message);
+      }
+    }
   </script>
 </body>
 </html>
