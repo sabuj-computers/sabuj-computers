@@ -3915,6 +3915,24 @@ function calcFeeDue(){
 // ═══════════════════════════════════════════════════════
 // NOTICE BOARD
 // ═══════════════════════════════════════════════════════
+// Force download via blob (bypasses cross-origin restrictions)
+function forceDownloadFile(url, filename) {
+  fetch(url, { mode: 'cors' })
+    .then(r => r.blob())
+    .then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'notice-file';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 200);
+    })
+    .catch(() => {
+      // Fallback: open in new tab
+      window.open(url, '_blank');
+    });
+}
+
 function renderNotices(){
   const notices=(DB.notices||[]).slice().reverse();
   const board=document.getElementById('noticeBoard');
@@ -3923,16 +3941,20 @@ function renderNotices(){
   if(!notices.length){board.innerHTML='';if(noEl)noEl.style.display='block';return;}
   if(noEl)noEl.style.display='none';
   const _en=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  board.innerHTML=notices.map(n=>
-    '<div style="background:#fff;border-radius:16px;padding:22px 24px;border:1px solid #e4ece7;box-shadow:0 2px 12px rgba(13,61,31,.07);display:flex;align-items:flex-start;gap:16px">'
+  const _escUrl=s=>String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  board.innerHTML=notices.map(n=>{
+    const fileUrl = n.pdf || n.fileUrl || '';
+    const hasFile = !!fileUrl;
+    const fname = _en(n.title).replace(/\s+/g,'_') + '.pdf';
+    return '<div style="background:#fff;border-radius:16px;padding:22px 24px;border:1px solid #e4ece7;box-shadow:0 2px 12px rgba(13,61,31,.07);display:flex;align-items:flex-start;gap:16px">'
     +'<div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,#0d3d1f,#1a6b35);display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>'
     +'<div style="flex:1;min-width:0">'
     +'<div style="font-weight:700;font-size:16px;color:#0d3d1f">'+_en(n.title)+(n.isNew?'<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px">নতুন</span>':'')+'</div>'
     +'<div style="font-size:11px;color:#6b8c76;margin:4px 0 8px">📅 '+(n.date||'')+'</div>'
     +(n.desc?'<div style="font-size:13px;color:#4a6040;margin-bottom:10px;line-height:1.6">'+_en(n.desc)+'</div>':'')
-    +((n.pdf||n.fileUrl)?'<a href="'+(n.pdf||n.fileUrl)+'" download="notice.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none">📄 PDF ডাউনলোড করুন</a>':'')
-    +'</div></div>'
-  ).join('');
+    +(hasFile?'<button onclick="forceDownloadFile(\''+_escUrl(fileUrl)+'\',\''+fname+'\')" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;border:none;cursor:pointer">📄 PDF ডাউনলোড করুন</button>':'')
+    +'</div></div>';
+  }).join('');
 }
 
 function renderNoticeAdmin(){

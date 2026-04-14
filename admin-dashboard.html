@@ -1611,9 +1611,20 @@
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-      const data = await res.json();
-      return data.secure_url;
+      try {
+        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+        const data = await res.json();
+        if(data.error) {
+          console.error('Cloudinary error:', data.error.message);
+          alert('❌ আপলোড ব্যর্থ: ' + data.error.message);
+          return null;
+        }
+        return data.secure_url;
+      } catch(err) {
+        console.error('Upload failed:', err);
+        alert('❌ ইন্টারনেট সমস্যা বা আপলোড ব্যর্থ!');
+        return null;
+      }
     }
 
     // ID Card Settings (Emergency Phone + Signature)
@@ -1726,44 +1737,91 @@
 
     // ========== LIBRARY MANAGEMENT ==========
     async function saveLibraryItem() {
-      const title = document.getElementById('libTitle').value;
+      const title = document.getElementById('libTitle').value.trim();
       if(!title) return alert('শিরোনাম দিন!');
-      let url = document.getElementById('libUrl').value;
+      let url = document.getElementById('libUrl').value.trim();
       const fileInput = document.getElementById('libFile');
+      
       if(fileInput.files[0] && !url) {
-        alert('ফাইল আপলোড হচ্ছে...');
-        url = await uploadToCloudinary(fileInput.files[0]);
+        alert('ফাইল আপলোড হচ্ছে, অপেক্ষা করুন...');
+        try {
+          url = await uploadToCloudinary(fileInput.files[0]);
+          console.log('Cloudinary upload result URL:', url);
+        } catch(e) {
+          console.error('Library upload error:', e);
+          alert('❌ আপলোডে সমস্যা: ' + e.message);
+          return;
+        }
       }
-      if(!url) return alert('URL দিন অথবা ফাইল আপলোড করুন!');
+      if(!url) return alert('❌ আপলোড ব্যর্থ হয়েছে অথবা URL দিন!');
+      
       const item = {
-        title, type: document.getElementById('libType').value,
-        size: document.getElementById('libSize').value, url,
+        title: title,
+        type: document.getElementById('libType').value,
+        size: document.getElementById('libSize').value || '',
+        url: url,
         addedAt: firebase.database.ServerValue.TIMESTAMP
       };
+      
+      console.log('Saving library item to Firebase:', JSON.stringify(item));
+      
       db.ref('sabuj/library').push(item).then(() => {
         alert('✅ লাইব্রেরিতে যোগ হয়েছে!');
         document.getElementById('libTitle').value = '';
         document.getElementById('libUrl').value = '';
         document.getElementById('libSize').value = '';
         document.getElementById('libFile').value = '';
+        // Force reload library list
+        loadLibraryList();
+      }).catch(err => {
+        alert('❌ ডাটাবেসে সেভ করতে সমস্যা: ' + err.message);
+        console.error('Firebase save error:', err);
       });
     }
+    
+    function loadLibraryList() {
+      db.ref('sabuj/library').once('value', snap => {
+        const data = snap.val();
+        const list = document.getElementById('adminLibList');
+        if(!list) return;
+        console.log('Library data from Firebase:', data);
+        if(data && Object.keys(data).length > 0) {
+          let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>শিরোনাম</th><th>ধরণ</th><th>সাইজ</th><th>অ্যাকশন</th></tr></thead><tbody>';
+          Object.entries(data).forEach(([key, item]) => {
+            if(!item || !item.title) return; // Skip invalid entries
+            html += '<tr><td>'+(item.title||'')+'</td><td>'+(item.type||'').toUpperCase()+'</td><td>'+(item.size||'—')+'</td><td><a href="'+(item.url||'#')+'" target="_blank" class="btn-sm btn-save" style="text-decoration:none;">👁️ দেখুন</a> <button class="btn-sm btn-reject" onclick="deleteLibItem(\''+key+'\');">🗑️</button></td></tr>';
+          });
+          html += '</tbody></table>';
+          list.innerHTML = html;
+        } else { 
+          list.innerHTML = '<p style="color:#6b8c76;">কোনো ম্যাটেরিয়াল নেই।</p>'; 
+        }
+      });
+    }
+    
+    // Auto-load library on page load & listen for changes
     db.ref('sabuj/library').on('value', snap => {
       const data = snap.val();
       const list = document.getElementById('adminLibList');
       if(!list) return;
-      if(data) {
+      if(data && Object.keys(data).length > 0) {
         let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>শিরোনাম</th><th>ধরণ</th><th>সাইজ</th><th>অ্যাকশন</th></tr></thead><tbody>';
         Object.entries(data).forEach(([key, item]) => {
-          html += '<tr><td>'+item.title+'</td><td>'+(item.type||'').toUpperCase()+'</td><td>'+(item.size||'—')+'</td><td><a href="'+item.url+'" target="_blank" class="btn-sm btn-save" style="text-decoration:none;">👁️</a> <button class="btn-sm btn-reject" onclick="deleteLibItem(\''+key+'\');">🗑️</button></td></tr>';
+          if(!item || !item.title) return;
+          html += '<tr><td>'+(item.title||'')+'</td><td>'+(item.type||'').toUpperCase()+'</td><td>'+(item.size||'—')+'</td><td><a href="'+(item.url||'#')+'" target="_blank" class="btn-sm btn-save" style="text-decoration:none;">👁️ দেখুন</a> <button class="btn-sm btn-reject" onclick="deleteLibItem(\''+key+'\');">🗑️</button></td></tr>';
         });
         html += '</tbody></table>';
         list.innerHTML = html;
-      } else { list.innerHTML = '<p style="color:#6b8c76;">কোনো ম্যাটেরিয়াল নেই।</p>'; }
+      } else { 
+        list.innerHTML = '<p style="color:#6b8c76;">কোনো ম্যাটেরিয়াল নেই।</p>'; 
+      }
     });
+    
     function deleteLibItem(key) {
       if(confirm('এই ম্যাটেরিয়াল মুছে ফেলবেন?')) {
-        db.ref('sabuj/library/' + key).remove().then(() => alert('✅ মুছে ফেলা হয়েছে!'));
+        db.ref('sabuj/library/' + key).remove().then(() => {
+          alert('✅ মুছে ফেলা হয়েছে!');
+        });
       }
     }
     // ========== OVERVIEW ANALYTICS ==========
