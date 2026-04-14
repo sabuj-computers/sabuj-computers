@@ -3915,22 +3915,23 @@ function calcFeeDue(){
 // ═══════════════════════════════════════════════════════
 // NOTICE BOARD
 // ═══════════════════════════════════════════════════════
-// Force download via blob (bypasses cross-origin restrictions)
+// Universal file download — no CORS dependency
 function forceDownloadFile(url, filename) {
-  fetch(url, { mode: 'cors' })
-    .then(r => r.blob())
-    .then(blob => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename || 'notice-file';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 200);
-    })
-    .catch(() => {
-      // Fallback: open in new tab
-      window.open(url, '_blank');
-    });
+  if (!url) return;
+  // Cloudinary URLs support CORS, try blob download for them
+  var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
+  if (isCloudinary) {
+    fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+      if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
+      var b = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
+    }).catch(function(){ window.open(url, '_blank'); });
+    return;
+  }
+  // For Firebase Storage & other cross-origin: open directly (no fetch = no CORS issue)
+  window.open(url, '_blank');
 }
 
 function renderNotices(){

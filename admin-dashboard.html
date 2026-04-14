@@ -486,42 +486,22 @@
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
-    // Cross-origin file download helper
-    async function downloadCrossOriginFile(url, filename) {
-      const safeFilename = filename || 'download-file';
-      try {
-        const response = await fetch(url, { mode: 'cors' });
-        if (!response.ok) throw new Error('Download failed');
-
-        const blob = await response.blob();
-        if (!blob || !blob.size) throw new Error('Empty file');
-
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = safeFilename;
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-
-        setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
-          if (a.parentNode) document.body.removeChild(a);
-        }, 1200);
-      } catch (error) {
-        try {
-          const fallbackLink = document.createElement('a');
-          fallbackLink.href = url;
-          fallbackLink.target = '_blank';
-          fallbackLink.rel = 'noopener noreferrer';
-          fallbackLink.download = safeFilename;
-          document.body.appendChild(fallbackLink);
-          fallbackLink.click();
-          if (fallbackLink.parentNode) document.body.removeChild(fallbackLink);
-        } catch (_) {
-          window.open(url, '_blank', 'noopener,noreferrer');
-        }
+    // Universal file download — no CORS dependency
+    function downloadCrossOriginFile(url, filename) {
+      if (!url) return;
+      var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
+      if (isCloudinary) {
+        fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+          if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
+          var b = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
+          document.body.appendChild(a); a.click();
+          setTimeout(function(){ URL.revokeObjectURL(b); if(a.parentNode) a.parentNode.removeChild(a); }, 3000);
+        }).catch(function(){ window.open(url, '_blank'); });
+        return;
       }
+      // For Firebase Storage & other cross-origin: open directly
+      window.open(url, '_blank');
     }
 
     // Store app data for modal viewing (avoids JSON.stringify in onclick)
