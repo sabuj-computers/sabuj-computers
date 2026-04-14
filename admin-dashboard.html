@@ -873,13 +873,17 @@
             }
             return {...rest, hasPhoto: !!safeKey};
           } else if (photo && (photo.startsWith('http://') || photo.startsWith('https://'))) {
-            // Keep Cloudinary/URL photos in the student object
             return {...rest, photo: photo};
           }
           return {...rest, hasPhoto: false};
         });
         Promise.all(photoSavePromises).then(() => {
           return db.ref('sabuj/students').set(studentsClean);
+        }).then(() => {
+          console.log('✅ Students data saved successfully');
+        }).catch(e => {
+          console.error('❌ Students save error:', e);
+          alert('❌ ডাটা সেভ করতে সমস্যা হয়েছে: ' + e.message);
         });
       }
     }
@@ -895,13 +899,18 @@
             db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
             
             // Sync to main website's students list via DB object
-            const exists = DB.students.some(s => s.phone === app.personal?.phone || s.applicationId === app.applicationId);
+            const appPhone = app.personal?.phone || '';
+            const exists = DB.students.some(s => {
+              if (s.applicationId && s.applicationId === app.applicationId) return true;
+              if (appPhone && appPhone.length >= 6 && s.phone === appPhone) return true;
+              return false;
+            });
             if(!exists) {
               const newStudent = {
                 name: app.personal?.nameBn || app.personal?.nameEn || '',
                 reg: '',
                 applicationId: app.applicationId,
-                phone: app.personal?.phone || '',
+                phone: appPhone,
                 fatherName: app.personal?.fatherName || '',
                 motherName: app.personal?.motherName || '',
                 gender: app.personal?.gender || '',
@@ -921,6 +930,8 @@
               renderAdminStudents();
               alert('✅ আবেদন অনুমোদিত এবং Students সেকশনে সিঙ্ক হয়েছে!');
             } else {
+              // Still update application status even if already in students
+              renderAdminStudents();
               alert('✅ আবেদন অনুমোদিত হয়েছে! (Students সেকশনে আগে থেকেই আছে)');
             }
 
