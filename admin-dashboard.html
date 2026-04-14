@@ -488,20 +488,39 @@
 
     // Cross-origin file download helper
     async function downloadCrossOriginFile(url, filename) {
+      const safeFilename = filename || 'download-file';
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, { mode: 'cors' });
         if (!response.ok) throw new Error('Download failed');
+
         const blob = await response.blob();
+        if (!blob || !blob.size) throw new Error('Empty file');
+
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = filename;
+        a.download = safeFilename;
+        a.rel = 'noopener';
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
+
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          if (a.parentNode) document.body.removeChild(a);
+        }, 1200);
       } catch (error) {
-        window.open(url, '_blank');
+        try {
+          const fallbackLink = document.createElement('a');
+          fallbackLink.href = url;
+          fallbackLink.target = '_blank';
+          fallbackLink.rel = 'noopener noreferrer';
+          fallbackLink.download = safeFilename;
+          document.body.appendChild(fallbackLink);
+          fallbackLink.click();
+          if (fallbackLink.parentNode) document.body.removeChild(fallbackLink);
+        } catch (_) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
       }
     }
 
