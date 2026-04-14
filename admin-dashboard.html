@@ -860,83 +860,132 @@
     });
 
     function saveDB(path, value) {
-      if (path === 'students') {
-        const photoSavePromises = [];
-        const studentsClean = (value||[]).map(s => {
-          const {photo, ...rest} = s;
-          if (photo && photo.startsWith('data:')) {
-            const safeKey = String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
-            if(safeKey) {
-              photoSavePromises.push(
-                db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
-              );
-            }
-            return {...rest, hasPhoto: !!safeKey};
-          } else if (photo && (photo.startsWith('http://') || photo.startsWith('https://'))) {
-            return {...rest, photo: photo};
+      if (path !== 'students') return Promise.resolve(null);
+
+      const photoSavePromises = [];
+      const studentsClean = (value||[]).map(s => {
+        const {photo, ...rest} = s;
+        if (photo && photo.startsWith('data:')) {
+          const safeKey = String(s.reg||s.applicationId||'').replace(/[^a-zA-Z0-9]/g,'_');
+          if(safeKey) {
+            photoSavePromises.push(
+              db.ref('sabuj/photos/' + safeKey).set(photo).catch(e => console.error('Photo save error:', e))
+            );
           }
-          return {...rest, hasPhoto: false};
-        });
-        Promise.all(photoSavePromises).then(() => {
-          return db.ref('sabuj/students').set(studentsClean);
-        }).then(() => {
-          console.log('✅ Students data saved successfully');
-        }).catch(e => {
-          console.error('❌ Students save error:', e);
-          alert('❌ ডাটা সেভ করতে সমস্যা হয়েছে: ' + e.message);
-        });
-      }
+          return {...rest, hasPhoto: !!safeKey};
+        } else if (photo && (photo.startsWith('http://') || photo.startsWith('https://'))) {
+          return {...rest, photo: photo};
+        }
+        return {...rest, hasPhoto: false};
+      });
+
+      return Promise.all(photoSavePromises).then(() => {
+        return db.ref('sabuj/students').set(studentsClean);
+      }).then(() => {
+        console.log('✅ Students data saved successfully');
+        return studentsClean;
+      }).catch(e => {
+        console.error('❌ Students save error:', e);
+        alert('❌ ডাটা সেভ করতে সমস্যা হয়েছে: ' + e.message);
+        throw e;
+      });
     }
 
-    function approveApp(appId, uid) {
+    function normalizeStudentCollection(data) {
+      if (!data) return [];
+      return Array.isArray(data) ? data.filter(Boolean) : Object.values(data).filter(Boolean);
+    }
+
+    function getStudentMatchIndex(students, appId, phone) {
+      const normalizedPhone = String(phone || '').trim();
+      return (students || []).findIndex(s => {
+        if (!s) return false;
+        if (appId && s.applicationId === appId) return true;
+        if (normalizedPhone && normalizedPhone.length >= 6 && String(s.phone || '').trim() === normalizedPhone) return true;
+        return false;
+      });
+    }
+
+    function buildStudentFromApplication(app, selectedSession, existingStudent) {
+      const prev = existingStudent || {};
+      const payment = app.payment || {};
+      const feeTotal = Number(prev.feeTotal ?? payment.total ?? 0) || 0;
+      const feePaid = Number(prev.feePaid ?? payment.paid ?? 0) || 0;
+      const feeDue = Number(prev.feeDue ?? payment.due ?? Math.max(0, feeTotal - feePaid)) || 0;
+      const addressText = prev.address || [
+        app.address?.present?.village,
+        app.address?.present?.po,
+        app.address?.present?.upazila,
+        app.address?.present?.district
+      ].filter(Boolean).join(', ');
+
+      return {
+        ...prev,
+        name: app.personal?.nameBn || app.personal?.nameEn || prev.name || '',
+        reg: prev.reg || app.regNo || '',
+        applicationId: app.applicationId || prev.applicationId || '',
+        phone: app.personal?.phone || prev.phone || '',
+        fatherName: app.personal?.fatherName || prev.fatherName || '',
+        motherName: app.personal?.motherName || prev.motherName || '',
+        gender: app.personal?.gender || prev.gender || '',
+        session: selectedSession || app.enrollment?.session || prev.session || '',
+        year: prev.year || (app.submittedAt ? String(new Date(app.submittedAt).getFullYear()) : String(new Date().getFullYear())),
+        address: addressText,
+        course: app.enrollment?.courseId || prev.course || '',
+        result: prev.result || app.exam?.result || '',
+        feeTotal: feeTotal,
+        feePaid: feePaid,
+        feeDue: feeDue,
+        feeStatus: prev.feeStatus || payment.status || app.paymentStatus || (feePaid > 0 ? (feeDue > 0 ? 'Partial' : 'Paid') : 'Due'),
+        photo: app.personal?.photo || prev.photo || null
+      };
+    }
+
+    async function approveApp(appId, uid) {
       var sessionEl = document.getElementById('session_' + appId);
       var selectedSession = sessionEl ? sessionEl.value : 'January - June';
       if(confirm('সেশন: ' + selectedSession + '\nআবেদনটি অনুমোদন করতে চান?')) {
-        db.ref('sabuj/applications/' + appId).once('value').then(snap => {
-          const app = snap.val();
-          if(app) {
-            db.ref('sabuj/applications/' + appId).update({ status: 'approved', 'enrollment/session': selectedSession });
-            db.ref('sabuj/students_auth/' + uid).update({ status: 'active' });
-            
-            // Sync to main website's students list via DB object
-            const appPhone = app.personal?.phone || '';
-            const exists = DB.students.some(s => {
-              if (s.applicationId && s.applicationId === app.applicationId) return true;
-              if (appPhone && appPhone.length >= 6 && s.phone === appPhone) return true;
-              return false;
-            });
-            if(!exists) {
-              const newStudent = {
-                name: app.personal?.nameBn || app.personal?.nameEn || '',
-                reg: '',
-                applicationId: app.applicationId,
-                phone: appPhone,
-                fatherName: app.personal?.fatherName || '',
-                motherName: app.personal?.motherName || '',
-                gender: app.personal?.gender || '',
-                session: selectedSession,
-                year: new Date().getFullYear().toString(),
-                address: '',
-                course: app.enrollment?.courseId || '',
-                result: '',
-                feeTotal: 0,
-                feePaid: 0,
-                feeDue: 0,
-                feeStatus: 'Due',
-                photo: app.personal?.photo || null
-              };
-              DB.students.push(newStudent);
-              saveDB('students', DB.students);
-              renderAdminStudents();
-              alert('✅ আবেদন অনুমোদিত এবং Students সেকশনে সিঙ্ক হয়েছে!');
-            } else {
-              // Still update application status even if already in students
-              renderAdminStudents();
-              alert('✅ আবেদন অনুমোদিত হয়েছে! (Students সেকশনে আগে থেকেই আছে)');
-            }
-
+        try {
+          const [appSnap, studentsSnap] = await Promise.all([
+            db.ref('sabuj/applications/' + appId).once('value'),
+            db.ref('sabuj/students').once('value')
+          ]);
+          const app = appSnap.val();
+          if(!app) {
+            alert('❌ আবেদন খুঁজে পাওয়া যায়নি');
+            return;
           }
-        });
+
+          const normalizedApp = { ...app, applicationId: app.applicationId || appId };
+          const latestStudents = normalizeStudentCollection(studentsSnap.val());
+          DB.students = latestStudents.slice();
+
+          const resolvedUid = uid || normalizedApp.uid || '';
+          const updates = [
+            db.ref('sabuj/applications/' + appId).update({ status: 'approved', 'enrollment/session': selectedSession })
+          ];
+          if (resolvedUid) {
+            updates.push(db.ref('sabuj/students_auth/' + resolvedUid).update({ status: 'active' }));
+          }
+          await Promise.all(updates);
+
+          const matchIndex = getStudentMatchIndex(latestStudents, normalizedApp.applicationId, normalizedApp.personal?.phone);
+          const nextStudents = latestStudents.slice();
+          const nextStudent = buildStudentFromApplication(normalizedApp, selectedSession, matchIndex >= 0 ? nextStudents[matchIndex] : null);
+
+          if (matchIndex >= 0) nextStudents[matchIndex] = nextStudent;
+          else nextStudents.unshift(nextStudent);
+
+          await saveDB('students', nextStudents);
+          DB.students = nextStudents;
+          renderAdminStudents();
+          alert(matchIndex >= 0
+            ? '✅ আবেদন অনুমোদিত হয়েছে এবং Students সেকশনের তথ্য আপডেট হয়েছে!'
+            : '✅ আবেদন অনুমোদিত এবং Students সেকশনে যোগ হয়েছে!');
+        } catch (error) {
+          console.error('❌ Approve sync error:', error);
+          alert('❌ approve/sync করতে সমস্যা হয়েছে: ' + (error && error.message ? error.message : error));
+        }
       }
     }
 
