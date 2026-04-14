@@ -852,7 +852,7 @@
     // Load Main Website Students Data
     db.ref('sabuj/students').on('value', snap => {
       const data = snap.val();
-      DB.students = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+      DB.students = normalizeStudentCollection(data);
       renderAdminStudents();
     });
     db.ref('sabuj/general').on('value', snap => {
@@ -896,17 +896,33 @@
       return Array.isArray(data) ? data.filter(Boolean) : Object.values(data).filter(Boolean);
     }
 
-    function getStudentMatchIndex(students, appId, phone) {
+    function normalizeLookupValue(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function getStudentMatchIndex(students, appId, phone, uid, regNo, name) {
       const normalizedPhone = String(phone || '').trim();
+      const normalizedUid = String(uid || '').trim();
+      const normalizedReg = String(regNo || '').trim();
+      const normalizedName = normalizeLookupValue(name);
+
       return (students || []).findIndex(s => {
         if (!s) return false;
         if (appId && s.applicationId === appId) return true;
-        if (normalizedPhone && normalizedPhone.length >= 6 && String(s.phone || '').trim() === normalizedPhone) return true;
+        if (normalizedUid && String(s.uid || '').trim() === normalizedUid) return true;
+        if (normalizedReg && String(s.reg || '').trim() === normalizedReg) return true;
+        if (
+          normalizedPhone &&
+          normalizedPhone.length >= 6 &&
+          String(s.phone || '').trim() === normalizedPhone &&
+          normalizedName &&
+          normalizeLookupValue(s.name) === normalizedName
+        ) return true;
         return false;
       });
     }
 
-    function buildStudentFromApplication(app, selectedSession, existingStudent) {
+    function buildStudentFromApplication(app, selectedSession, existingStudent, resolvedUid) {
       const prev = existingStudent || {};
       const payment = app.payment || {};
       const feeTotal = Number(prev.feeTotal ?? payment.total ?? 0) || 0;
@@ -921,6 +937,7 @@
 
       return {
         ...prev,
+        uid: resolvedUid || prev.uid || app.uid || '',
         name: app.personal?.nameBn || app.personal?.nameEn || prev.name || '',
         reg: prev.reg || app.regNo || '',
         applicationId: app.applicationId || prev.applicationId || '',
@@ -969,9 +986,21 @@
           }
           await Promise.all(updates);
 
-          const matchIndex = getStudentMatchIndex(latestStudents, normalizedApp.applicationId, normalizedApp.personal?.phone);
+          const matchIndex = getStudentMatchIndex(
+            latestStudents,
+            normalizedApp.applicationId,
+            normalizedApp.personal?.phone,
+            resolvedUid,
+            normalizedApp.regNo,
+            normalizedApp.personal?.nameBn || normalizedApp.personal?.nameEn
+          );
           const nextStudents = latestStudents.slice();
-          const nextStudent = buildStudentFromApplication(normalizedApp, selectedSession, matchIndex >= 0 ? nextStudents[matchIndex] : null);
+          const nextStudent = buildStudentFromApplication(
+            normalizedApp,
+            selectedSession,
+            matchIndex >= 0 ? nextStudents[matchIndex] : null,
+            resolvedUid
+          );
 
           if (matchIndex >= 0) nextStudents[matchIndex] = nextStudent;
           else nextStudents.unshift(nextStudent);
@@ -1221,6 +1250,7 @@
         }
         // Preserve applicationId from existing student
         if(idx!=='') {
+          obj.uid = DB.students[+idx].uid || '';
           obj.applicationId = DB.students[+idx].applicationId || '';
           DB.students[+idx]=obj;
         } else DB.students.push(obj);
