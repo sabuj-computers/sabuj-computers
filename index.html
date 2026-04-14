@@ -3920,16 +3920,15 @@ function forceDownloadFile(url, filename) {
   if (!url) return;
   var isCloudinary = url.indexOf('cloudinary') !== -1 || url.indexOf('res.cloudinary.com') !== -1;
   if (isCloudinary) {
-    // Fix broken Cloudinary URLs: image/upload -> raw/upload for PDFs/docs
     var dlUrl = url;
+    if (dlUrl.indexOf('/raw/upload/fl_attachment/') !== -1) {
+      dlUrl = dlUrl.replace('/raw/upload/fl_attachment/', '/raw/upload/');
+    }
     if (dlUrl.match(/\.(pdf|doc|docx|ppt|pptx|zip|rar)(\?|$)/i) && dlUrl.indexOf('/image/upload/') !== -1) {
       dlUrl = dlUrl.replace('/image/upload/', '/raw/upload/');
     }
-    if (dlUrl.indexOf('/raw/upload/') !== -1 && dlUrl.indexOf('fl_attachment') === -1) {
-      dlUrl = dlUrl.replace('/raw/upload/', '/raw/upload/fl_attachment/');
-    }
     fetch(dlUrl).then(function(r){ return r.blob(); }).then(function(blob){
-      if (blob.size < 100) { window.open(dlUrl, '_blank'); return; }
+      if (!blob || blob.size < 100) { window.open(dlUrl, '_blank'); return; }
       if (typeof saveAs === 'function') { saveAs(blob, filename || 'file'); return; }
       var b = URL.createObjectURL(blob);
       var a = document.createElement('a'); a.href = b; a.download = filename || 'file';
