@@ -536,24 +536,26 @@
     const EMAILJS_TEMPLATE_RESULT = 'template_ymrxekc';
 
     function sendAdmissionEmail(studentEmail, studentName, status, appId, message) {
-      if (!studentEmail) { console.warn('No email for student, skipping email'); return; }
-      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ADMISSION, {
+      if (!studentEmail) { console.warn('No email for student, skipping email'); return Promise.resolve(); }
+      return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ADMISSION, {
         to_email: studentEmail,
-        student_name: studentName || 'Student',
+        student_name: studentName || 'শিক্ষার্থী',
         status: status,
         application_id: appId || '',
-        message: message || ''
+        message: message || '',
+        time: new Date().toLocaleString('bn-BD')
       }).then(() => console.log('✅ Admission email sent to ' + studentEmail))
         .catch(err => console.error('❌ Email send failed:', err));
     }
 
     function sendResultEmail(studentEmail, studentName, examName, result) {
-      if (!studentEmail) { console.warn('No email for student, skipping email'); return; }
-      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_RESULT, {
+      if (!studentEmail) { console.warn('No email for student, skipping email'); return Promise.resolve(); }
+      return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_RESULT, {
         to_email: studentEmail,
-        student_name: studentName || 'Student',
+        student_name: studentName || 'শিক্ষার্থী',
         exam_name: examName || 'পরীক্ষা',
         result: result || '',
+        message: 'প্রিয় ' + (studentName || 'শিক্ষার্থী') + ',\n\nআপনার পরীক্ষার ফলাফল প্রকাশিত হয়েছে! 📋\n\n📚 কোর্স/পরীক্ষা: ' + (examName || '') + '\n📊 ফলাফল: ' + (result || '') + '\n\nবিস্তারিত দেখতে Student Portal এ লগইন করুন।\n\nধন্যবাদ,\nসবুজ কম্পিউটার ট্রেনিং সেন্টার',
         time: new Date().toLocaleString('bn-BD')
       }).then(() => console.log('✅ Result email sent to ' + studentEmail))
         .catch(err => console.error('❌ Email send failed:', err));
@@ -1143,7 +1145,7 @@
           const studentEmail = normalizedApp.personal?.email || '';
           const studentName = normalizedApp.personal?.nameBn || normalizedApp.personal?.nameEn || '';
           const emailNote = studentEmail ? '\n📧 ইমেইলে approval notification পাঠানোর চেষ্টা করা হয়েছে।' : '\n📧 কোনো email না থাকায় notification পাঠানো হয়নি।';
-          sendAdmissionEmail(studentEmail, studentName, 'Approved ✅', appId, 'আপনার ভর্তি আবেদন অনুমোদিত হয়েছে। সেশন: ' + selectedSession + '। Student Portal এ লগইন করে বিস্তারিত দেখুন।');
+          sendAdmissionEmail(studentEmail, studentName, '✅ আবেদন অনুমোদিত', appId, 'প্রিয় ' + studentName + ',\n\nআপনার ভর্তি আবেদন সফলভাবে অনুমোদিত হয়েছে! 🎉\n\n📌 আবেদন আইডি: ' + appId + '\n📅 সেশন: ' + selectedSession + '\n\n✅ এখন আপনি Student Portal এ লগইন করে আপনার সকল তথ্য, আইডি কার্ড, রেজাল্ট ইত্যাদি দেখতে পারবেন।\n\n⚠️ প্রতিষ্ঠানে এসে কোর্স ফি পরিশোধ করুন।\n\nধন্যবাদ,\nসবুজ কম্পিউটার ট্রেনিং সেন্টার');
 
           alert((matchIndex >= 0
             ? '✅ আবেদন অনুমোদিত হয়েছে এবং Students সেকশনের তথ্য আপডেট হয়েছে!'
@@ -1166,7 +1168,7 @@
         if (app) {
           const studentEmail = app.personal?.email || '';
           const studentName = app.personal?.nameBn || app.personal?.nameEn || '';
-          sendAdmissionEmail(studentEmail, studentName, 'Rejected ❌', appId, 'দুঃখিত, আপনার ভর্তি আবেদন বাতিল করা হয়েছে। বিস্তারিত জানতে প্রতিষ্ঠানে যোগাযোগ করুন।');
+          sendAdmissionEmail(studentEmail, studentName, '❌ আবেদন বাতিল', appId, 'প্রিয় ' + studentName + ',\n\nদুঃখিত, আপনার ভর্তি আবেদন বাতিল করা হয়েছে।\n\n📌 আবেদন আইডি: ' + appId + '\n\nবিস্তারিত জানতে প্রতিষ্ঠানে যোগাযোগ করুন।\nফোন: ০১XXX-XXXXXX\n\nআপনি চাইলে পুনরায় আবেদন করতে পারেন।\n\nধন্যবাদ,\nসবুজ কম্পিউটার ট্রেনিং সেন্টার');
         }
       }
     }

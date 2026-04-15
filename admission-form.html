@@ -849,20 +849,43 @@
             document.getElementById('progressFill').style.width = '100%';
             document.getElementById('step6-circle').classList.add('completed');
 
-            // Send EmailJS notification to admin
+            // ===== EMAIL NOTIFICATIONS =====
+            var studentEmailVal = (document.getElementById('email').value || '').trim();
+            var studentNameVal = (document.getElementById('nameBn').value || '') + ' (' + (document.getElementById('nameEn').value || '') + ')';
+            var courseNameVal = (document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex]?.text || '');
+            var phoneVal = document.getElementById('phone').value || '';
+            var submitTime = new Date().toLocaleString('bn-BD');
+
             try {
               emailjs.init('ndTzsxQcXnkqvdpwv');
+
+              // 1) Admin notification email
               emailjs.send('service_2mdknti', 'template_v1exu1d', {
-                to_email: 'sabujcomp1@gmail.com',
-                student_name: (document.getElementById('nameBn').value || '') + ' (' + (document.getElementById('nameEn').value || '') + ')',
+                to_email: 'demotik770@gmail.com',
+                student_name: studentNameVal,
                 application_id: appId,
-                phone: document.getElementById('phone').value || '',
-                course: (document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex]?.text || ''),
-                status: 'নতুন আবেদন জমা হয়েছে',
-                message: 'শিক্ষার্থী ' + (document.getElementById('nameBn').value || '') + ' একটি নতুন ভর্তি আবেদন জমা দিয়েছেন। আবেদন আইডি: ' + appId + '। অনুগ্রহ করে Admin Dashboard থেকে রিভিউ করুন।',
-                time: new Date().toLocaleString('bn-BD')
+                phone: phoneVal,
+                course: courseNameVal,
+                status: '📋 নতুন আবেদন জমা হয়েছে',
+                message: 'শিক্ষার্থী ' + studentNameVal + ' একটি নতুন ভর্তি আবেদন জমা দিয়েছেন।\n\n📌 আবেদন আইডি: ' + appId + '\n📞 ফোন: ' + phoneVal + '\n📚 কোর্স: ' + courseNameVal + '\n🕐 সময়: ' + submitTime + '\n\nঅনুগ্রহ করে Admin Dashboard থেকে রিভিউ করুন।',
+                time: submitTime
               }).then(function() { console.log('✅ Admin notification email sent'); })
                 .catch(function(err) { console.error('❌ Admin email failed:', err); });
+
+              // 2) Student confirmation email (if email provided)
+              if (studentEmailVal) {
+                emailjs.send('service_2mdknti', 'template_v1exu1d', {
+                  to_email: studentEmailVal,
+                  student_name: studentNameVal,
+                  application_id: appId,
+                  phone: phoneVal,
+                  course: courseNameVal,
+                  status: '✅ আবেদন সফলভাবে জমা হয়েছে',
+                  message: 'প্রিয় ' + (document.getElementById('nameBn').value || '') + ',\n\nআপনার ভর্তি আবেদন সফলভাবে জমা হয়েছে।\n\n📌 আবেদন আইডি: ' + appId + '\n📚 কোর্স: ' + courseNameVal + '\n🕐 জমার সময়: ' + submitTime + '\n\n⏳ আপনার আবেদনটি বর্তমানে অনুমোদনের অপেক্ষায় রয়েছে। অনুমোদিত বা বাতিল হলে আপনাকে ইমেইলে জানানো হবে।\n\nধন্যবাদ,\nসবুজ কম্পিউটার ট্রেনিং সেন্টার',
+                  time: submitTime
+                }).then(function() { console.log('✅ Student confirmation email sent to ' + studentEmailVal); })
+                  .catch(function(err) { console.error('❌ Student confirmation email failed:', err); });
+              }
             } catch(emailErr) { console.error('EmailJS error:', emailErr); }
           }).catch(function(err) {
             console.error('Form submit error:', err);
