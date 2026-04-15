@@ -1144,9 +1144,7 @@
           // Send approval email
           const studentEmail = normalizedApp.personal?.email || '';
           const studentName = normalizedApp.personal?.nameBn || normalizedApp.personal?.nameEn || '';
-          const emailNote = studentEmail ? '
-📧 ইমেইলে approval notification পাঠানোর চেষ্টা করা হয়েছে।' : '
-📧 কোনো email না থাকায় notification পাঠানো হয়নি।';
+          const emailNote = studentEmail ? '\n📧 ইমেইলে approval notification পাঠানোর চেষ্টা করা হয়েছে।' : '\n📧 কোনো email না থাকায় notification পাঠানো হয়নি।';
           sendAdmissionEmail(studentEmail, studentName, 'Approved ✅', appId, 'আপনার ভর্তি আবেদন অনুমোদিত হয়েছে। সেশন: ' + selectedSession + '। Student Portal এ লগইন করে বিস্তারিত দেখুন।');
 
           alert((matchIndex >= 0
