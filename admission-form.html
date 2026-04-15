@@ -7,6 +7,8 @@
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&display=swap" rel="stylesheet">
   
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- QR Code Library -->
@@ -150,6 +152,7 @@
               <input type="tel" id="phone" required readonly style="background: #e4ece7;">
               <div class="checkbox-group" style="margin-top: 5px;"><input type="checkbox" id="hasWhatsApp"><label for="hasWhatsApp" style="margin:0; font-weight:normal;">এই নম্বরে WhatsApp আছে</label></div>
             </div>
+            <div class="input-group"><label>ই-মেইল (ঐচ্ছিক)</label><input type="email" id="email" placeholder="যেমন: student@example.com" autocomplete="email"></div>
             <div class="input-group"><label>অভিভাবকের মোবাইল নম্বর *</label><input type="tel" id="guardianPhone" required></div>
           </div>
           <div class="btn-group">
@@ -797,7 +800,7 @@
             dob: document.getElementById('dob').value, birthPlace: document.getElementById('birthPlace').value,
             gender: document.getElementById('gender').value, religion: document.getElementById('religion').value,
             bloodGroup: document.getElementById('bloodGroup').value, nid: document.getElementById('nid').value,
-            phone: document.getElementById('phone').value, hasWhatsApp: document.getElementById('hasWhatsApp').checked,
+            phone: document.getElementById('phone').value, email: (document.getElementById('email').value || '').trim(), hasWhatsApp: document.getElementById('hasWhatsApp').checked,
             guardianPhone: document.getElementById('guardianPhone').value, photo: photoUrl, nidDoc: nidUrl
           },
           documents: {
@@ -845,6 +848,22 @@
               '</div>';
             document.getElementById('progressFill').style.width = '100%';
             document.getElementById('step6-circle').classList.add('completed');
+
+            // Send EmailJS notification to admin
+            try {
+              emailjs.init('ndTzsxQcXnkqvdpwv');
+              emailjs.send('service_2mdknti', 'template_v1exu1d', {
+                to_email: 'sabujcomp1@gmail.com',
+                student_name: (document.getElementById('nameBn').value || '') + ' (' + (document.getElementById('nameEn').value || '') + ')',
+                application_id: appId,
+                phone: document.getElementById('phone').value || '',
+                course: (document.getElementById('courseSelect').options[document.getElementById('courseSelect').selectedIndex]?.text || ''),
+                status: 'নতুন আবেদন জমা হয়েছে',
+                message: 'শিক্ষার্থী ' + (document.getElementById('nameBn').value || '') + ' একটি নতুন ভর্তি আবেদন জমা দিয়েছেন। আবেদন আইডি: ' + appId + '। অনুগ্রহ করে Admin Dashboard থেকে রিভিউ করুন।',
+                time: new Date().toLocaleString('bn-BD')
+              }).then(function() { console.log('✅ Admin notification email sent'); })
+                .catch(function(err) { console.error('❌ Admin email failed:', err); });
+            } catch(emailErr) { console.error('EmailJS error:', emailErr); }
           }).catch(function(err) {
             console.error('Form submit error:', err);
             alert('❌ সমস্যা হয়েছে: ' + (err.message || err.code || 'অজানা ত্রুটি') + '\nআবার চেষ্টা করুন।');

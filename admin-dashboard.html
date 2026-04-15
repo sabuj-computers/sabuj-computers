@@ -688,7 +688,7 @@
           tbody.innerHTML = pendingApps.map(app => `
             <tr>
               <td>${new Date(app.submittedAt).toLocaleDateString('bn-BD')}</td>
-              <td>${app.personal?.nameBn || 'অজানা'}</td>
+              <td>${app.personal?.nameBn || 'অজানা'}<div style="font-size:11px;color:#64748b;margin-top:4px;word-break:break-word;">${app.personal?.email || 'ইমেইল নেই'}</div></td>
               <td>${app.personal?.phone || 'অজানা'}</td>
               <td>${app.enrollment?.courseId || 'অজানা'}</td>
               <td><span style="background:#fef9c3;color:#854d0e;padding:2px 8px;border-radius:10px;font-size:11px;">Pending</span></td>
@@ -1090,7 +1090,11 @@
     async function approveApp(appId, uid) {
       var sessionEl = document.getElementById('session_' + appId);
       var selectedSession = sessionEl ? sessionEl.value : 'January - June';
-      if(confirm('সেশন: ' + selectedSession + '\nআবেদনটি অনুমোদন করতে চান?')) {
+      var previewApp = _appDataMap[appId] || {};
+      var previewEmail = previewApp.personal?.email || '';
+      if(confirm('সেশন: ' + selectedSession + '
+শিক্ষার্থীর ইমেইল: ' + (previewEmail || 'নেই') + '
+আবেদনটি অনুমোদন করতে চান?')) {
         try {
           const [appSnap, studentsSnap] = await Promise.all([
             db.ref('sabuj/applications/' + appId).once('value'),
@@ -1140,11 +1144,14 @@
           // Send approval email
           const studentEmail = normalizedApp.personal?.email || '';
           const studentName = normalizedApp.personal?.nameBn || normalizedApp.personal?.nameEn || '';
+          const emailNote = studentEmail ? '
+📧 ইমেইলে approval notification পাঠানোর চেষ্টা করা হয়েছে।' : '
+📧 কোনো email না থাকায় notification পাঠানো হয়নি।';
           sendAdmissionEmail(studentEmail, studentName, 'Approved ✅', appId, 'আপনার ভর্তি আবেদন অনুমোদিত হয়েছে। সেশন: ' + selectedSession + '। Student Portal এ লগইন করে বিস্তারিত দেখুন।');
 
-          alert(matchIndex >= 0
+          alert((matchIndex >= 0
             ? '✅ আবেদন অনুমোদিত হয়েছে এবং Students সেকশনের তথ্য আপডেট হয়েছে!'
-            : '✅ আবেদন অনুমোদিত এবং Students সেকশনে যোগ হয়েছে!');
+            : '✅ আবেদন অনুমোদিত এবং Students সেকশনে যোগ হয়েছে!') + emailNote);
         } catch (error) {
           console.error('❌ Approve sync error:', error);
           alert('❌ approve/sync করতে সমস্যা হয়েছে: ' + (error && error.message ? error.message : error));
