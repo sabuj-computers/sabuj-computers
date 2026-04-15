@@ -1092,9 +1092,7 @@
       var selectedSession = sessionEl ? sessionEl.value : 'January - June';
       var previewApp = _appDataMap[appId] || {};
       var previewEmail = previewApp.personal?.email || '';
-      if(confirm('সেশন: ' + selectedSession + '
-শিক্ষার্থীর ইমেইল: ' + (previewEmail || 'নেই') + '
-আবেদনটি অনুমোদন করতে চান?')) {
+      if(confirm('সেশন: ' + selectedSession + '\nশিক্ষার্থীর ইমেইল: ' + (previewEmail || 'নেই') + '\nআবেদনটি অনুমোদন করতে চান?')) {
         try {
           const [appSnap, studentsSnap] = await Promise.all([
             db.ref('sabuj/applications/' + appId).once('value'),
