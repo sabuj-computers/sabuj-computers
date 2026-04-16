@@ -284,6 +284,8 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     var db = firebase.database();
+    // Tab-isolated session: এই tab এ logout করলে অন্য tab অপ্রভাবিত থাকবে
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){ console.warn('Persistence:', e); });
 
     var CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
     var CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';

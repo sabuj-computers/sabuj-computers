@@ -399,6 +399,8 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    // Tab-isolated session: এই tab এ logout করলে অন্য tab অপ্রভাবিত থাকবে
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){ console.warn('Persistence:', e); });
 
     const ADMIN_UID = 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1';
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
