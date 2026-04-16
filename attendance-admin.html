@@ -114,7 +114,7 @@
 
     /* QR */
     .qr-output { text-align:center; padding:20px; }
-    .qr-output canvas { border:3px solid var(--gold); border-radius:16px; padding:12px; background:#fff; box-shadow:0 0 30px rgba(200,168,71,0.15); }
+    .qr-output canvas, .qr-output img { border:3px solid var(--gold); border-radius:16px; padding:12px; background:#fff; box-shadow:0 0 30px rgba(200,168,71,0.15); max-width:100%; height:auto; }
 
     /* Modal */
     .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
@@ -822,8 +822,99 @@
         document.getElementById('qrOutput').style.display = 'block';
       } catch(e) { alert('❌ QR ব্যর্থ!'); }
     }
-    function printQR() { window.print(); }
-    function downloadQR() { var qrDiv = document.getElementById('qrCanvas'); var img = qrDiv.querySelector('img') || qrDiv.querySelector('canvas'); if (!img) { alert('আগে QR জেনারেট করুন'); return; } var a = document.createElement('a'); a.download = 'SCTC-Attendance-QR.png'; if (img.tagName === 'CANVAS') { a.href = img.toDataURL('image/png'); } else { a.href = img.src; } a.click(); }
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function getQrDataUrl() {
+      return new Promise((resolve, reject) => {
+        var qrDiv = document.getElementById('qrCanvas');
+        var canvas = qrDiv.querySelector('canvas');
+        if (canvas) {
+          try { resolve(canvas.toDataURL('image/png')); return; }
+          catch (err) { reject(err); return; }
+        }
+
+        var img = qrDiv.querySelector('img');
+        if (!img) { reject(new Error('QR not generated')); return; }
+
+        function exportImg() {
+          try {
+            if (img.src && img.src.indexOf('data:image/') === 0) {
+              resolve(img.src);
+              return;
+            }
+            var tempCanvas = document.createElement('canvas');
+            var width = img.naturalWidth || img.width || 260;
+            var height = img.naturalHeight || img.height || 260;
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            var ctx = tempCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(tempCanvas.toDataURL('image/png'));
+          } catch (err) {
+            reject(err);
+          }
+        }
+
+        if (img.complete && (img.naturalWidth || img.width)) exportImg();
+        else {
+          img.onload = exportImg;
+          img.onerror = () => reject(new Error('QR image load failed'));
+        }
+      });
+    }
+    async function printQR() {
+      try {
+        var dataUrl = await getQrDataUrl();
+        var url = document.getElementById('qrUrl').textContent.trim();
+        var logo = document.getElementById('qrLogo');
+        var logoMarkup = (logo && logo.src && logo.style.display !== 'none')
+          ? '<img src="' + escapeHtml(logo.src) + '" alt="Logo" style="width:72px;height:72px;border-radius:50%;display:block;margin:0 auto 14px;object-fit:cover;">'
+          : '';
+        var printWindow = window.open('', '_blank', 'width=900,height=1100');
+        if (!printWindow) { alert('❌ প্রিন্ট উইন্ডো খুলছে না। ব্রাউজারের popup allow করুন।'); return; }
+
+        printWindow.document.open();
+        printWindow.document.write('<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>Attendance QR</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{margin:0;font-family:Hind Siliguri,system-ui,sans-serif;background:#fff;color:#0d3d1f;} .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px;} .sheet{text-align:center;max-width:700px;width:100%;} .title{font-size:28px;font-weight:700;margin:0 0 8px;color:#0d3d1f;} .subtitle{font-size:18px;margin:0 0 20px;color:#475569;} .qr{display:block;margin:0 auto 18px;max-width:100%;width:360px;height:auto;border:10px solid #c8a847;border-radius:24px;padding:14px;background:#fff;} .link{font-size:16px;word-break:break-all;color:#475569;} @page{size:auto;margin:12mm;}</style></head><body><div class="wrap"><div class="sheet">' + logoMarkup + '<h1 class="title">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1><p class="subtitle">উপস্থিতি দিতে QR কোড স্ক্যান করুন</p><img id="qrPrintImage" class="qr" src="' + dataUrl + '" alt="Attendance QR Code"><p class="link">' + escapeHtml(url) + '</p></div></div></body></html>');
+        printWindow.document.close();
+        var printImage = printWindow.document.getElementById('qrPrintImage');
+        function startPrint() {
+          printWindow.focus();
+          setTimeout(function() { printWindow.print(); }, 150);
+        }
+        if (printImage) {
+          if (printImage.complete) startPrint();
+          else printImage.onload = startPrint;
+        } else startPrint();
+        printWindow.onafterprint = function() { printWindow.close(); };
+      } catch (err) {
+        alert('❌ প্রিন্ট ব্যর্থ! আবার QR জেনারেট করে চেষ্টা করুন।');
+      }
+    }
+    async function downloadQR() {
+      try {
+        var dataUrl = await getQrDataUrl();
+        var response = await fetch(dataUrl);
+        var blob = await response.blob();
+        var objectUrl = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = 'SCTC-Attendance-QR.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+      } catch (err) {
+        alert('❌ ডাউনলোড ব্যর্থ! আগে QR জেনারেট করুন।');
+      }
+    }
 
     // =========== SETTINGS ===========
     function uploadNewLogo(input) {
