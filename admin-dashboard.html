@@ -120,9 +120,37 @@
     @keyframes fadeInBg { from { opacity:0; } to { opacity:1; } }
     .modal-content { background:#fff; padding:25px; border-radius:20px; width:90%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation: modalSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
     @keyframes modalSlideUp { from { transform:translateY(20px) scale(0.97); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
+    /* Login Overlay */
+    #adminLoginOverlay { position:fixed; inset:0; background:linear-gradient(135deg,#0d3d1f,#1a6b35); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px; }
+    #adminLoginOverlay .login-card { background:#fff; border-radius:24px; padding:36px 30px; max-width:420px; width:100%; box-shadow:0 25px 70px rgba(0,0,0,0.4); }
+    #adminLoginOverlay .login-logo { width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg,#d4af37,#b8941f); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; box-shadow:0 6px 18px rgba(212,175,55,0.35); }
+    #adminLoginOverlay h2 { text-align:center; color:var(--g1); margin:0 0 4px; font-size:22px; }
+    #adminLoginOverlay p.sub { text-align:center; color:var(--muted); font-size:13px; margin:0 0 22px; }
+    #adminLoginOverlay input { width:100%; padding:13px 14px; border:1.5px solid #dde8e0; border-radius:12px; font-family:inherit; font-size:14px; box-sizing:border-box; margin-bottom:12px; outline:none; transition:border-color 0.2s; }
+    #adminLoginOverlay input:focus { border-color:var(--g2); }
+    #adminLoginOverlay button.login-btn { width:100%; padding:13px; background:linear-gradient(135deg,var(--g1),var(--g2)); color:#fff; border:none; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer; transition:transform 0.2s; }
+    #adminLoginOverlay button.login-btn:hover { transform:translateY(-1px); }
+    #adminLoginOverlay button.login-btn:disabled { opacity:0.6; cursor:wait; }
+    #adminLoginErr { display:none; background:#fee2e2; color:#991b1b; padding:10px 12px; border-radius:10px; font-size:13px; margin-bottom:12px; text-align:center; }
+    #adminLoginOverlay .back-portal { display:block; text-align:center; margin-top:16px; color:var(--muted); font-size:12px; text-decoration:none; }
+    #adminLoginOverlay .back-portal:hover { color:var(--g2); }
   </style>
 </head>
 <body>
+
+  <!-- LOGIN OVERLAY (shown until admin authenticated) -->
+  <div id="adminLoginOverlay">
+    <div class="login-card">
+      <div class="login-logo">⚙️</div>
+      <h2>মূল অ্যাডমিন প্যানেল</h2>
+      <p class="sub">শুধুমাত্র অনুমোদিত অ্যাডমিন প্রবেশ করতে পারবেন</p>
+      <div id="adminLoginErr"></div>
+      <input type="email" id="adminLoginEmail" placeholder="📧 অ্যাডমিন ইমেইল" autocomplete="email">
+      <input type="password" id="adminLoginPass" placeholder="🔒 পাসওয়ার্ড" autocomplete="current-password">
+      <button class="login-btn" id="adminLoginBtn" onclick="doAdminLogin()">প্রবেশ করুন →</button>
+      <a href="portal.html" class="back-portal">← পোর্টালে ফিরুন</a>
+    </div>
+  </div>
 
   <!-- SIDEBAR -->
   <div class="sidebar">
@@ -528,6 +556,8 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    // Tab-isolated session: এই tab এ logout করলে অন্য tab অপ্রভাবিত থাকবে
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){ console.warn('Persistence:', e); });
 
     // EmailJS Config
     emailjs.init('ndTzsxQcXnkqvdpwv');
@@ -620,24 +650,86 @@
     let _appDataMap = {};
 
     // Check Admin Auth
+    const ADMIN_UID = 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1';
     let intentionalLogout = false;
+    let _adminInited = false;
+
+    function showAdminLogin(errMsg) {
+      const overlay = document.getElementById('adminLoginOverlay');
+      if (overlay) overlay.style.display = 'flex';
+      if (errMsg) {
+        const e = document.getElementById('adminLoginErr');
+        if (e) { e.textContent = errMsg; e.style.display = 'block'; }
+      }
+    }
+    function hideAdminLogin() {
+      const overlay = document.getElementById('adminLoginOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function initAdminDashboard() {
+      if (_adminInited) return;
+      _adminInited = true;
+      hideAdminLogin();
+      loadApplications();
+      loadStudentsData();
+      loadFormSettings();
+      db.ref('sabuj/general/logo').on('value', snap => {
+        if(snap.val()) document.getElementById('adminLogo').src = snap.val();
+      });
+    }
+
+    window.doAdminLogin = function() {
+      const email = (document.getElementById('adminLoginEmail').value || '').trim();
+      const pass = document.getElementById('adminLoginPass').value || '';
+      const errEl = document.getElementById('adminLoginErr');
+      const btn = document.getElementById('adminLoginBtn');
+      errEl.style.display = 'none';
+      if (!email || !pass) {
+        errEl.textContent = '⚠️ ইমেইল ও পাসওয়ার্ড দিন!';
+        errEl.style.display = 'block';
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'প্রবেশ করছে...';
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(cred => {
+          if (cred.user.uid !== ADMIN_UID) {
+            auth.signOut();
+            errEl.textContent = '❌ আপনি অ্যাডমিন নন!';
+            errEl.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'প্রবেশ করুন →';
+          }
+          // success → onAuthStateChanged will trigger initAdminDashboard
+        })
+        .catch(err => {
+          errEl.textContent = '❌ ' + (err.message || 'লগইন ব্যর্থ');
+          errEl.style.display = 'block';
+          btn.disabled = false; btn.textContent = 'প্রবেশ করুন →';
+        });
+    };
+
+    // Enter key submit
+    document.addEventListener('DOMContentLoaded', () => {
+      ['adminLoginEmail','adminLoginPass'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
+      });
+    });
+
     auth.onAuthStateChanged(user => {
       if(user) {
-        if(user.uid === 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1') {
-          loadApplications();
-          loadStudentsData();
-          loadFormSettings();
-          
-          // Load Logo
-          db.ref('sabuj/general/logo').on('value', snap => {
-            if(snap.val()) document.getElementById('adminLogo').src = snap.val();
-          });
+        if(user.uid === ADMIN_UID) {
+          initAdminDashboard();
         } else {
-          intentionalLogout = true;
-          auth.signOut(); window.location.href = 'portal.html';
+          // Other role logged-in in same tab — show inline login, don't redirect
+          showAdminLogin('⚠️ এই অ্যাকাউন্টটি অ্যাডমিন নয়। অ্যাডমিন ক্রেডেনশিয়াল দিন।');
         }
       } else {
-        if(intentionalLogout) window.location.href = 'portal.html';
+        if (intentionalLogout) {
+          window.location.href = 'portal.html';
+        } else {
+          showAdminLogin();
+        }
       }
     });
 
