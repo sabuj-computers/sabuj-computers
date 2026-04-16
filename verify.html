@@ -121,6 +121,51 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    function verifyEmployee(empId) {
+      document.getElementById('certId').value = empId;
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('resultBox').style.display = 'none';
+
+      db.ref('sabuj/attendance-employees').once('value').then(function(snap) {
+        document.getElementById('loader').style.display = 'none';
+        var data = snap.val() || {};
+        var foundEmp = null;
+        for (var k in data) {
+          if (data[k].uniqueId === empId) { foundEmp = data[k]; break; }
+        }
+        var resultBox = document.getElementById('resultBox');
+        if (foundEmp) {
+          var imgHtml = foundEmp.photo
+            ? '<img src="' + foundEmp.photo + '" class="student-img">'
+            : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👔</div>';
+          resultBox.className = 'result success';
+          resultBox.innerHTML =
+            '<div class="icon-large">✅</div>' +
+            '<h3 style="color:#166534;margin:0 0 15px 0;font-size:22px;">কর্মী যাচাই সফল!</h3>' +
+            '<div style="display:inline-block;background:#fff;color:var(--g1);padding:4px 14px;border-radius:99px;font-size:12px;font-weight:700;margin-bottom:8px;border:1px solid #bbf7d0;">👔 প্রতিষ্ঠানের কর্মী</div>' +
+            imgHtml +
+            '<h2 style="margin:15px 0 5px;color:var(--g1);font-size:24px;">' + (foundEmp.name || '—') + '</h2>' +
+            '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">কর্মী আইডি: ' + foundEmp.uniqueId + '</p>' +
+            (foundEmp.designation ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">পদবী: ' + foundEmp.designation + '</p>' : '') +
+            (foundEmp.shift ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">শিফট: ' + foundEmp.shift + '</p>' : '') +
+            '<div style="margin-top:20px;padding-top:15px;border-top:1px dashed #bbf7d0;">' +
+            '<p style="margin:0;color:#15803d;font-size:14px;">এই ব্যক্তি সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত কর্মী।</p>' +
+            '</div>';
+        } else {
+          resultBox.className = 'result error';
+          resultBox.innerHTML =
+            '<div class="icon-large">❌</div>' +
+            '<h3 style="color:#991b1b;margin:0 0 10px 0;font-size:22px;">কর্মী খুঁজে পাওয়া যায়নি!</h3>' +
+            '<p style="margin:0;color:#7f1d1d;font-size:15px;">এই কর্মী আইডিটি আমাদের রেকর্ডে নেই। দয়া করে কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>';
+        }
+        resultBox.style.display = 'block';
+      }).catch(function(error) {
+        document.getElementById('loader').style.display = 'none';
+        alert('সার্ভার এরর! দয়া করে একটু পর আবার চেষ্টা করুন।');
+        console.error(error);
+      });
+    }
+
     function verifyCert(id = null) {
       const certId = id || document.getElementById('certId').value.trim();
       if(!certId) {
@@ -178,12 +223,26 @@
             </div>
           `;
         } else {
-          resultBox.className = 'result error';
-          resultBox.innerHTML = `
-            <div class="icon-large">❌</div>
-            <h3 style="color: #991b1b; margin: 0 0 10px 0; font-size: 22px;">সনদটি খুঁজে পাওয়া যায়নি!</h3>
-            <p style="margin: 0; color: #7f1d1d; font-size: 15px;">দয়া করে সঠিক আইডি বা সনদ নম্বর প্রদান করুন অথবা কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>
-          `;
+          // Fallback: try employee verification
+          db.ref('sabuj/attendance-employees').once('value').then(function(empSnap) {
+            var empData = empSnap.val() || {};
+            var foundEmp = null;
+            for (var k in empData) {
+              if (empData[k].uniqueId === certId) { foundEmp = empData[k]; break; }
+            }
+            if (foundEmp) {
+              verifyEmployee(certId);
+            } else {
+              resultBox.className = 'result error';
+              resultBox.innerHTML = `
+                <div class="icon-large">❌</div>
+                <h3 style="color: #991b1b; margin: 0 0 10px 0; font-size: 22px;">কোনো রেকর্ড পাওয়া যায়নি!</h3>
+                <p style="margin: 0; color: #7f1d1d; font-size: 15px;">দয়া করে সঠিক শিক্ষার্থী/কর্মী আইডি বা সনদ নম্বর প্রদান করুন অথবা কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>
+              `;
+              resultBox.style.display = 'block';
+            }
+          });
+          return;
         }
         resultBox.style.display = 'block';
       }).catch((error) => {
@@ -196,8 +255,11 @@
     // Check URL params on load (For QR Code Scanning)
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
+      const empParam = urlParams.get('emp');
       const certParam = urlParams.get('cert');
-      if(certParam) {
+      if(empParam) {
+        verifyEmployee(empParam);
+      } else if(certParam) {
         verifyCert(certParam);
       }
     };
