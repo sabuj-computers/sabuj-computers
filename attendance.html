@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>উপস্থিতি - সবুজ কম্পিউটার ট্রেনিং সেন্টার</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root { --g1:#0d3d1f; --g2:#1a6b35; --gold:#c8a847; --gold2:#f0d860; --bg:#0a1f12; --glass:rgba(255,255,255,0.06); --glass-border:rgba(200,168,71,0.15); --text:#e8f5ec; --text-muted:#8aab94; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); min-height:100vh; color:var(--text); }
+    body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at 20% 50%, rgba(26,107,53,0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(200,168,71,0.08) 0%, transparent 50%), radial-gradient(ellipse at 50% 100%, rgba(13,61,31,0.2) 0%, transparent 50%); pointer-events:none; z-index:0; }
+    
+    /* Header */
+    .att-header { 
+      background:linear-gradient(135deg, rgba(13,61,31,0.9), rgba(26,107,53,0.8));
+      backdrop-filter:blur(20px);
+      padding:24px 20px; text-align:center; color:#fff; 
+      position:relative; overflow:hidden; border-bottom:1px solid var(--glass-border);
+    }
+    .att-header::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle, rgba(200,168,71,0.12) 0%, transparent 60%); animation:shimmerBg 10s ease infinite; }
+    .att-header::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:1px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+    @keyframes shimmerBg { 0%,100%{transform:rotate(0deg) scale(1);} 50%{transform:rotate(180deg) scale(1.1);} }
+    .att-header .logo-wrap { display:flex; align-items:center; justify-content:center; gap:14px; position:relative; z-index:1; }
+    .att-header .logo-wrap img { width:55px; height:55px; border-radius:50%; background:#fff; padding:3px; box-shadow:0 0 20px rgba(200,168,71,0.3); }
+    .att-header h1 { font-size:20px; margin:0; position:relative; z-index:1; text-shadow:0 2px 10px rgba(0,0,0,0.3); }
+    .att-header p { font-size:13px; opacity:0.8; margin-top:4px; position:relative; z-index:1; }
+
+    /* Main Container */
+    .att-container { max-width:500px; margin:0 auto; padding:20px; position:relative; z-index:1; }
+
+    /* Glassmorphism Card */
+    .att-card { 
+      background:var(--glass);
+      backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      border-radius:24px; 
+      padding:28px 24px; 
+      box-shadow:0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+      border:1px solid var(--glass-border);
+      margin-bottom:20px;
+      animation:slideUp 0.5s ease;
+    }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+    .att-card h2 { color:var(--text); font-size:18px; margin-bottom:16px; text-align:center; }
+    .att-card h2 span { background:linear-gradient(135deg, var(--gold), var(--gold2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    /* Input Group */
+    .input-group { margin-bottom:16px; }
+    .input-group label { display:block; font-weight:700; color:var(--text); font-size:13px; margin-bottom:6px; }
+    .input-group input, .input-group select, .input-group textarea { 
+      width:100%; padding:13px 16px; border:1.5px solid rgba(200,168,71,0.2); border-radius:14px; 
+      font-family:'Hind Siliguri'; font-size:14px; outline:none; transition:all 0.3s;
+      background:rgba(255,255,255,0.06); color:var(--text);
+    }
+    .input-group input::placeholder { color:var(--text-muted); }
+    .input-group input:focus, .input-group select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,168,71,0.15), 0 0 20px rgba(200,168,71,0.1); background:rgba(255,255,255,0.08); }
+    .input-group select option { background:#1a3a24; color:#fff; }
+
+    /* Buttons */
+    .btn-primary { 
+      width:100%; padding:14px; 
+      background:linear-gradient(135deg, var(--gold), var(--gold2), var(--gold)); 
+      background-size:200% 200%; animation:goldShimmer 3s ease infinite;
+      color:#0d3d1f; border:none; border-radius:14px; font-size:16px; font-weight:700; 
+      cursor:pointer; font-family:'Hind Siliguri'; transition:all 0.3s;
+      box-shadow:0 4px 15px rgba(200,168,71,0.3);
+    }
+    @keyframes goldShimmer { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(200,168,71,0.4); }
+    .btn-primary:active { transform:translateY(0); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; animation:none; }
+
+    .btn-secondary { 
+      width:100%; padding:12px; background:transparent; color:var(--gold); 
+      border:1.5px solid var(--gold); border-radius:14px; font-size:14px; font-weight:700; 
+      cursor:pointer; font-family:'Hind Siliguri'; transition:all 0.3s; margin-top:10px;
+    }
+    .btn-secondary:hover { background:rgba(200,168,71,0.1); }
+
+    /* Student Info Card */
+    .student-info { 
+      display:none; text-align:center; padding:24px; 
+      background:linear-gradient(135deg, rgba(26,107,53,0.2), rgba(13,61,31,0.3));
+      border-radius:20px; border:1.5px solid rgba(26,107,53,0.3); margin-bottom:16px;
+      backdrop-filter:blur(10px);
+    }
+    .student-info.show { display:block; animation:slideUp 0.4s ease; }
+    .student-info img { width:95px; height:95px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); margin-bottom:12px; box-shadow:0 0 25px rgba(200,168,71,0.2); }
+    .student-info h3 { color:#fff; font-size:19px; margin-bottom:4px; }
+    .student-info .meta { font-size:13px; color:var(--text-muted); line-height:1.7; }
+    .student-info .meta strong { color:var(--text); }
+    .student-info .late-badge { display:inline-block; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; padding:3px 12px; border-radius:20px; font-size:11px; font-weight:700; margin-top:8px; }
+
+    /* Success */
+    .success-msg { 
+      display:none; text-align:center; padding:30px; 
+      background:linear-gradient(135deg, rgba(22,163,74,0.15), rgba(5,150,105,0.1));
+      border-radius:20px; border:1.5px solid rgba(34,197,94,0.3);
+      backdrop-filter:blur(10px);
+    }
+    .success-msg.show { display:block; animation:slideUp 0.4s ease; }
+    .success-msg .check { font-size:60px; margin-bottom:10px; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+    .success-msg h3 { color:#4ade80; font-size:20px; margin-bottom:8px; }
+    .success-msg p { color:var(--text-muted); font-size:14px; }
+
+    /* Error */
+    .error-msg { 
+      display:none; padding:12px 16px; 
+      background:rgba(220,38,38,0.15); 
+      color:#fca5a5; border-radius:12px; font-size:13px; 
+      margin-bottom:12px; border:1px solid rgba(220,38,38,0.3); text-align:center;
+      backdrop-filter:blur(10px);
+    }
+    .error-msg.show { display:block; animation:slideUp 0.3s ease; }
+
+    /* Visitor Form */
+    .visitor-section { display:none; }
+    .visitor-section.show { display:block; animation:slideUp 0.4s ease; }
+    .photo-preview { width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--gold); margin:10px auto; display:none; box-shadow:0 0 20px rgba(200,168,71,0.2); }
+    .photo-preview.show { display:block; }
+
+    /* Camera Section */
+    .camera-section { text-align:center; margin-bottom:12px; }
+    .camera-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; background:rgba(200,168,71,0.15); color:var(--gold); border:1.5px dashed var(--gold); border-radius:14px; cursor:pointer; font-family:'Hind Siliguri'; font-size:13px; font-weight:700; transition:all 0.3s; }
+    .camera-btn:hover { background:rgba(200,168,71,0.25); }
+
+    /* Time display */
+    .time-display { text-align:center; }
+    .time-display .date { font-size:14px; color:var(--text-muted); }
+    .time-display .time { font-size:32px; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(200,168,71,0.3); letter-spacing:2px; }
+
+    /* Footer */
+    .att-footer { text-align:center; padding:20px; font-size:12px; color:var(--text-muted); }
+    .att-footer a { color:var(--gold); text-decoration:none; }
+
+    /* Tabs */
+    .tab-btns { display:flex; gap:8px; margin-bottom:16px; }
+    .tab-btn { flex:1; padding:12px; border:1.5px solid var(--glass-border); border-radius:14px; background:var(--glass); backdrop-filter:blur(10px); font-family:'Hind Siliguri'; font-size:13px; font-weight:700; cursor:pointer; text-align:center; color:var(--text-muted); transition:all 0.3s; }
+    .tab-btn.active { background:linear-gradient(135deg, var(--gold), var(--gold2)); color:#0d3d1f; border-color:var(--gold); box-shadow:0 4px 15px rgba(200,168,71,0.3); }
+
+    /* Loading */
+    .spinner { display:inline-block; width:20px; height:20px; border:3px solid rgba(200,168,71,0.3); border-radius:50%; border-top-color:var(--gold); animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:8px; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    /* Floating particles */
+    .particle { position:fixed; width:3px; height:3px; background:var(--gold); border-radius:50%; opacity:0.2; animation:float 15s infinite; pointer-events:none; z-index:0; }
+    @keyframes float { 0%,100%{transform:translateY(100vh) rotate(0deg);opacity:0;} 10%{opacity:0.3;} 90%{opacity:0.1;} 100%{transform:translateY(-10vh) rotate(720deg);} }
+
+    @media(max-width:500px) {
+      .att-container { padding:12px; }
+      .att-card { padding:22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Particles -->
+  <div class="particle" style="left:10%;animation-delay:0s;animation-duration:18s;"></div>
+  <div class="particle" style="left:30%;animation-delay:3s;animation-duration:22s;"></div>
+  <div class="particle" style="left:55%;animation-delay:6s;animation-duration:16s;"></div>
+  <div class="particle" style="left:75%;animation-delay:9s;animation-duration:20s;"></div>
+  <div class="particle" style="left:90%;animation-delay:2s;animation-duration:24s;"></div>
+
+  <!-- Header -->
+  <div class="att-header">
+    <div class="logo-wrap">
+      <img id="headerLogo" src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" crossorigin="anonymous">
+      <div>
+        <h1 id="headerTitle">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1>
+        <p>📍 বাগাতিপাড়া, নাটোর</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="att-container">
+
+    <!-- Time Display -->
+    <div class="time-display att-card" style="padding:18px;">
+      <div class="date" id="currentDate"></div>
+      <div class="time" id="currentTime"></div>
+    </div>
+
+    <!-- Tab Selection -->
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchMode('student')">🎓 শিক্ষার্থী</button>
+      <button class="tab-btn" onclick="switchMode('visitor')">👤 অতিথি</button>
+    </div>
+
+    <!-- Student Attendance Section -->
+    <div id="studentSection">
+      <div class="att-card">
+        <h2>🎓 আজকের <span>উপস্থিতি</span></h2>
+        
+        <div class="error-msg" id="errorMsg"></div>
+
+        <!-- Step 1: Enter ID -->
+        <div id="step1">
+          <div class="input-group">
+            <label>আপনার ইউনিক আইডি দিন</label>
+            <input type="text" id="studentIdInput" placeholder="যেমন: SCTC-001" autocomplete="off" onkeydown="if(event.key==='Enter')findStudent()">
+          </div>
+          <button class="btn-primary" onclick="findStudent()">🔍 খুঁজুন</button>
+        </div>
+
+        <!-- Step 2: Confirm -->
+        <div id="step2" style="display:none;">
+          <div class="student-info show" id="studentInfoCard"></div>
+          <button class="btn-primary" id="confirmBtn" onclick="confirmAttendance()">✅ উপস্থিতি নিশ্চিত করুন</button>
+          <button class="btn-secondary" onclick="resetStudent()">🔄 অন্য আইডি দিন</button>
+        </div>
+
+        <!-- Step 3: Success -->
+        <div class="success-msg" id="successMsg">
+          <div class="check">✅</div>
+          <h3>উপস্থিতি সফল!</h3>
+          <p id="successDetail"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visitor Section -->
+    <div class="visitor-section" id="visitorSection">
+      <div class="att-card">
+        <h2>👤 অতিথি <span>রেজিস্ট্রেশন</span></h2>
+        <p style="text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:16px;">আপনি যদি শিক্ষার্থী না হন, তাহলে নিচের ফর্মটি পূরণ করুন।</p>
+
+        <div class="error-msg" id="visitorError"></div>
+
+        <div class="input-group">
+          <label>📸 ছবি তুলুন / আপলোড করুন *</label>
+          <div class="camera-section">
+            <label class="camera-btn" for="visitorPhoto">📷 ক্যামেরা / গ্যালারি</label>
+          </div>
+          <input type="file" id="visitorPhoto" accept="image/*" capture="user" style="display:none;" onchange="previewVisitorPhoto(this)">
+          <img class="photo-preview" id="visitorPhotoPreview">
+        </div>
+        <div class="input-group">
+          <label>নাম *</label>
+          <input type="text" id="visitorName" placeholder="আপনার পূর্ণ নাম">
+        </div>
+        <div class="input-group">
+          <label>মোবাইল নম্বর *</label>
+          <input type="tel" id="visitorMobile" placeholder="০১XXXXXXXXX">
+        </div>
+        <div class="input-group">
+          <label>ঠিকানা</label>
+          <input type="text" id="visitorAddress" placeholder="গ্রাম/শহর, উপজেলা">
+        </div>
+        <div class="input-group">
+          <label>ব্যাচ</label>
+          <select id="visitorBatch">
+            <option value="">-- নির্বাচন করুন --</option>
+            <option value="সকাল">সকাল</option>
+            <option value="বিকাল">বিকাল</option>
+          </select>
+        </div>
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;">
+            <label>সময় থেকে</label>
+            <input type="time" id="visitorTimeFrom">
+          </div>
+          <div style="flex:1;">
+            <label>সময় পর্যন্ত</label>
+            <input type="time" id="visitorTimeTo">
+          </div>
+        </div>
+        <button class="btn-primary" id="visitorSubmitBtn" onclick="submitVisitor()">📝 জমা দিন</button>
+
+        <div class="success-msg" id="visitorSuccess" style="margin-top:16px;">
+          <div class="check">✅</div>
+          <h3>রেজিস্ট্রেশন সফল!</h3>
+          <p id="visitorSuccessDetail"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="att-footer">
+      &copy; <span id="footerYear"></span> <a href="/home.html">সবুজ কম্পিউটার ট্রেনিং সেন্টার</a> | সকল অধিকার সংরক্ষিত
+    </div>
+  </div>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTCLqLGCzBt9EpgMpEBWent8fa4M-C0Xk",
+      authDomain: "sabuj-computers.firebaseapp.com",
+      databaseURL: "https://sabuj-computers-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sabuj-computers",
+      storageBucket: "sabuj-computers.firebasestorage.app",
+      messagingSenderId: "781121353789",
+      appId: "1:781121353789:web:38b0f78af57b66ddf05254"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
+
+    let gracePeriodMinutes = 10;
+
+    // Load logo & grace period from Firebase
+    db.ref('sabuj/general/logo').once('value', snap => {
+      const logo = snap.val();
+      if (logo) document.getElementById('headerLogo').src = logo;
+    });
+    db.ref('sabuj/attendance-settings/gracePeriod').once('value', snap => {
+      if (snap.exists()) gracePeriodMinutes = snap.val();
+    });
+
+    // Date & Time
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('bn-BD', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+    // Mode Switch
+    function switchMode(mode) {
+      document.querySelectorAll('.tab-btn').forEach((b,i) => {
+        b.classList.toggle('active', (mode==='student' && i===0) || (mode==='visitor' && i===1));
+      });
+      document.getElementById('studentSection').style.display = mode==='student' ? 'block' : 'none';
+      document.getElementById('visitorSection').style.display = mode==='visitor' ? 'block' : 'none';
+      if (mode==='visitor') document.getElementById('visitorSection').classList.add('show');
+    }
+
+    // ============ PHOTO COMPRESS ============
+    function compressImage(file, maxWidth, maxHeight, quality) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+            if (h > maxHeight) { w = Math.round(w * maxHeight / h); h = maxHeight; }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            canvas.toBlob(resolve, 'image/jpeg', quality || 0.7);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ============ LATE CHECK ============
+    function isLate(student) {
+      if (!student.timeFrom) return false;
+      const now = new Date();
+      const [h, m] = student.timeFrom.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return false;
+      const classTime = new Date(); classTime.setHours(h, m, 0, 0);
+      classTime.setMinutes(classTime.getMinutes() + gracePeriodMinutes);
+      return now > classTime;
+    }
+
+    // ============ STUDENT ATTENDANCE ============
+    let foundStudent = null;
+    let foundStudentKey = null;
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function findStudent() {
+      const id = document.getElementById('studentIdInput').value.trim().toUpperCase();
+      if (!id) return showError('❌ আইডি লিখুন!');
+
+      document.getElementById('errorMsg').classList.remove('show');
+      
+      db.ref('sabuj/attendance-students').orderByChild('uniqueId').equalTo(id).once('value', snap => {
+        const data = snap.val();
+        if (!data) return showError('❌ এই আইডিতে কোনো শিক্ষার্থী পাওয়া যায়নি!');
+        
+        const key = Object.keys(data)[0];
+        const student = data[key];
+        foundStudent = student;
+        foundStudentKey = key;
+
+        const today = new Date().toISOString().split('T')[0];
+        db.ref('sabuj/attendance-records/' + today + '/' + key).once('value', attSnap => {
+          if (attSnap.exists()) {
+            const rec = attSnap.val();
+            showError('⚠️ আপনি আজ ইতিমধ্যে উপস্থিতি দিয়েছেন! (সময়: ' + (rec.time || '') + ')');
+            return;
+          }
+
+          const photo = student.photo || 'https://via.placeholder.com/95x95?text=👤';
+          const late = isLate(student);
+          document.getElementById('studentInfoCard').innerHTML = 
+            '<img src="'+photo+'" alt="ছবি" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/95x95?text=👤\'">' +
+            '<h3>'+student.name+'</h3>' +
+            (late ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '') +
+            '<div class="meta">' +
+              '<strong>আইডি:</strong> '+student.uniqueId+'<br>' +
+              (student.fatherName ? '<strong>পিতা:</strong> '+student.fatherName+'<br>' : '') +
+              '<strong>ব্যাচ:</strong> '+(student.batch||'—')+' | <strong>সময়:</strong> '+(student.timeFrom||'')+' - '+(student.timeTo||'') +
+            '</div>';
+
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+        });
+      });
+    }
+
+    function confirmAttendance() {
+      if (!foundStudent || !foundStudentKey) return;
+      
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const time = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit' });
+      const late = isLate(foundStudent);
+
+      const record = {
+        studentId: foundStudentKey,
+        uniqueId: foundStudent.uniqueId,
+        name: foundStudent.name,
+        photo: foundStudent.photo || '',
+        batch: foundStudent.batch || '',
+        timeFrom: foundStudent.timeFrom || '',
+        timeTo: foundStudent.timeTo || '',
+        date: today,
+        time: time,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        method: 'qr-scan',
+        isLate: late
+      };
+
+      db.ref('sabuj/attendance-records/' + today + '/' + foundStudentKey).set(record)
+        .then(() => {
+          document.getElementById('step2').style.display = 'none';
+          document.getElementById('successMsg').classList.add('show');
+          document.getElementById('successDetail').textContent = 
+            foundStudent.name + ' — ' + time + ' এ উপস্থিতি রেকর্ড হয়েছে।' + (late ? ' (বিলম্বিত)' : '');
+          setTimeout(resetStudent, 8000);
+        })
+        .catch(err => {
+          showError('❌ সেভ করতে সমস্যা: ' + err.message);
+          btn.disabled = false;
+          btn.innerHTML = '✅ উপস্থিতি নিশ্চিত করুন';
+        });
+    }
+
+    function resetStudent() {
+      foundStudent = null; foundStudentKey = null;
+      document.getElementById('step1').style.display = 'block';
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('successMsg').classList.remove('show');
+      document.getElementById('studentIdInput').value = '';
+      document.getElementById('errorMsg').classList.remove('show');
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = false;
+      btn.innerHTML = '✅ উপস্থিতি নিশ্চিত করুন';
+    }
+
+    // ============ VISITOR ============
+    function previewVisitorPhoto(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 400, 400, 0.7).then(blob => {
+          input._compressedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          const img = document.getElementById('visitorPhotoPreview');
+          img.src = url;
+          img.classList.add('show');
+        });
+      }
+    }
+
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      try {
+        const res = await fetch(CLOUDINARY_URL, { method:'POST', body:formData });
+        const data = await res.json();
+        if (data.error) return null;
+        return data.secure_url;
+      } catch(err) { return null; }
+    }
+
+    async function submitVisitor() {
+      const name = document.getElementById('visitorName').value.trim();
+      const mobile = document.getElementById('visitorMobile').value.trim();
+      const photoInput = document.getElementById('visitorPhoto');
+
+      if (!name) return showVisitorError('❌ নাম লিখুন!');
+      if (!mobile) return showVisitorError('❌ মোবাইল নম্বর দিন!');
+      if (!photoInput.files[0]) return showVisitorError('❌ ছবি আপলোড করুন!');
+
+      const btn = document.getElementById('visitorSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> আপলোড হচ্ছে...';
+
+      const fileToUpload = photoInput._compressedBlob || photoInput.files[0];
+      const photoUrl = await uploadToCloudinary(fileToUpload);
+      if (!photoUrl) { btn.disabled = false; btn.innerHTML = '📝 জমা দিন'; return showVisitorError('❌ ছবি আপলোড ব্যর্থ!'); }
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const time = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit' });
+
+      const visitor = {
+        name, mobile, photo: photoUrl, date: today, time,
+        address: document.getElementById('visitorAddress').value.trim(),
+        batch: document.getElementById('visitorBatch').value,
+        timeFrom: document.getElementById('visitorTimeFrom').value,
+        timeTo: document.getElementById('visitorTimeTo').value,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      db.ref('sabuj/attendance-visitors/' + today).push(visitor)
+        .then(() => {
+          btn.disabled = false; btn.innerHTML = '📝 জমা দিন';
+          document.getElementById('visitorSuccess').classList.add('show');
+          document.getElementById('visitorSuccessDetail').textContent = name + ' — সফলভাবে রেজিস্ট্রেশন হয়েছে!';
+          ['visitorName','visitorMobile','visitorAddress'].forEach(id => document.getElementById(id).value = '');
+          document.getElementById('visitorBatch').value = '';
+          document.getElementById('visitorTimeFrom').value = '';
+          document.getElementById('visitorTimeTo').value = '';
+          document.getElementById('visitorPhoto').value = '';
+          document.getElementById('visitorPhotoPreview').classList.remove('show');
+          setTimeout(() => document.getElementById('visitorSuccess').classList.remove('show'), 6000);
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = '📝 জমা দিন'; showVisitorError('❌ সমস্যা: ' + err.message); });
+    }
+
+    function showVisitorError(msg) {
+      const el = document.getElementById('visitorError');
+      el.textContent = msg; el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+  </script>
+</body>
+</html>

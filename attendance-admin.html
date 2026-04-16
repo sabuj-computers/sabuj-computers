@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>অ্যাটেনডেন্স অ্যাডমিন - SCTC</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root { --g1:#0d3d1f; --g2:#1a6b35; --gold:#c8a847; --gold2:#f0d860; --bg:#060f0a; --sidebar-bg:#0a1a10; --glass:rgba(255,255,255,0.04); --glass2:rgba(255,255,255,0.07); --glass-border:rgba(200,168,71,0.12); --text:#e8f5ec; --text-muted:#6b8c76; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); display:flex; height:100vh; overflow:hidden; color:var(--text); }
+    body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at 10% 20%, rgba(26,107,53,0.12) 0%, transparent 50%), radial-gradient(ellipse at 90% 80%, rgba(200,168,71,0.06) 0%, transparent 50%); pointer-events:none; z-index:0; }
+
+    /* Login */
+    .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .login-overlay::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at 50% 50%, rgba(26,107,53,0.2) 0%, transparent 70%); }
+    .login-card { background:var(--glass2); backdrop-filter:blur(30px); padding:44px 36px; border-radius:28px; width:90%; max-width:400px; text-align:center; box-shadow:0 25px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); border:1px solid var(--glass-border); position:relative; z-index:1; }
+    .login-card img { width:75px; height:75px; border-radius:50%; margin-bottom:14px; box-shadow:0 0 30px rgba(200,168,71,0.3); }
+    .login-card h2 { color:var(--gold); margin-bottom:6px; font-size:22px; }
+    .login-card p { color:var(--text-muted); font-size:13px; margin-bottom:22px; }
+    .login-card input { width:100%; padding:13px 18px; border:1.5px solid rgba(200,168,71,0.15); border-radius:14px; font-family:'Hind Siliguri'; font-size:14px; outline:none; margin-bottom:12px; background:rgba(255,255,255,0.05); color:var(--text); }
+    .login-card input::placeholder { color:var(--text-muted); }
+    .login-card input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,168,71,0.1); }
+    .login-card button { width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0d3d1f; border:none; border-radius:14px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri'; box-shadow:0 4px 15px rgba(200,168,71,0.3); transition:all 0.3s; }
+    .login-card button:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(200,168,71,0.4); }
+    .login-error { color:#fca5a5; font-size:13px; margin-top:8px; display:none; }
+
+    /* Sidebar */
+    .sidebar { width:260px; background:var(--sidebar-bg); color:#fff; display:flex; flex-direction:column; overflow-y:auto; border-right:1px solid var(--glass-border); position:relative; z-index:1; }
+    .sidebar-header { padding:22px; text-align:center; border-bottom:1px solid var(--glass-border); display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .sidebar-header img { width:50px; height:50px; border-radius:50%; background:#fff; padding:3px; box-shadow:0 0 15px rgba(200,168,71,0.2); }
+    .sidebar-header h2 { margin:0; font-size:15px; color:var(--gold); }
+    .nav-list { list-style:none; padding:8px 0; margin:0; }
+    .nav-item { padding:13px 22px; cursor:pointer; border-left:3px solid transparent; transition:all 0.2s; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-muted); }
+    .nav-item:hover { background:rgba(200,168,71,0.05); color:var(--text); }
+    .nav-item.active { background:rgba(200,168,71,0.1); border-left-color:var(--gold); color:var(--gold); }
+
+    /* Main */
+    .main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; position:relative; z-index:1; }
+    .topbar { background:var(--glass); backdrop-filter:blur(20px); padding:14px 28px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--glass-border); }
+    .topbar h3 { margin:0; color:var(--gold); font-size:17px; }
+    .logout-btn { background:rgba(220,38,38,0.15); color:#fca5a5; border:1px solid rgba(220,38,38,0.2); padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; font-family:'Hind Siliguri'; font-size:12px; transition:all 0.2s; }
+    .logout-btn:hover { background:rgba(220,38,38,0.25); }
+
+    .content-area { flex:1; padding:24px; overflow-y:auto; overflow-x:hidden; }
+
+    /* Cards */
+    .card { background:var(--glass2); backdrop-filter:blur(20px); padding:22px; border-radius:18px; box-shadow:0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03); margin-bottom:20px; border:1px solid var(--glass-border); transition:all 0.3s; }
+    .card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.3); border-color:rgba(200,168,71,0.2); }
+    .card h3 { color:var(--gold); margin-bottom:14px; font-size:15px; }
+
+    /* Stats */
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .stat-card { background:linear-gradient(135deg, rgba(200,168,71,0.12), rgba(13,61,31,0.3)); backdrop-filter:blur(20px); border:1px solid var(--glass-border); color:#fff; padding:20px; border-radius:18px; text-align:center; position:relative; overflow:hidden; }
+    .stat-card::before { content:''; position:absolute; top:-20px; right:-20px; width:60px; height:60px; background:rgba(200,168,71,0.1); border-radius:50%; }
+    .stat-card .num { font-size:30px; font-weight:700; background:linear-gradient(135deg,var(--gold),var(--gold2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat-card .label { font-size:11px; color:var(--text-muted); margin-top:4px; }
+    .stat-card.late-card { background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); }
+    .stat-card.late-card .num { background:linear-gradient(135deg,#f59e0b,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    /* Table */
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th { background:rgba(200,168,71,0.1); color:var(--gold); padding:11px 12px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--glass-border); }
+    td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--text); }
+    tr:hover td { background:rgba(200,168,71,0.03); }
+    .late-row td { background:rgba(245,158,11,0.05); }
+    .late-badge { display:inline-block; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .fg { margin-bottom:12px; }
+    .fg label { display:block; font-weight:700; font-size:11px; color:var(--gold); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.3px; }
+    .fg input, .fg select { width:100%; padding:10px 14px; border:1.5px solid rgba(200,168,71,0.15); border-radius:12px; font-family:'Hind Siliguri'; font-size:13px; outline:none; background:rgba(255,255,255,0.04); color:var(--text); }
+    .fg input::placeholder { color:var(--text-muted); }
+    .fg input:focus, .fg select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,168,71,0.1); }
+    .fg select option { background:#0a1a10; color:#fff; }
+    .photo-upload-area { width:100px; height:100px; border:2px dashed rgba(200,168,71,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; margin:0 auto 14px; transition:all 0.3s; }
+    .photo-upload-area:hover { border-color:var(--gold); box-shadow:0 0 20px rgba(200,168,71,0.1); }
+    .photo-upload-area img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .photo-upload-area span { color:var(--text-muted); font-size:24px; }
+
+    /* Buttons */
+    .btn-primary { padding:12px 24px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0d3d1f; border:none; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri'; transition:all 0.3s; box-shadow:0 4px 15px rgba(200,168,71,0.2); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(200,168,71,0.3); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .btn-sm { padding:5px 10px; border:none; border-radius:8px; cursor:pointer; font-size:11px; font-weight:700; font-family:'Hind Siliguri'; transition:all 0.2s; }
+    .btn-edit { background:rgba(200,168,71,0.15); color:var(--gold); }
+    .btn-edit:hover { background:rgba(200,168,71,0.3); }
+    .btn-del { background:rgba(220,38,38,0.15); color:#fca5a5; margin-left:4px; }
+    .btn-del:hover { background:rgba(220,38,38,0.3); }
+    .btn-export { background:rgba(59,130,246,0.15); color:#93c5fd; }
+    .btn-export:hover { background:rgba(59,130,246,0.3); }
+
+    /* Tabs */
+    .tab-content { display:none; animation:fadeIn 0.35s ease-out; }
+    .tab-content.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+    /* Filter Bar */
+    .filter-bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; padding:12px; background:var(--glass); border-radius:14px; border:1px solid var(--glass-border); backdrop-filter:blur(10px); }
+    .filter-bar input, .filter-bar select { padding:8px 12px; border:1.5px solid rgba(200,168,71,0.15); border-radius:10px; font-family:'Hind Siliguri'; font-size:12px; outline:none; background:rgba(255,255,255,0.04); color:var(--text); }
+    .filter-bar input::placeholder { color:var(--text-muted); }
+    .filter-bar input:focus, .filter-bar select:focus { border-color:var(--gold); }
+    .filter-bar select option { background:#0a1a10; }
+    .filter-count { font-size:11px; color:var(--text-muted); margin-left:auto; }
+
+    /* QR */
+    .qr-output { text-align:center; padding:20px; }
+    .qr-output canvas { border:3px solid var(--gold); border-radius:16px; padding:12px; background:#fff; box-shadow:0 0 30px rgba(200,168,71,0.15); }
+
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+    .modal-overlay.show { display:flex; }
+    .modal-content { background:linear-gradient(135deg, #0a1a10, #0d2516); padding:28px; border-radius:24px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 25px 70px rgba(0,0,0,0.5); border:1px solid var(--glass-border); animation:modalSlide 0.3s ease; }
+    @keyframes modalSlide { from{transform:translateY(20px) scale(0.97);opacity:0;} to{transform:translateY(0) scale(1);opacity:1;} }
+    .modal-close { position:absolute; top:14px; right:14px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); }
+
+    /* Spinner */
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(13,61,31,0.3); border-radius:50%; border-top-color:var(--g1); animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(200,168,71,0.2); border-radius:99px; }
+
+    /* Logo upload */
+    .logo-upload-section { display:flex; align-items:center; gap:16px; padding:16px; background:var(--glass); border-radius:14px; border:1px solid var(--glass-border); margin-bottom:14px; }
+    .logo-upload-section img { width:55px; height:55px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); box-shadow:0 0 15px rgba(200,168,71,0.2); }
+
+    /* Chart */
+    .chart-container { position:relative; height:250px; margin-top:12px; }
+
+    /* Mobile hamburger */
+    .hamburger { display:none; position:fixed; top:10px; left:10px; z-index:999; background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; padding:10px 12px; border-radius:12px; cursor:pointer; box-shadow:0 4px 15px rgba(200,168,71,0.3); font-size:18px; line-height:1; }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .hamburger { display:block; }
+      body { flex-direction:column; height:auto; overflow:auto; }
+      .sidebar { position:fixed; top:0; left:-280px; width:260px; height:100vh; z-index:998; transition:left 0.3s ease; box-shadow:4px 0 30px rgba(0,0,0,0.5); }
+      .sidebar.open { left:0; }
+      .sidebar-header { cursor:pointer; }
+      .sidebar ul { display:block; }
+      .main-content { overflow:auto; width:100%; }
+      .content-area { padding:12px; padding-top:50px; }
+      .topbar { padding:10px 14px; padding-left:52px; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .form-grid { grid-template-columns:1fr; }
+      table { font-size:10px; }
+      .modal-content { width:95%; padding:18px; }
+      .login-card { width:92%; padding:28px 20px; }
+    }
+    .sidebar-backdrop { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:997; }
+    .sidebar-backdrop.show { display:block; }
+
+    @media print {
+      body * { visibility:hidden; }
+      #printQrArea, #printQrArea * { visibility:visible; }
+      #printQrArea { position:absolute; top:0; left:0; width:100%; text-align:center; padding:40px; background:#fff; color:#000; }
+    }
+  </style>
+</head>
+<body>
+  <!-- HAMBURGER -->
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+  <!-- LOGIN -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="loginLogo" crossorigin="anonymous">
+      <h2>🔐 অ্যাটেনডেন্স অ্যাডমিন</h2>
+      <p>সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
+      <input type="email" id="loginEmail" placeholder="ইমেইল">
+      <input type="password" id="loginPass" placeholder="পাসওয়ার্ড" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">🔑 লগইন</button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="mainSidebar" style="display:none;">
+    <div class="sidebar-header">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="sidebarLogo" crossorigin="anonymous">
+      <h2>📋 অ্যাটেনডেন্স</h2>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchTab('overview', this)">📊 ওভারভিউ</li>
+      <li class="nav-item" onclick="switchTab('analytics', this)">📈 অ্যানালিটিক্স</li>
+      <li class="nav-item" onclick="switchTab('students', this)">👨‍🎓 শিক্ষার্থী</li>
+      <li class="nav-item" onclick="switchTab('today', this)">📅 আজকের উপস্থিতি</li>
+      <li class="nav-item" onclick="switchTab('history', this)">📜 ইতিহাস</li>
+      <li class="nav-item" onclick="switchTab('visitors', this)">👤 অতিথি লগ</li>
+      <li class="nav-item" onclick="switchTab('qr', this)">📱 QR কোড</li>
+      <li class="nav-item" onclick="switchTab('settings', this)">⚙️ সেটিংস</li>
+    </ul>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content" id="mainContent" style="display:none;">
+    <div class="topbar">
+      <h3 id="topbarTitle">📊 ওভারভিউ</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <a href="/home.html" style="color:var(--gold);font-size:12px;text-decoration:none;opacity:0.7;">🏠 হোম</a>
+        <button class="logout-btn" onclick="doLogout()">লগআউট</button>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- OVERVIEW -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">মোট শিক্ষার্থী</div></div>
+          <div class="stat-card"><div class="num" id="statToday">0</div><div class="label">আজকের উপস্থিত</div></div>
+          <div class="stat-card"><div class="num" id="statAbsent">0</div><div class="label">অনুপস্থিত</div></div>
+          <div class="stat-card late-card"><div class="num" id="statLate">0</div><div class="label">⏰ বিলম্বিত</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+          <div class="stat-card"><div class="num" id="statVisitors">0</div><div class="label">আজকের অতিথি</div></div>
+          <div class="stat-card" style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(5,150,105,0.1));"><div class="num" id="statRate" style="background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0%</div><div class="label">উপস্থিতি হার</div></div>
+        </div>
+        <div class="card"><h3>📊 ব্যাচ-ওয়াইজ সারসংক্ষেপ</h3><div id="overviewSummary" style="color:var(--text-muted);font-size:13px;">লোড হচ্ছে...</div></div>
+        <div class="card"><h3>🕐 সাম্প্রতিক উপস্থিতি</h3><div id="recentAttendance">লোড হচ্ছে...</div></div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="tab-content" id="tab-analytics">
+        <div class="card">
+          <h3>📈 সাপ্তাহিক উপস্থিতি চার্ট</h3>
+          <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>📊 ব্যাচ অনুযায়ী তুলনা</h3>
+          <div class="chart-container" style="height:200px;"><canvas id="batchChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>🏆 সবচেয়ে নিয়মিত শিক্ষার্থী (এই মাসে)</h3>
+          <div id="topStudents" style="color:var(--text-muted);font-size:13px;">লোড হচ্ছে...</div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="tab-content" id="tab-students">
+        <div class="card">
+          <h3>➕ নতুন শিক্ষার্থী যোগ করুন</h3>
+          <div style="text-align:center;margin-bottom:14px;">
+            <div class="photo-upload-area" onclick="document.getElementById('stuPhotoInput').click()">
+              <img id="stuPhotoPreview" src="" style="display:none;">
+              <span id="stuPhotoPlaceholder">📸</span>
+            </div>
+            <input type="file" id="stuPhotoInput" accept="image/*" style="display:none;" onchange="previewStudentPhoto(this)">
+            <p style="font-size:11px;color:var(--text-muted);">ছবি আপলোড করুন</p>
+          </div>
+          <div class="form-grid">
+            <div class="fg"><label>ইউনিক আইডি *</label><input type="text" id="stuId" placeholder="যেমন: SCTC-001"></div>
+            <div class="fg"><label>নাম *</label><input type="text" id="stuName" placeholder="পূর্ণ নাম"></div>
+            <div class="fg"><label>পিতার নাম</label><input type="text" id="stuFather" placeholder="পিতার নাম"></div>
+            <div class="fg"><label>মাতার নাম</label><input type="text" id="stuMother" placeholder="মাতার নাম"></div>
+            <div class="fg"><label>মোবাইল *</label><input type="tel" id="stuPhone" placeholder="০১XXXXXXXXX"></div>
+            <div class="fg"><label>ঠিকানা</label><input type="text" id="stuAddress" placeholder="গ্রাম/শহর, উপজেলা"></div>
+            <div class="fg"><label>রক্তের গ্রুপ</label><select id="stuBlood"><option value="">--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+            <div class="fg"><label>সিজন/সেশন</label><input type="text" id="stuSeason" placeholder="জানু-জুন ২০২৬"></div>
+            <div class="fg"><label>ব্যাচ *</label><select id="stuBatch"><option value="">--</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select></div>
+            <div class="fg"><label>সময় থেকে</label><input type="time" id="stuTimeFrom"></div>
+            <div class="fg"><label>সময় পর্যন্ত</label><input type="time" id="stuTimeTo"></div>
+            <div class="fg"><label>কোর্স</label><input type="text" id="stuCourse" placeholder="BTEB / Foundation"></div>
+          </div>
+          <button class="btn-primary" id="saveStudentBtn" onclick="saveStudent()" style="width:100%;margin-top:8px;">💾 শিক্ষার্থী সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>📋 শিক্ষার্থী তালিকা</h3>
+          <div class="filter-bar">
+            <input type="text" id="stuSearchInput" placeholder="🔍 নাম বা আইডি..." oninput="renderStudentList()">
+            <select id="stuFilterBatch" onchange="renderStudentList()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
+            <span class="filter-count" id="stuCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>মোবাইল</th><th>ব্যাচ</th><th>সময়</th><th>অ্যাকশন</th></tr></thead><tbody id="studentTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- TODAY -->
+      <div class="tab-content" id="tab-today">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3 style="margin:0;">📅 আজকের উপস্থিতি — <span id="todayDate"></span></h3>
+            <button class="btn-sm btn-export" onclick="exportTodayCSV()">📤 CSV</button>
+          </div>
+          <div class="filter-bar">
+            <select id="todayFilterBatch" onchange="renderTodayAttendance()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
+            <span class="filter-count" id="todayCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="todayTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="tab-content" id="tab-history">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3 style="margin:0;">📜 তারিখ অনুযায়ী উপস্থিতি</h3>
+            <button class="btn-sm btn-export" onclick="exportHistoryCSV()">📤 CSV</button>
+          </div>
+          <div class="filter-bar">
+            <input type="date" id="historyDate" onchange="loadHistory()">
+            <select id="historyFilterBatch" onchange="renderHistory()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
+            <span class="filter-count" id="historyCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">তারিখ নির্বাচন করুন</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- VISITORS -->
+      <div class="tab-content" id="tab-visitors">
+        <div class="card">
+          <h3>👤 অতিথি লগ — <span id="visitorDate"></span></h3>
+          <div class="filter-bar">
+            <input type="date" id="visitorDatePicker" onchange="loadVisitors()">
+            <span class="filter-count" id="visitorCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>নাম</th><th>মোবাইল</th><th>ঠিকানা</th><th>ব্যাচ</th><th>সময়</th></tr></thead><tbody id="visitorTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="tab-content" id="tab-qr">
+        <div class="card">
+          <h3>📱 QR কোড জেনারেট করুন</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">এই QR কোড প্রিন্ট করে দেয়ালে লাগান। শিক্ষার্থীরা স্ক্যান করে উপস্থিতি দিতে পারবে।</p>
+          <div style="text-align:center;margin-bottom:14px;"><button class="btn-primary" onclick="generateAttendanceQR()">🔄 QR কোড জেনারেট করুন</button></div>
+          <div class="qr-output" id="qrOutput" style="display:none;">
+            <div id="printQrArea">
+              <div style="margin-bottom:12px;"><img id="qrLogo" src="" style="width:50px;height:50px;border-radius:50%;display:none;" crossorigin="anonymous"><h3 style="color:var(--g1);margin:8px 0 4px;">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h3><p style="font-size:12px;color:#666;">উপস্থিতি দিতে QR কোড স্ক্যান করুন</p></div>
+              <canvas id="qrCanvas"></canvas>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="qrUrl"></p>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
+              <button class="btn-primary" onclick="printQR()">🖨️ প্রিন্ট</button>
+              <button class="btn-primary" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);" onclick="downloadQR()">⬇️ ডাউনলোড</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tab-content" id="tab-settings">
+        <div class="card">
+          <h3>🏷️ লোগো পরিবর্তন</h3>
+          <div class="logo-upload-section">
+            <img id="currentLogo" src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" crossorigin="anonymous">
+            <div><p style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px;">বর্তমান লোগো</p><input type="file" id="logoUploadInput" accept="image/*" onchange="uploadNewLogo(this)" style="font-size:12px;color:var(--text-muted);"></div>
+          </div>
+          <button class="btn-primary" id="logoSaveBtn" onclick="saveNewLogo()" style="display:none;width:100%;">💾 লোগো সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>🔔 Late Alert সেটিংস</h3>
+          <div class="fg"><label>Grace Period (মিনিট)</label><input type="number" id="gracePeriod" value="10" min="0" max="60" style="max-width:120px;"></div>
+          <button class="btn-primary" onclick="saveGracePeriod()" style="margin-top:8px;">💾 সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>🔗 অ্যাটেনডেন্স পেজ লিংক</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">শিক্ষার্থীদের সাথে শেয়ার করুন:</p>
+          <div style="display:flex;gap:8px;"><input type="text" id="attendanceLink" readonly style="flex:1;padding:10px;border:1.5px solid var(--glass-border);border-radius:10px;font-family:'Hind Siliguri';font-size:12px;background:var(--glass);color:var(--text);"><button class="btn-primary" onclick="copyLink()">📋 কপি</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <h3 style="color:var(--gold);margin-bottom:16px;">✏️ শিক্ষার্থী সম্পাদনা</h3>
+      <div id="editFormContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // =========== FIREBASE ===========
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTCLqLGCzBt9EpgMpEBWent8fa4M-C0Xk",
+      authDomain: "sabuj-computers.firebaseapp.com",
+      databaseURL: "https://sabuj-computers-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sabuj-computers",
+      storageBucket: "sabuj-computers.firebasestorage.app",
+      messagingSenderId: "781121353789",
+      appId: "1:781121353789:web:38b0f78af57b66ddf05254"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    const ADMIN_UID = 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1';
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
+    const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
+
+    let allStudents = {};
+    let todayRecords = {};
+    let historyRecords = {};
+    let gracePeriodMinutes = 10;
+    let weeklyChartInstance = null;
+    let batchChartInstance = null;
+
+    // =========== AUTH ===========
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if (!email || !pass) { showLoginError('ইমেইল ও পাসওয়ার্ড দিন!'); return; }
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(cred => { if (cred.user.uid !== ADMIN_UID) { auth.signOut(); showLoginError('❌ আপনি অ্যাডমিন নন!'); return; } initDashboard(); })
+        .catch(err => showLoginError('❌ ' + err.message));
+    }
+    function showLoginError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.style.display = 'block'; }
+    // =========== SIDEBAR TOGGLE ===========
+    function toggleSidebar() {
+      var sidebar = document.getElementById('mainSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+
+    function doLogout() { auth.signOut().then(() => location.reload()); }
+    auth.onAuthStateChanged(user => { if (user && user.uid === ADMIN_UID) initDashboard(); });
+
+    function initDashboard() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('mainSidebar').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'flex';
+      document.getElementById('attendanceLink').value = window.location.origin + '/attendance.html';
+      
+      db.ref('sabuj/general/logo').once('value', snap => {
+        const logo = snap.val();
+        if (logo) { ['sidebarLogo','currentLogo','loginLogo'].forEach(id => document.getElementById(id).src = logo); }
+      });
+      db.ref('sabuj/attendance-settings/gracePeriod').once('value', snap => {
+        if (snap.exists()) { gracePeriodMinutes = snap.val(); document.getElementById('gracePeriod').value = gracePeriodMinutes; }
+      });
+
+      loadStudents(); loadTodayAttendance(); loadTodayVisitors();
+      const today = new Date();
+      document.getElementById('todayDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+      document.getElementById('historyDate').value = today.toISOString().split('T')[0];
+      document.getElementById('visitorDatePicker').value = today.toISOString().split('T')[0];
+      document.getElementById('visitorDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+    }
+
+    // =========== TAB ===========
+    function switchTab(tab, clickedEl) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-'+tab).classList.add('active');
+      const titles = { overview:'📊 ওভারভিউ', analytics:'📈 অ্যানালিটিক্স', students:'👨‍🎓 শিক্ষার্থী', today:'📅 আজকের উপস্থিতি', history:'📜 ইতিহাস', visitors:'👤 অতিথি লগ', qr:'📱 QR কোড', settings:'⚙️ সেটিংস' };
+      document.getElementById('topbarTitle').textContent = titles[tab] || tab;
+      if (clickedEl) clickedEl.classList.add('active');
+      if (tab === 'analytics') loadAnalytics();
+      // Close sidebar on mobile after tab switch
+      var sidebar = document.getElementById('mainSidebar');
+      if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+    }
+
+    // =========== CLOUDINARY ===========
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      try {
+        const res = await fetch(CLOUDINARY_URL, { method:'POST', body:formData });
+        const data = await res.json();
+        if (data.error) { alert('❌ আপলোড ব্যর্থ: ' + data.error.message); return null; }
+        return data.secure_url;
+      } catch(err) { alert('❌ ইন্টারনেট সমস্যা!'); return null; }
+    }
+
+    // =========== PHOTO COMPRESS ===========
+    function compressImage(file, maxW, maxH, quality) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+            if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob(resolve, 'image/jpeg', quality || 0.7);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // =========== STUDENTS ===========
+    function previewStudentPhoto(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 500, 500, 0.75).then(blob => {
+          input._compressedBlob = blob;
+          const url = URL.createObjectURL(blob);
+          document.getElementById('stuPhotoPreview').src = url;
+          document.getElementById('stuPhotoPreview').style.display = 'block';
+          document.getElementById('stuPhotoPlaceholder').style.display = 'none';
+        });
+      }
+    }
+
+    async function saveStudent() {
+      const uniqueId = document.getElementById('stuId').value.trim().toUpperCase();
+      const name = document.getElementById('stuName').value.trim();
+      const phone = document.getElementById('stuPhone').value.trim();
+      const batch = document.getElementById('stuBatch').value;
+      if (!uniqueId || !name || !phone || !batch) return alert('❌ আইডি, নাম, মোবাইল ও ব্যাচ আবশ্যক!');
+      if (Object.values(allStudents).find(s => s.uniqueId === uniqueId)) return alert('❌ এই আইডি ইতিমধ্যে ব্যবহৃত!');
+
+      const btn = document.getElementById('saveStudentBtn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
+
+      let photoUrl = '';
+      const photoInput = document.getElementById('stuPhotoInput');
+      if (photoInput.files[0]) {
+        const fileToUpload = photoInput._compressedBlob || photoInput.files[0];
+        photoUrl = await uploadToCloudinary(fileToUpload);
+        if (!photoUrl) { btn.disabled = false; btn.textContent = '💾 শিক্ষার্থী সেভ করুন'; return; }
+      }
+
+      const student = {
+        uniqueId, name, photo: photoUrl,
+        fatherName: document.getElementById('stuFather').value.trim(),
+        motherName: document.getElementById('stuMother').value.trim(),
+        phone, address: document.getElementById('stuAddress').value.trim(),
+        bloodGroup: document.getElementById('stuBlood').value,
+        season: document.getElementById('stuSeason').value.trim(),
+        batch, timeFrom: document.getElementById('stuTimeFrom').value,
+        timeTo: document.getElementById('stuTimeTo').value,
+        course: document.getElementById('stuCourse').value.trim(),
+        addedAt: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      db.ref('sabuj/attendance-students').push(student).then(() => {
+        alert('✅ সফলভাবে যোগ হয়েছে!');
+        ['stuId','stuName','stuFather','stuMother','stuPhone','stuAddress','stuSeason','stuCourse'].forEach(id => document.getElementById(id).value = '');
+        ['stuBlood','stuBatch'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('stuTimeFrom').value = ''; document.getElementById('stuTimeTo').value = '';
+        document.getElementById('stuPhotoInput').value = '';
+        document.getElementById('stuPhotoPreview').style.display = 'none';
+        document.getElementById('stuPhotoPlaceholder').style.display = 'block';
+        btn.disabled = false; btn.textContent = '💾 শিক্ষার্থী সেভ করুন';
+      }).catch(err => { alert('❌ সমস্যা: ' + err.message); btn.disabled = false; btn.textContent = '💾 শিক্ষার্থী সেভ করুন'; });
+    }
+
+    function loadStudents() {
+      db.ref('sabuj/attendance-students').on('value', snap => { allStudents = snap.val() || {}; renderStudentList(); updateOverview(); });
+    }
+
+    function renderStudentList() {
+      const search = (document.getElementById('stuSearchInput').value || '').trim().toLowerCase();
+      const bf = document.getElementById('stuFilterBatch').value;
+      let entries = Object.entries(allStudents);
+      if (search) entries = entries.filter(([k,s]) => (s.name||'').toLowerCase().includes(search) || (s.uniqueId||'').toLowerCase().includes(search));
+      if (bf) entries = entries.filter(([k,s]) => s.batch === bf);
+      document.getElementById('stuCount').textContent = entries.length + ' জন';
+      const tbody = document.getElementById('studentTableBody');
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো শিক্ষার্থী নেই</td></tr>'; return; }
+      tbody.innerHTML = entries.map(([k,s]) =>
+        '<tr><td><img src="'+(s.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<td style="color:var(--gold);font-weight:700;">'+(s.uniqueId||'—')+'</td><td>'+(s.name||'—')+'</td><td>'+(s.phone||'—')+'</td><td>'+(s.batch||'—')+'</td><td>'+(s.timeFrom||'')+'-'+(s.timeTo||'')+'</td>' +
+        '<td><button class="btn-sm btn-edit" onclick="openEditModal(\''+k+'\')">✏️</button><button class="btn-sm btn-del" onclick="deleteStudent(\''+k+'\',\''+encodeURIComponent(s.name||'')+'\')">🗑️</button></td></tr>'
+      ).join('');
+    }
+
+    function deleteStudent(key, n) { if (confirm('⚠️ "'+decodeURIComponent(n)+'" মুছবেন?')) db.ref('sabuj/attendance-students/'+key).remove().then(() => alert('✅ মুছে ফেলা হয়েছে!')); }
+
+    // =========== EDIT MODAL ===========
+    function openEditModal(key) {
+      const s = allStudents[key]; if (!s) return;
+      const bv = (v,o) => s.bloodGroup===o?' selected':'';
+      document.getElementById('editFormContent').innerHTML =
+        '<div class="form-grid">'+
+        '<div class="fg"><label>আইডি</label><input type="text" id="editId" value="'+(s.uniqueId||'')+'"></div>'+
+        '<div class="fg"><label>নাম</label><input type="text" id="editName" value="'+(s.name||'')+'"></div>'+
+        '<div class="fg"><label>পিতা</label><input type="text" id="editFather" value="'+(s.fatherName||'')+'"></div>'+
+        '<div class="fg"><label>মাতা</label><input type="text" id="editMother" value="'+(s.motherName||'')+'"></div>'+
+        '<div class="fg"><label>মোবাইল</label><input type="tel" id="editPhone" value="'+(s.phone||'')+'"></div>'+
+        '<div class="fg"><label>ঠিকানা</label><input type="text" id="editAddress" value="'+(s.address||'')+'"></div>'+
+        '<div class="fg"><label>রক্তের গ্রুপ</label><select id="editBlood"><option value="">--</option><option'+bv(s,'A+')+'>A+</option><option'+bv(s,'A-')+'>A-</option><option'+bv(s,'B+')+'>B+</option><option'+bv(s,'B-')+'>B-</option><option'+bv(s,'AB+')+'>AB+</option><option'+bv(s,'AB-')+'>AB-</option><option'+bv(s,'O+')+'>O+</option><option'+bv(s,'O-')+'>O-</option></select></div>'+
+        '<div class="fg"><label>সেশন</label><input type="text" id="editSeason" value="'+(s.season||'')+'"></div>'+
+        '<div class="fg"><label>ব্যাচ</label><select id="editBatch"><option value="">--</option><option value="সকাল"'+(s.batch==='সকাল'?' selected':'')+'>সকাল</option><option value="বিকাল"'+(s.batch==='বিকাল'?' selected':'')+'>বিকাল</option></select></div>'+
+        '<div class="fg"><label>সময় থেকে</label><input type="time" id="editTimeFrom" value="'+(s.timeFrom||'')+'"></div>'+
+        '<div class="fg"><label>সময় পর্যন্ত</label><input type="time" id="editTimeTo" value="'+(s.timeTo||'')+'"></div>'+
+        '<div class="fg"><label>কোর্স</label><input type="text" id="editCourse" value="'+(s.course||'')+'"></div>'+
+        '</div><div class="fg"><label>নতুন ছবি</label><input type="file" id="editPhotoInput" accept="image/*" style="font-size:12px;color:var(--text-muted);"></div>'+
+        '<button class="btn-primary" style="width:100%;margin-top:12px;" onclick="saveEditStudent(\''+key+'\')">💾 আপডেট</button>';
+      document.getElementById('editModal').classList.add('show');
+    }
+    function closeEditModal() { document.getElementById('editModal').classList.remove('show'); }
+
+    async function saveEditStudent(key) {
+      const updates = {
+        uniqueId: document.getElementById('editId').value.trim().toUpperCase(),
+        name: document.getElementById('editName').value.trim(),
+        fatherName: document.getElementById('editFather').value.trim(),
+        motherName: document.getElementById('editMother').value.trim(),
+        phone: document.getElementById('editPhone').value.trim(),
+        address: document.getElementById('editAddress').value.trim(),
+        bloodGroup: document.getElementById('editBlood').value,
+        season: document.getElementById('editSeason').value.trim(),
+        batch: document.getElementById('editBatch').value,
+        timeFrom: document.getElementById('editTimeFrom').value,
+        timeTo: document.getElementById('editTimeTo').value,
+        course: document.getElementById('editCourse').value.trim()
+      };
+      if (!updates.uniqueId || !updates.name) return alert('❌ আইডি ও নাম আবশ্যক!');
+      const photoFile = document.getElementById('editPhotoInput').files[0];
+      if (photoFile) {
+        const compressed = await compressImage(photoFile, 500, 500, 0.75);
+        const url = await uploadToCloudinary(compressed);
+        if (url) updates.photo = url;
+      }
+      db.ref('sabuj/attendance-students/'+key).update(updates).then(() => { alert('✅ আপডেট সফল!'); closeEditModal(); }).catch(err => alert('❌ '+err.message));
+    }
+
+    // =========== TODAY ===========
+    function loadTodayAttendance() {
+      const today = new Date().toISOString().split('T')[0];
+      db.ref('sabuj/attendance-records/'+today).on('value', snap => { todayRecords = snap.val() || {}; renderTodayAttendance(); updateOverview(); });
+    }
+
+    function renderAttendanceTable(records, tbodyId, countId, filterId) {
+      const bf = document.getElementById(filterId).value;
+      let entries = Object.entries(records);
+      if (bf) entries = entries.filter(([k,r]) => r.batch === bf);
+      document.getElementById(countId).textContent = entries.length + ' জন';
+      const tbody = document.getElementById(tbodyId);
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো উপস্থিতি নেই</td></tr>'; return; }
+      entries.sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
+      tbody.innerHTML = entries.map(([k,r]) =>
+        '<tr class="'+(r.isLate?'late-row':'')+'">' +
+        '<td><img src="'+(r.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<td style="color:var(--gold);font-weight:700;">'+(r.uniqueId||'—')+'</td><td>'+(r.name||'—')+'</td><td>'+(r.batch||'—')+'</td>' +
+        '<td>'+(r.timeFrom||'')+'-'+(r.timeTo||'')+'</td><td style="color:#4ade80;font-weight:700;">'+(r.time||'—')+'</td>' +
+        '<td>'+(r.isLate ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '<span style="color:#4ade80;font-size:11px;">✅ সময়মতো</span>')+'</td></tr>'
+      ).join('');
+    }
+
+    function renderTodayAttendance() { renderAttendanceTable(todayRecords, 'todayTableBody', 'todayCount', 'todayFilterBatch'); }
+
+    // =========== HISTORY ===========
+    function loadHistory() {
+      const date = document.getElementById('historyDate').value;
+      if (!date) return;
+      db.ref('sabuj/attendance-records/'+date).once('value', snap => { historyRecords = snap.val() || {}; renderHistory(); });
+    }
+    function renderHistory() { renderAttendanceTable(historyRecords, 'historyTableBody', 'historyCount', 'historyFilterBatch'); }
+
+    // =========== VISITORS ===========
+    function loadTodayVisitors() { loadVisitorsForDate(new Date().toISOString().split('T')[0]); }
+    function loadVisitors() {
+      const date = document.getElementById('visitorDatePicker').value;
+      if (date) { document.getElementById('visitorDate').textContent = new Date(date).toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' }); loadVisitorsForDate(date); }
+    }
+    function loadVisitorsForDate(date) {
+      db.ref('sabuj/attendance-visitors/'+date).once('value', snap => {
+        const data = snap.val() || {};
+        const entries = Object.entries(data);
+        document.getElementById('visitorCount').textContent = entries.length + ' জন';
+        document.getElementById('statVisitors').textContent = entries.length;
+        const tbody = document.getElementById('visitorTableBody');
+        if (!entries.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">কোনো অতিথি নেই</td></tr>'; return; }
+        tbody.innerHTML = entries.map(([k,v]) =>
+          '<tr><td><img src="'+(v.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+          '<td>'+(v.name||'—')+'</td><td>'+(v.mobile||'—')+'</td><td>'+(v.address||'—')+'</td><td>'+(v.batch||'—')+'</td><td>'+(v.time||'—')+'</td></tr>'
+        ).join('');
+      });
+    }
+
+    // =========== OVERVIEW ===========
+    function updateOverview() {
+      const total = Object.keys(allStudents).length;
+      const present = Object.keys(todayRecords).length;
+      const late = Object.values(todayRecords).filter(r => r.isLate).length;
+      const rate = total > 0 ? Math.round(present / total * 100) : 0;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statToday').textContent = present;
+      document.getElementById('statAbsent').textContent = Math.max(0, total - present);
+      document.getElementById('statLate').textContent = late;
+      document.getElementById('statRate').textContent = rate + '%';
+
+      const mb = Object.values(allStudents).filter(s => s.batch==='সকাল').length;
+      const eb = Object.values(allStudents).filter(s => s.batch==='বিকাল').length;
+      const mp = Object.values(todayRecords).filter(r => r.batch==='সকাল').length;
+      const ep = Object.values(todayRecords).filter(r => r.batch==='বিকাল').length;
+      const ml = Object.values(todayRecords).filter(r => r.batch==='সকাল' && r.isLate).length;
+      const el = Object.values(todayRecords).filter(r => r.batch==='বিকাল' && r.isLate).length;
+
+      document.getElementById('overviewSummary').innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">'+
+        '<div style="background:rgba(34,197,94,0.08);padding:14px;border-radius:14px;text-align:center;border:1px solid rgba(34,197,94,0.15);"><p style="font-size:11px;color:#4ade80;margin:0;">☀️ সকাল</p><h3 style="color:#4ade80;margin:6px 0 2px;font-size:22px;">'+mp+'/'+mb+'</h3><p style="font-size:10px;color:var(--text-muted);margin:0;">বিলম্বিত: '+ml+'</p></div>'+
+        '<div style="background:rgba(59,130,246,0.08);padding:14px;border-radius:14px;text-align:center;border:1px solid rgba(59,130,246,0.15);"><p style="font-size:11px;color:#93c5fd;margin:0;">🌙 বিকাল</p><h3 style="color:#93c5fd;margin:6px 0 2px;font-size:22px;">'+ep+'/'+eb+'</h3><p style="font-size:10px;color:var(--text-muted);margin:0;">বিলম্বিত: '+el+'</p></div></div>';
+
+      const recent = Object.values(todayRecords).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0,5);
+      document.getElementById('recentAttendance').innerHTML = recent.length ? recent.map(r =>
+        '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
+        '<img src="'+(r.photo||'https://via.placeholder.com/38x38?text=👤')+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/38x38?text=👤\'">'+
+        '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+(r.name||'—')+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+(r.uniqueId||'')+' | '+(r.batch||'')+'</span></div>'+
+        '<div style="text-align:right;"><span style="color:var(--gold);font-weight:700;font-size:13px;">'+(r.time||'')+'</span>'+(r.isLate?'<br><span class="late-badge" style="font-size:9px;">বিলম্বিত</span>':'')+'</div></div>'
+      ).join('') : '<p style="color:var(--text-muted);text-align:center;padding:20px;font-size:13px;">আজ কোনো উপস্থিতি নেই</p>';
+    }
+
+    // =========== ANALYTICS ===========
+    async function loadAnalytics() {
+      // Weekly chart
+      const dates = [];
+      const counts = [];
+      const lateCounts = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        dates.push(d.toLocaleDateString('bn-BD', { weekday:'short' }));
+        const snap = await db.ref('sabuj/attendance-records/'+ds).once('value');
+        const data = snap.val() || {};
+        counts.push(Object.keys(data).length);
+        lateCounts.push(Object.values(data).filter(r => r.isLate).length);
+      }
+
+      if (weeklyChartInstance) weeklyChartInstance.destroy();
+      weeklyChartInstance = new Chart(document.getElementById('weeklyChart'), {
+        type: 'bar',
+        data: {
+          labels: dates,
+          datasets: [
+            { label: 'উপস্থিত', data: counts, backgroundColor: 'rgba(200,168,71,0.6)', borderColor: 'rgba(200,168,71,1)', borderWidth: 1, borderRadius: 6 },
+            { label: 'বিলম্বিত', data: lateCounts, backgroundColor: 'rgba(245,158,11,0.5)', borderColor: 'rgba(245,158,11,1)', borderWidth: 1, borderRadius: 6 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aab94', font: { family: 'Hind Siliguri' } } } }, scales: { x: { ticks: { color: '#6b8c76', font: { family: 'Hind Siliguri' } }, grid: { color: 'rgba(255,255,255,0.03)' } }, y: { ticks: { color: '#6b8c76' }, grid: { color: 'rgba(255,255,255,0.03)' } } } }
+      });
+
+      // Batch chart
+      const morningTotal = Object.values(allStudents).filter(s => s.batch==='সকাল').length;
+      const eveningTotal = Object.values(allStudents).filter(s => s.batch==='বিকাল').length;
+      if (batchChartInstance) batchChartInstance.destroy();
+      batchChartInstance = new Chart(document.getElementById('batchChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['সকাল ব্যাচ', 'বিকাল ব্যাচ'],
+          datasets: [{ data: [morningTotal, eveningTotal], backgroundColor: ['rgba(34,197,94,0.7)', 'rgba(59,130,246,0.7)'], borderColor: ['rgba(34,197,94,1)', 'rgba(59,130,246,1)'], borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aab94', font: { family: 'Hind Siliguri' } } } } }
+      });
+
+      // Top students this month
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const studentAttCount = {};
+      const snap = await db.ref('sabuj/attendance-records').orderByKey().startAt(monthStart).once('value');
+      const allDays = snap.val() || {};
+      Object.values(allDays).forEach(day => {
+        Object.keys(day).forEach(stuKey => {
+          studentAttCount[stuKey] = (studentAttCount[stuKey] || 0) + 1;
+        });
+      });
+      const sorted = Object.entries(studentAttCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+      const topEl = document.getElementById('topStudents');
+      if (sorted.length) {
+        topEl.innerHTML = sorted.map(([key, count], i) => {
+          const s = allStudents[key];
+          if (!s) return '';
+          const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+          return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
+            '<span style="font-size:18px;">'+medals[i]+'</span>'+
+            '<img src="'+(s.photo||'https://via.placeholder.com/35x35?text=👤')+'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/35x35?text=👤\'">'+
+            '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+(s.name||'—')+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+(s.uniqueId||'')+'</span></div>'+
+            '<span style="color:var(--gold);font-weight:700;font-size:14px;">'+count+' দিন</span></div>';
+        }).join('');
+      } else {
+        topEl.innerHTML = '<p style="text-align:center;padding:20px;">এই মাসে কোনো ডাটা নেই</p>';
+      }
+    }
+
+    // =========== EXPORT CSV ===========
+    function exportCSV(records, filename) {
+      const entries = Object.values(records);
+      if (!entries.length) return alert('❌ কোনো ডাটা নেই!');
+      let csv = '\uFEFF' + 'আইডি,নাম,ব্যাচ,ক্লাস সময়,উপস্থিতির সময়,স্ট্যাটাস\n';
+      entries.forEach(r => {
+        csv += '"'+(r.uniqueId||'')+'","'+(r.name||'')+'","'+(r.batch||'')+'","'+(r.timeFrom||'')+'-'+(r.timeTo||'')+'","'+(r.time||'')+'","'+(r.isLate?'বিলম্বিত':'সময়মতো')+'"\n';
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function exportTodayCSV() { exportCSV(todayRecords, 'attendance-today-'+new Date().toISOString().split('T')[0]+'.csv'); }
+    function exportHistoryCSV() { exportCSV(historyRecords, 'attendance-'+document.getElementById('historyDate').value+'.csv'); }
+
+    // =========== QR ===========
+    function generateAttendanceQR() {
+      const url = window.location.origin + '/attendance.html';
+      document.getElementById('qrUrl').textContent = url;
+      db.ref('sabuj/general/logo').once('value', snap => { const logo = snap.val(); if (logo) { document.getElementById('qrLogo').src = logo; document.getElementById('qrLogo').style.display = 'inline-block'; } });
+      QRCode.toCanvas(document.getElementById('qrCanvas'), url, { width: 260, margin: 2, color: { dark:'#0d3d1f', light:'#ffffff' } }, function(err) {
+        if (err) { alert('❌ QR ব্যর্থ!'); return; }
+        document.getElementById('qrOutput').style.display = 'block';
+      });
+    }
+    function printQR() { window.print(); }
+    function downloadQR() { const c = document.getElementById('qrCanvas'); const a = document.createElement('a'); a.download = 'SCTC-Attendance-QR.png'; a.href = c.toDataURL('image/png'); a.click(); }
+
+    // =========== SETTINGS ===========
+    function uploadNewLogo(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => { document.getElementById('currentLogo').src = e.target.result; document.getElementById('logoSaveBtn').style.display = 'block'; };
+      reader.readAsDataURL(input.files[0]);
+    }
+    async function saveNewLogo() {
+      const file = document.getElementById('logoUploadInput').files[0]; if (!file) return;
+      const btn = document.getElementById('logoSaveBtn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> আপলোড হচ্ছে...';
+      const compressed = await compressImage(file, 400, 400, 0.8);
+      const url = await uploadToCloudinary(compressed);
+      if (!url) { btn.disabled = false; btn.textContent = '💾 লোগো সেভ করুন'; return; }
+      db.ref('sabuj/general/logo').set(url).then(() => {
+        alert('✅ লোগো আপডেট হয়েছে!');
+        document.getElementById('sidebarLogo').src = url;
+        btn.disabled = false; btn.textContent = '💾 লোগো সেভ করুন'; btn.style.display = 'none';
+      });
+    }
+    function saveGracePeriod() {
+      const val = parseInt(document.getElementById('gracePeriod').value) || 10;
+      db.ref('sabuj/attendance-settings/gracePeriod').set(val).then(() => { gracePeriodMinutes = val; alert('✅ সেভ হয়েছে!'); });
+    }
+    function copyLink() { navigator.clipboard.writeText(document.getElementById('attendanceLink').value).then(() => alert('✅ কপি হয়েছে!')); }
+  </script>
+</body>
+</html>
