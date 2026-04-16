@@ -430,6 +430,12 @@
     }
 
     function doLogout() { auth.signOut().then(() => location.reload()); }
+    // Load logo on page load (for login screen)
+    db.ref('sabuj/general/logo').once('value', snap => {
+      const logo = snap.val();
+      if (logo) { ['loginLogo'].forEach(id => { var el = document.getElementById(id); if(el) el.src = logo; }); }
+    });
+
     auth.onAuthStateChanged(user => { if (user && user.uid === ADMIN_UID) initDashboard(); });
 
     function initDashboard() {
