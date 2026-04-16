@@ -370,6 +370,22 @@
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">কর্মীদের সাথে শেয়ার করুন:</p>
           <div style="display:flex;gap:8px;"><input type="text" id="attendanceLink" readonly style="flex:1;padding:10px;border:1.5px solid var(--glass-border);border-radius:10px;font-family:'Hind Siliguri';font-size:12px;background:var(--glass);color:var(--text);"><button class="btn-primary" onclick="copyLink()">📋 কপি</button></div>
         </div>
+
+        <!-- ID CARD SETTINGS -->
+        <div class="card">
+          <h3>🆔 ID Card সেটিংস</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">কর্মীর ID Card-এ যে জরুরি যোগাযোগ নম্বর ও অনুমোদিত স্বাক্ষর দেখাবে।</p>
+          <div class="fg">
+            <label>জরুরি যোগাযোগ নম্বর</label>
+            <input type="tel" id="empIdEmergencyPhone" placeholder="+8801724084350" style="max-width:280px;">
+          </div>
+          <div class="fg" style="margin-top:12px;">
+            <label>অনুমোদিত স্বাক্ষর আপলোড (পরিচালক/মালিকের স্বাক্ষর)</label>
+            <input type="file" id="empSignatureUpload" accept="image/*" onchange="uploadEmpSignature(event)" style="font-size:12px;color:var(--text-muted);">
+            <div id="empSignaturePreview" style="margin-top:10px;"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;" onclick="saveEmpIdCardSettings()">💾 ID Card সেটিংস সেভ করুন</button>
+        </div>
       </div>
 
     </div>
@@ -1006,6 +1022,46 @@
       input.select();
       document.execCommand('copy');
       alert('✅ লিংক কপি হয়েছে!');
+    }
+
+    // =========== ID CARD SETTINGS (Emergency Phone + Signature) ===========
+    db.ref('sabuj/general/employeeIdCardSettings').on('value', function(snap) {
+      var data = snap.val() || {};
+      var phoneEl = document.getElementById('empIdEmergencyPhone');
+      if (phoneEl && data.emergencyPhone) phoneEl.value = data.emergencyPhone;
+      if (data.signatureUrl) {
+        var prev = document.getElementById('empSignaturePreview');
+        if (prev) prev.innerHTML = '<p style="margin:0 0 6px;font-size:12px;color:var(--text-muted);">বর্তমান স্বাক্ষর:</p><img src="'+data.signatureUrl+'" crossorigin="anonymous" style="max-width:200px;max-height:80px;border:1px solid var(--glass-border);border-radius:8px;padding:5px;background:#fff;">';
+      }
+    });
+
+    var _pendingEmpSignatureUrl = '';
+    function uploadEmpSignature(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var prev = document.getElementById('empSignaturePreview');
+      if (prev) prev.innerHTML = '<p style="margin:0;font-size:12px;color:var(--text-muted);">⏳ আপলোড হচ্ছে...</p>';
+      uploadToCloudinary(file).then(function(url) {
+        _pendingEmpSignatureUrl = url;
+        if (prev) prev.innerHTML = '<p style="margin:0 0 6px;font-size:12px;color:#4ade80;">✅ স্বাক্ষর আপলোড সফল! সেভ করুন।</p><img src="'+url+'" crossorigin="anonymous" style="max-width:200px;max-height:80px;border:1px solid var(--glass-border);border-radius:8px;padding:5px;background:#fff;">';
+      }).catch(function(err) {
+        if (prev) prev.innerHTML = '<p style="margin:0;font-size:12px;color:#fca5a5;">❌ আপলোডে সমস্যা: '+err.message+'</p>';
+      });
+    }
+
+    function saveEmpIdCardSettings() {
+      var phone = document.getElementById('empIdEmergencyPhone').value.trim();
+      db.ref('sabuj/general/employeeIdCardSettings').once('value').then(function(snap) {
+        var existing = snap.val() || {};
+        var merged = {
+          emergencyPhone: phone || existing.emergencyPhone || '',
+          signatureUrl: _pendingEmpSignatureUrl || existing.signatureUrl || ''
+        };
+        return db.ref('sabuj/general/employeeIdCardSettings').set(merged);
+      }).then(function() {
+        _pendingEmpSignatureUrl = '';
+        alert('✅ ID Card সেটিংস সফলভাবে সেভ হয়েছে!');
+      }).catch(function(err) { alert('❌ সমস্যা: '+err.message); });
     }
   </script>
 </body>

@@ -247,6 +247,9 @@
               </ol>
             </div>
             <div style="margin-top:12px; padding-top:10px; border-top:2px solid var(--gold); text-align:center;">
+              <div id="idSignatureContainer" style="min-height:45px; display:flex; align-items:center; justify-content:center; margin-bottom:6px;">
+                <img id="idSignatureImg" src="" alt="" crossorigin="anonymous" style="max-width:160px; max-height:45px; display:none;">
+              </div>
               <p style="margin:0; font-size:11px; color:var(--g1); font-weight:700;">অনুমোদিত স্বাক্ষর</p>
               <p style="margin:2px 0 0; font-size:10px; color:var(--muted);">পরিচালক, সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
             </div>
@@ -305,6 +308,22 @@
     // Load admin whatsapp
     db.ref('sabuj/employee-attendance-settings/adminWhatsapp').once('value', function(snap) {
       if (snap.exists()) adminWhatsapp = snap.val();
+    });
+
+    // Load Employee ID Card Settings (Emergency Phone + Signature) — admin set kore
+    db.ref('sabuj/general/employeeIdCardSettings').on('value', function(snap) {
+      var settings = snap.val() || {};
+      if (settings.emergencyPhone) {
+        var el = document.getElementById('idEmergency');
+        if (el) el.textContent = settings.emergencyPhone;
+      }
+      if (settings.signatureUrl) {
+        var sig = document.getElementById('idSignatureImg');
+        if (sig) {
+          sig.src = settings.signatureUrl;
+          sig.style.display = 'block';
+        }
+      }
     });
 
     function switchTab(tabId) {
