@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>কর্মী অ্যাটেনডেন্স অ্যাডমিন - SCTC</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root { --g1:#0d3d1f; --g2:#1a6b35; --gold:#c8a847; --gold2:#f0d860; --bg:#060f0a; --sidebar-bg:#0a1a10; --glass:rgba(255,255,255,0.04); --glass2:rgba(255,255,255,0.07); --glass-border:rgba(200,168,71,0.12); --text:#e8f5ec; --text-muted:#6b8c76; --emp-accent:#4f9cf7; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Hind Siliguri',sans-serif; background:var(--bg); display:flex; height:100vh; overflow:hidden; color:var(--text); }
+    body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at 10% 20%, rgba(26,107,53,0.12) 0%, transparent 50%), radial-gradient(ellipse at 90% 80%, rgba(200,168,71,0.06) 0%, transparent 50%); pointer-events:none; z-index:0; }
+
+    .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .login-overlay::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at 50% 50%, rgba(26,107,53,0.2) 0%, transparent 70%); }
+    .login-card { background:var(--glass2); backdrop-filter:blur(30px); padding:44px 36px; border-radius:28px; width:90%; max-width:400px; text-align:center; box-shadow:0 25px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); border:1px solid var(--glass-border); position:relative; z-index:1; }
+    .login-card img { width:75px; height:75px; border-radius:50%; margin-bottom:14px; box-shadow:0 0 30px rgba(200,168,71,0.3); }
+    .login-card h2 { color:var(--gold); margin-bottom:6px; font-size:22px; }
+    .login-card p { color:var(--text-muted); font-size:13px; margin-bottom:22px; }
+    .login-card input { width:100%; padding:13px 18px; border:1.5px solid rgba(200,168,71,0.15); border-radius:14px; font-family:'Hind Siliguri'; font-size:14px; outline:none; margin-bottom:12px; background:rgba(255,255,255,0.05); color:var(--text); }
+    .login-card input::placeholder { color:var(--text-muted); }
+    .login-card input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,168,71,0.1); }
+    .login-card button { width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0d3d1f; border:none; border-radius:14px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri'; box-shadow:0 4px 15px rgba(200,168,71,0.3); transition:all 0.3s; }
+    .login-card button:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(200,168,71,0.4); }
+    .login-error { color:#fca5a5; font-size:13px; margin-top:8px; display:none; }
+
+    .sidebar { width:260px; background:var(--sidebar-bg); color:#fff; display:flex; flex-direction:column; overflow-y:auto; border-right:1px solid var(--glass-border); position:relative; z-index:1; }
+    .sidebar-header { padding:22px; text-align:center; border-bottom:1px solid var(--glass-border); display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .sidebar-header img { width:50px; height:50px; border-radius:50%; background:#fff; padding:3px; box-shadow:0 0 15px rgba(200,168,71,0.2); }
+    .sidebar-header h2 { margin:0; font-size:15px; color:var(--gold); }
+    .nav-list { list-style:none; padding:8px 0; margin:0; }
+    .nav-item { padding:13px 22px; cursor:pointer; border-left:3px solid transparent; transition:all 0.2s; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-muted); }
+    .nav-item:hover { background:rgba(200,168,71,0.05); color:var(--text); }
+    .nav-item.active { background:rgba(200,168,71,0.1); border-left-color:var(--gold); color:var(--gold); }
+
+    .main-content { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; position:relative; z-index:1; }
+    .topbar { background:var(--glass); backdrop-filter:blur(20px); padding:14px 28px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--glass-border); }
+    .topbar h3 { margin:0; color:var(--gold); font-size:17px; }
+    .logout-btn { background:rgba(220,38,38,0.15); color:#fca5a5; border:1px solid rgba(220,38,38,0.2); padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; font-family:'Hind Siliguri'; font-size:12px; transition:all 0.2s; }
+    .logout-btn:hover { background:rgba(220,38,38,0.25); }
+
+    .content-area { flex:1; padding:24px; overflow-y:auto; overflow-x:hidden; }
+
+    .card { background:var(--glass2); backdrop-filter:blur(20px); padding:22px; border-radius:18px; box-shadow:0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03); margin-bottom:20px; border:1px solid var(--glass-border); transition:all 0.3s; }
+    .card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.3); border-color:rgba(200,168,71,0.2); }
+    .card h3 { color:var(--gold); margin-bottom:14px; font-size:15px; }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .stat-card { background:linear-gradient(135deg, rgba(200,168,71,0.12), rgba(13,61,31,0.3)); backdrop-filter:blur(20px); border:1px solid var(--glass-border); color:#fff; padding:20px; border-radius:18px; text-align:center; position:relative; overflow:hidden; }
+    .stat-card::before { content:''; position:absolute; top:-20px; right:-20px; width:60px; height:60px; background:rgba(200,168,71,0.1); border-radius:50%; }
+    .stat-card .num { font-size:30px; font-weight:700; background:linear-gradient(135deg,var(--gold),var(--gold2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat-card .label { font-size:11px; color:var(--text-muted); margin-top:4px; }
+    .stat-card.late-card { background:linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); }
+    .stat-card.late-card .num { background:linear-gradient(135deg,#f59e0b,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th { background:rgba(200,168,71,0.1); color:var(--gold); padding:11px 12px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--glass-border); }
+    td { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--text); }
+    tr:hover td { background:rgba(200,168,71,0.03); }
+    .late-row td { background:rgba(245,158,11,0.05); }
+    .late-badge { display:inline-block; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .fg { margin-bottom:12px; }
+    .fg label { display:block; font-weight:700; font-size:11px; color:var(--gold); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.3px; }
+    .fg input, .fg select, .fg textarea { width:100%; padding:10px 14px; border:1.5px solid rgba(200,168,71,0.15); border-radius:12px; font-family:'Hind Siliguri'; font-size:13px; outline:none; background:rgba(255,255,255,0.04); color:var(--text); }
+    .fg input::placeholder, .fg textarea::placeholder { color:var(--text-muted); }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,168,71,0.1); }
+    .fg select option { background:#0a1a10; color:#fff; }
+    .fg textarea { resize:vertical; min-height:60px; }
+    .photo-upload-area { width:100px; height:100px; border:2px dashed rgba(200,168,71,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; overflow:hidden; margin:0 auto 14px; transition:all 0.3s; }
+    .photo-upload-area:hover { border-color:var(--gold); box-shadow:0 0 20px rgba(200,168,71,0.1); }
+    .photo-upload-area img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .photo-upload-area span { color:var(--text-muted); font-size:24px; }
+
+    .btn-primary { padding:12px 24px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#0d3d1f; border:none; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri'; transition:all 0.3s; box-shadow:0 4px 15px rgba(200,168,71,0.2); }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(200,168,71,0.3); }
+    .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .btn-sm { padding:5px 10px; border:none; border-radius:8px; cursor:pointer; font-size:11px; font-weight:700; font-family:'Hind Siliguri'; transition:all 0.2s; }
+    .btn-edit { background:rgba(200,168,71,0.15); color:var(--gold); }
+    .btn-edit:hover { background:rgba(200,168,71,0.3); }
+    .btn-del { background:rgba(220,38,38,0.15); color:#fca5a5; margin-left:4px; }
+    .btn-del:hover { background:rgba(220,38,38,0.3); }
+    .btn-export { background:rgba(59,130,246,0.15); color:#93c5fd; }
+    .btn-export:hover { background:rgba(59,130,246,0.3); }
+
+    .tab-content { display:none; animation:fadeIn 0.35s ease-out; }
+    .tab-content.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+    .filter-bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; padding:12px; background:var(--glass); border-radius:14px; border:1px solid var(--glass-border); backdrop-filter:blur(10px); }
+    .filter-bar input, .filter-bar select { padding:8px 12px; border:1.5px solid rgba(200,168,71,0.15); border-radius:10px; font-family:'Hind Siliguri'; font-size:12px; outline:none; background:rgba(255,255,255,0.04); color:var(--text); }
+    .filter-bar input::placeholder { color:var(--text-muted); }
+    .filter-bar input:focus, .filter-bar select:focus { border-color:var(--gold); }
+    .filter-bar select option { background:#0a1a10; }
+    .filter-count { font-size:11px; color:var(--text-muted); margin-left:auto; }
+
+    .qr-output { text-align:center; padding:20px; }
+    .qr-output canvas, .qr-output img { border:3px solid var(--gold); border-radius:16px; padding:12px; background:#fff; box-shadow:0 0 30px rgba(200,168,71,0.15); max-width:100%; height:auto; }
+
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(8px); }
+    .modal-overlay.show { display:flex; }
+    .modal-content { background:linear-gradient(135deg, #0a1a10, #0d2516); padding:28px; border-radius:24px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 25px 70px rgba(0,0,0,0.5); border:1px solid var(--glass-border); animation:modalSlide 0.3s ease; }
+    @keyframes modalSlide { from{transform:translateY(20px) scale(0.97);opacity:0;} to{transform:translateY(0) scale(1);opacity:1;} }
+    .modal-close { position:absolute; top:14px; right:14px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted); }
+
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(13,61,31,0.3); border-radius:50%; border-top-color:var(--g1); animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(200,168,71,0.2); border-radius:99px; }
+
+    .logo-upload-section { display:flex; align-items:center; gap:16px; padding:16px; background:var(--glass); border-radius:14px; border:1px solid var(--glass-border); margin-bottom:14px; }
+    .logo-upload-section img { width:55px; height:55px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); box-shadow:0 0 15px rgba(200,168,71,0.2); }
+
+    .chart-container { position:relative; height:250px; margin-top:12px; }
+
+    .hamburger { display:none; position:fixed; top:10px; left:10px; z-index:999; background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; padding:10px 12px; border-radius:12px; cursor:pointer; box-shadow:0 4px 15px rgba(200,168,71,0.3); font-size:18px; line-height:1; }
+
+    @media(max-width:768px) {
+      .hamburger { display:block; }
+      body { flex-direction:column; height:auto; overflow:auto; }
+      .sidebar { position:fixed; top:0; left:-280px; width:260px; height:100vh; z-index:998; transition:left 0.3s ease; box-shadow:4px 0 30px rgba(0,0,0,0.5); }
+      .sidebar.open { left:0; }
+      .main-content { overflow:auto; width:100%; }
+      .content-area { padding:12px; padding-top:50px; }
+      .topbar { padding:10px 14px; padding-left:52px; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .form-grid { grid-template-columns:1fr; }
+      table { font-size:10px; }
+      .modal-content { width:95%; padding:18px; }
+      .login-card { width:92%; padding:28px 20px; }
+    }
+    .sidebar-backdrop { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:997; }
+    .sidebar-backdrop.show { display:block; }
+
+    @media print {
+      body * { visibility:hidden; }
+      #printQrArea, #printQrArea * { visibility:visible; }
+      #printQrArea { position:absolute; top:0; left:0; width:100%; text-align:center; padding:40px; background:#fff; color:#000; }
+    }
+  </style>
+</head>
+<body>
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+  <!-- LOGIN -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="loginLogo" crossorigin="anonymous">
+      <h2>🔐 কর্মী অ্যাটেনডেন্স অ্যাডমিন</h2>
+      <p>সবুজ কম্পিউটার ট্রেনিং সেন্টার</p>
+      <input type="email" id="loginEmail" placeholder="ইমেইল">
+      <input type="password" id="loginPass" placeholder="পাসওয়ার্ড" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">🔑 লগইন</button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="mainSidebar" style="display:none;">
+    <div class="sidebar-header">
+      <img src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="Logo" id="sidebarLogo" crossorigin="anonymous">
+      <h2>👔 কর্মী অ্যাটেনডেন্স</h2>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchTab('overview', this)">📊 ওভারভিউ</li>
+      <li class="nav-item" onclick="switchTab('analytics', this)">📈 অ্যানালিটিক্স</li>
+      <li class="nav-item" onclick="switchTab('employees', this)">👔 কর্মী তালিকা</li>
+      <li class="nav-item" onclick="switchTab('accounts', this)">🔑 কর্মী অ্যাকাউন্ট</li>
+      <li class="nav-item" onclick="switchTab('today', this)">📅 আজকের উপস্থিতি</li>
+      <li class="nav-item" onclick="switchTab('history', this)">📜 ইতিহাস</li>
+      <li class="nav-item" onclick="switchTab('leaves', this)">📋 ছুটির আবেদন</li>
+      <li class="nav-item" onclick="switchTab('qr', this)">📱 QR কোড</li>
+      <li class="nav-item" onclick="switchTab('settings', this)">⚙️ সেটিংস</li>
+    </ul>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content" id="mainContent" style="display:none;">
+    <div class="topbar">
+      <h3 id="topbarTitle">📊 ওভারভিউ</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <a href="/home.html" style="color:var(--gold);font-size:12px;text-decoration:none;opacity:0.7;">🏠 হোম</a>
+        <button class="logout-btn" onclick="doLogout()">লগআউট</button>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- OVERVIEW -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">মোট কর্মী</div></div>
+          <div class="stat-card"><div class="num" id="statToday">0</div><div class="label">আজকের উপস্থিত</div></div>
+          <div class="stat-card"><div class="num" id="statAbsent">0</div><div class="label">অনুপস্থিত</div></div>
+          <div class="stat-card late-card"><div class="num" id="statLate">0</div><div class="label">⏰ বিলম্বিত</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+          <div class="stat-card"><div class="num" id="statLeaves">0</div><div class="label">📋 ছুটির আবেদন (আজ)</div></div>
+          <div class="stat-card" style="background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(5,150,105,0.1));"><div class="num" id="statRate" style="background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">0%</div><div class="label">উপস্থিতি হার</div></div>
+        </div>
+        <div class="card"><h3>📊 শিফট-ওয়াইজ সারসংক্ষেপ</h3><div id="overviewSummary" style="color:var(--text-muted);font-size:13px;">লোড হচ্ছে...</div></div>
+        <div class="card"><h3>🕐 সাম্প্রতিক উপস্থিতি</h3><div id="recentAttendance">লোড হচ্ছে...</div></div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="tab-content" id="tab-analytics">
+        <div class="card">
+          <h3>📈 সাপ্তাহিক উপস্থিতি চার্ট</h3>
+          <div class="chart-container"><canvas id="weeklyChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>📊 শিফট অনুযায়ী তুলনা</h3>
+          <div class="chart-container" style="height:200px;"><canvas id="shiftChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>🏆 সবচেয়ে নিয়মিত কর্মী (এই মাসে)</h3>
+          <div id="topEmployees" style="color:var(--text-muted);font-size:13px;">লোড হচ্ছে...</div>
+        </div>
+      </div>
+
+      <!-- EMPLOYEES -->
+      <div class="tab-content" id="tab-employees">
+        <div class="card">
+          <h3>➕ নতুন কর্মী যোগ করুন</h3>
+          <div style="text-align:center;margin-bottom:14px;">
+            <div class="photo-upload-area" onclick="document.getElementById('empPhotoInput').click()">
+              <img id="empPhotoPreview" src="" style="display:none;">
+              <span id="empPhotoPlaceholder">📸</span>
+            </div>
+            <input type="file" id="empPhotoInput" accept="image/*" style="display:none;" onchange="previewEmpPhoto(this)">
+            <p style="font-size:11px;color:var(--text-muted);">ছবি আপলোড করুন</p>
+          </div>
+          <div class="form-grid">
+            <div class="fg"><label>কর্মী আইডি *</label><input type="text" id="empId" placeholder="যেমন: EMP-001"></div>
+            <div class="fg"><label>নাম *</label><input type="text" id="empName" placeholder="পূর্ণ নাম"></div>
+            <div class="fg"><label>পদবী *</label><input type="text" id="empDesignation" placeholder="যেমন: শিক্ষক"></div>
+            <div class="fg"><label>পিতার নাম</label><input type="text" id="empFather" placeholder="পিতার নাম"></div>
+            <div class="fg"><label>মাতার নাম</label><input type="text" id="empMother" placeholder="মাতার নাম"></div>
+            <div class="fg"><label>মোবাইল *</label><input type="tel" id="empPhone" placeholder="০১XXXXXXXXX"></div>
+            <div class="fg"><label>ঠিকানা</label><input type="text" id="empAddress" placeholder="গ্রাম/শহর, উপজেলা"></div>
+            <div class="fg"><label>রক্তের গ্রুপ</label><select id="empBlood"><option value="">--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+            <div class="fg"><label>শিফট *</label><select id="empShift"><option value="">--</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option><option value="উভয়">উভয় (সকাল+বিকাল)</option></select></div>
+            <div class="fg"><label>সকাল - সময় থেকে</label><input type="time" id="empMorningFrom"></div>
+            <div class="fg"><label>সকাল - সময় পর্যন্ত</label><input type="time" id="empMorningTo"></div>
+            <div class="fg"><label>বিকাল - সময় থেকে</label><input type="time" id="empEveningFrom"></div>
+            <div class="fg"><label>বিকাল - সময় পর্যন্ত</label><input type="time" id="empEveningTo"></div>
+            <div class="fg"><label>মাসিক বেতন</label><input type="number" id="empSalary" placeholder="টাকা"></div>
+          </div>
+          <div class="fg"><label>উল্লেখ / মন্তব্য</label><textarea id="empRemarks" placeholder="বিশেষ কোনো তথ্য..."></textarea></div>
+          <button class="btn-primary" id="saveEmpBtn" onclick="saveEmployee()" style="width:100%;margin-top:8px;">💾 কর্মী সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>📋 কর্মী তালিকা</h3>
+          <div class="filter-bar">
+            <input type="text" id="empSearchInput" placeholder="🔍 নাম বা আইডি..." oninput="renderEmployeeList()">
+            <select id="empFilterShift" onchange="renderEmployeeList()"><option value="">সব শিফট</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option><option value="উভয়">উভয়</option></select>
+            <span class="filter-count" id="empCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>পদবী</th><th>মোবাইল</th><th>শিফট</th><th>অ্যাকশন</th></tr></thead><tbody id="employeeTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS -->
+      <div class="tab-content" id="tab-accounts">
+        <div class="card">
+          <h3>🔑 কর্মী ড্যাশবোর্ড অ্যাকাউন্ট তৈরি করুন</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">কর্মীকে ইমেইল ও পাসওয়ার্ড দিয়ে ড্যাশবোর্ড অ্যাক্সেস দিন।</p>
+          <div class="form-grid">
+            <div class="fg"><label>কর্মী নির্বাচন করুন *</label><select id="accEmpSelect"><option value="">-- কর্মী নির্বাচন --</option></select></div>
+            <div class="fg"><label>ইমেইল *</label><input type="email" id="accEmail" placeholder="employee@example.com"></div>
+            <div class="fg"><label>পাসওয়ার্ড *</label><input type="text" id="accPass" placeholder="কমপক্ষে ৬ অক্ষর"></div>
+          </div>
+          <button class="btn-primary" id="createAccBtn" onclick="createEmployeeAccount()" style="width:100%;margin-top:8px;">🔑 অ্যাকাউন্ট তৈরি করুন</button>
+        </div>
+        <div class="card">
+          <h3>📋 কর্মী অ্যাকাউন্ট তালিকা</h3>
+          <div style="overflow-x:auto;"><table><thead><tr><th>কর্মী আইডি</th><th>নাম</th><th>ইমেইল</th><th>স্ট্যাটাস</th></tr></thead><tbody id="accountTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- TODAY -->
+      <div class="tab-content" id="tab-today">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3 style="margin:0;">📅 আজকের উপস্থিতি — <span id="todayDate"></span></h3>
+            <button class="btn-sm btn-export" onclick="exportTodayCSV()">📤 CSV</button>
+          </div>
+          <div class="filter-bar">
+            <select id="todayFilterShift" onchange="renderTodayAttendance()"><option value="">সব শিফট</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option><option value="উভয়">উভয়</option></select>
+            <span class="filter-count" id="todayCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>পদবী</th><th>শিফট</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="todayTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="tab-content" id="tab-history">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3 style="margin:0;">📜 তারিখ অনুযায়ী উপস্থিতি</h3>
+            <button class="btn-sm btn-export" onclick="exportHistoryCSV()">📤 CSV</button>
+          </div>
+          <div class="filter-bar">
+            <input type="date" id="historyDate" onchange="loadHistory()">
+            <select id="historyFilterShift" onchange="renderHistory()"><option value="">সব শিফট</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option><option value="উভয়">উভয়</option></select>
+            <span class="filter-count" id="historyCount">0 জন</span>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>পদবী</th><th>শিফট</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">তারিখ নির্বাচন করুন</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- LEAVES -->
+      <div class="tab-content" id="tab-leaves">
+        <div class="card">
+          <h3>📋 ছুটির আবেদন সমূহ</h3>
+          <div class="filter-bar">
+            <select id="leaveFilter" onchange="renderLeaves()"><option value="">সব</option><option value="pending">অপেক্ষমান</option><option value="approved">অনুমোদিত</option><option value="rejected">বাতিল</option></select>
+            <span class="filter-count" id="leaveCount">0 টি</span>
+          </div>
+          <div id="leavesList" style="color:var(--text-muted);font-size:13px;">লোড হচ্ছে...</div>
+        </div>
+      </div>
+
+      <!-- QR -->
+      <div class="tab-content" id="tab-qr">
+        <div class="card">
+          <h3>📱 কর্মী QR কোড জেনারেট করুন</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">এই QR কোড প্রিন্ট করে দেয়ালে লাগান। কর্মীরা স্ক্যান করে উপস্থিতি দিতে পারবে।</p>
+          <div style="text-align:center;margin-bottom:14px;"><button class="btn-primary" onclick="generateEmpQR()">🔄 QR কোড জেনারেট করুন</button></div>
+          <div class="qr-output" id="qrOutput" style="display:none;">
+            <div id="printQrArea">
+              <div style="margin-bottom:12px;"><img id="qrLogo" src="" style="width:50px;height:50px;border-radius:50%;display:none;" crossorigin="anonymous"><h3 style="color:var(--g1);margin:8px 0 4px;">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h3><p style="font-size:12px;color:#666;">কর্মী উপস্থিতি দিতে QR কোড স্ক্যান করুন</p></div>
+              <div id="qrCanvas"></div>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="qrUrl"></p>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">
+              <button class="btn-primary" onclick="printQR()">🖨️ প্রিন্ট</button>
+              <button class="btn-primary" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);" onclick="downloadQR()">⬇️ ডাউনলোড</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="tab-content" id="tab-settings">
+        <div class="card">
+          <h3>🔔 Late Alert সেটিংস</h3>
+          <div class="fg"><label>Grace Period (মিনিট)</label><input type="number" id="gracePeriod" value="10" min="0" max="60" style="max-width:120px;"></div>
+          <button class="btn-primary" onclick="saveGracePeriod()" style="margin-top:8px;">💾 সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>📞 অ্যাডমিন WhatsApp নম্বর</h3>
+          <div class="fg"><label>WhatsApp নম্বর</label><input type="tel" id="adminWhatsapp" placeholder="৮৮০১XXXXXXXXX" style="max-width:250px;"></div>
+          <button class="btn-primary" onclick="saveAdminWhatsapp()" style="margin-top:8px;">💾 সেভ করুন</button>
+        </div>
+        <div class="card">
+          <h3>🔗 কর্মী অ্যাটেনডেন্স পেজ লিংক</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">কর্মীদের সাথে শেয়ার করুন:</p>
+          <div style="display:flex;gap:8px;"><input type="text" id="attendanceLink" readonly style="flex:1;padding:10px;border:1.5px solid var(--glass-border);border-radius:10px;font-family:'Hind Siliguri';font-size:12px;background:var(--glass);color:var(--text);"><button class="btn-primary" onclick="copyLink()">📋 কপি</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <h3 style="color:var(--gold);margin-bottom:16px;">✏️ কর্মী সম্পাদনা</h3>
+      <div id="editFormContent"></div>
+    </div>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyCTCLqLGCzBt9EpgMpEBWent8fa4M-C0Xk",
+      authDomain: "sabuj-computers.firebaseapp.com",
+      databaseURL: "https://sabuj-computers-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sabuj-computers",
+      storageBucket: "sabuj-computers.firebasestorage.app",
+      messagingSenderId: "781121353789",
+      appId: "1:781121353789:web:38b0f78af57b66ddf05254"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.database();
+
+    var ADMIN_UID = 'jsHAoRXyJkXrIZLgTRMSQ4kD1qf1';
+    var CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
+    var CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
+
+    var allEmployees = {};
+    var todayRecords = {};
+    var historyRecords = {};
+    var allLeaves = {};
+    var gracePeriodMinutes = 10;
+    var weeklyChartInstance = null;
+    var shiftChartInstance = null;
+
+    // =========== AUTH ===========
+    function doLogin() {
+      var email = document.getElementById('loginEmail').value.trim();
+      var pass = document.getElementById('loginPass').value;
+      if (!email || !pass) { showLoginError('ইমেইল ও পাসওয়ার্ড দিন!'); return; }
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(function(cred) { if (cred.user.uid !== ADMIN_UID) { auth.signOut(); showLoginError('❌ আপনি অ্যাডমিন নন!'); return; } initDashboard(); })
+        .catch(function(err) { showLoginError('❌ ' + err.message); });
+    }
+    function showLoginError(msg) { var el = document.getElementById('loginError'); el.textContent = msg; el.style.display = 'block'; }
+    function toggleSidebar() {
+      var sidebar = document.getElementById('mainSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+    function doLogout() { auth.signOut().then(function() { location.reload(); }); }
+
+    db.ref('sabuj/general/logo').once('value', function(snap) {
+      var logo = snap.val();
+      if (logo) { document.getElementById('loginLogo').src = logo; }
+    });
+
+    auth.onAuthStateChanged(function(user) { if (user && user.uid === ADMIN_UID) initDashboard(); });
+
+    function initDashboard() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('mainSidebar').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'flex';
+      document.getElementById('attendanceLink').value = window.location.origin + '/employee-attendance.html';
+
+      db.ref('sabuj/general/logo').once('value', function(snap) {
+        var logo = snap.val();
+        if (logo) { ['sidebarLogo','loginLogo'].forEach(function(id) { document.getElementById(id).src = logo; }); }
+      });
+      db.ref('sabuj/employee-attendance-settings/gracePeriod').once('value', function(snap) {
+        if (snap.exists()) { gracePeriodMinutes = snap.val(); document.getElementById('gracePeriod').value = gracePeriodMinutes; }
+      });
+      db.ref('sabuj/employee-attendance-settings/adminWhatsapp').once('value', function(snap) {
+        if (snap.exists()) document.getElementById('adminWhatsapp').value = snap.val();
+      });
+
+      loadEmployees(); loadTodayAttendance(); loadLeaves();
+      var today = new Date();
+      document.getElementById('todayDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+      document.getElementById('historyDate').value = today.toISOString().split('T')[0];
+    }
+
+    // =========== TAB ===========
+    function switchTab(tab, clickedEl) {
+      document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+      document.getElementById('tab-'+tab).classList.add('active');
+      var titles = { overview:'📊 ওভারভিউ', analytics:'📈 অ্যানালিটিক্স', employees:'👔 কর্মী তালিকা', accounts:'🔑 কর্মী অ্যাকাউন্ট', today:'📅 আজকের উপস্থিতি', history:'📜 ইতিহাস', leaves:'📋 ছুটির আবেদন', qr:'📱 QR কোড', settings:'⚙️ সেটিংস' };
+      document.getElementById('topbarTitle').textContent = titles[tab] || tab;
+      if (clickedEl) clickedEl.classList.add('active');
+      if (tab === 'analytics') loadAnalytics();
+      if (tab === 'accounts') populateAccountSelect();
+      var sidebar = document.getElementById('mainSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+      if (window.innerWidth <= 768 && sidebar) { sidebar.classList.remove('open'); backdrop.classList.remove('show'); }
+    }
+
+    // =========== CLOUDINARY ===========
+    function uploadToCloudinary(file) {
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      return fetch(CLOUDINARY_URL, { method:'POST', body:formData })
+        .then(function(res) { return res.json(); })
+        .then(function(data) { if (data.error) { alert('❌ আপলোড ব্যর্থ: ' + data.error.message); return null; } return data.secure_url; })
+        .catch(function() { alert('❌ ইন্টারনেট সমস্যা!'); return null; });
+    }
+
+    function compressImage(file, maxW, maxH, quality) {
+      return new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+            if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob(resolve, 'image/jpeg', quality || 0.7);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // =========== EMPLOYEES ===========
+    function previewEmpPhoto(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 500, 500, 0.75).then(function(blob) {
+          input._compressedBlob = blob;
+          var url = URL.createObjectURL(blob);
+          document.getElementById('empPhotoPreview').src = url;
+          document.getElementById('empPhotoPreview').style.display = 'block';
+          document.getElementById('empPhotoPlaceholder').style.display = 'none';
+        });
+      }
+    }
+
+    function saveEmployee() {
+      var uniqueId = document.getElementById('empId').value.trim().toUpperCase();
+      var name = document.getElementById('empName').value.trim();
+      var phone = document.getElementById('empPhone').value.trim();
+      var shift = document.getElementById('empShift').value;
+      var designation = document.getElementById('empDesignation').value.trim();
+      if (!uniqueId || !name || !phone || !shift || !designation) return alert('❌ আইডি, নাম, পদবী, মোবাইল ও শিফট আবশ্যক!');
+      if (Object.values(allEmployees).find(function(e) { return e.uniqueId === uniqueId; })) return alert('❌ এই আইডি ইতিমধ্যে ব্যবহৃত!');
+
+      var btn = document.getElementById('saveEmpBtn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
+
+      var photoInput = document.getElementById('empPhotoInput');
+      var photoPromise = Promise.resolve('');
+      if (photoInput.files[0]) {
+        var fileToUpload = photoInput._compressedBlob || photoInput.files[0];
+        photoPromise = uploadToCloudinary(fileToUpload);
+      }
+
+      photoPromise.then(function(photoUrl) {
+        if (photoInput.files[0] && !photoUrl) { btn.disabled = false; btn.textContent = '💾 কর্মী সেভ করুন'; return; }
+        var employee = {
+          uniqueId: uniqueId, name: name, photo: photoUrl || '',
+          designation: designation,
+          fatherName: document.getElementById('empFather').value.trim(),
+          motherName: document.getElementById('empMother').value.trim(),
+          phone: phone, address: document.getElementById('empAddress').value.trim(),
+          bloodGroup: document.getElementById('empBlood').value,
+          shift: shift,
+          morningFrom: document.getElementById('empMorningFrom').value,
+          morningTo: document.getElementById('empMorningTo').value,
+          eveningFrom: document.getElementById('empEveningFrom').value,
+          eveningTo: document.getElementById('empEveningTo').value,
+          salary: document.getElementById('empSalary').value || '',
+          remarks: document.getElementById('empRemarks').value.trim(),
+          addedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        db.ref('sabuj/attendance-employees').push(employee).then(function() {
+          alert('✅ কর্মী সফলভাবে যোগ হয়েছে!');
+          ['empId','empName','empDesignation','empFather','empMother','empPhone','empAddress','empSalary','empRemarks'].forEach(function(id) { document.getElementById(id).value = ''; });
+          ['empBlood','empShift'].forEach(function(id) { document.getElementById(id).value = ''; });
+          ['empMorningFrom','empMorningTo','empEveningFrom','empEveningTo'].forEach(function(id) { document.getElementById(id).value = ''; });
+          document.getElementById('empPhotoInput').value = '';
+          document.getElementById('empPhotoPreview').style.display = 'none';
+          document.getElementById('empPhotoPlaceholder').style.display = 'block';
+          btn.disabled = false; btn.textContent = '💾 কর্মী সেভ করুন';
+        }).catch(function(err) { alert('❌ সমস্যা: ' + err.message); btn.disabled = false; btn.textContent = '💾 কর্মী সেভ করুন'; });
+      });
+    }
+
+    function loadEmployees() {
+      db.ref('sabuj/attendance-employees').on('value', function(snap) { allEmployees = snap.val() || {}; renderEmployeeList(); updateOverview(); });
+    }
+
+    function renderEmployeeList() {
+      var search = (document.getElementById('empSearchInput').value || '').trim().toLowerCase();
+      var sf = document.getElementById('empFilterShift').value;
+      var entries = Object.entries(allEmployees);
+      if (search) entries = entries.filter(function(e) { var s=e[1]; return (s.name||'').toLowerCase().indexOf(search)!==-1 || (s.uniqueId||'').toLowerCase().indexOf(search)!==-1; });
+      if (sf) entries = entries.filter(function(e) { return e[1].shift === sf; });
+      document.getElementById('empCount').textContent = entries.length + ' জন';
+      var tbody = document.getElementById('employeeTableBody');
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো কর্মী নেই</td></tr>'; return; }
+      tbody.innerHTML = entries.map(function(entry) {
+        var k=entry[0], s=entry[1];
+        return '<tr><td><img src="'+(s.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<td style="color:var(--gold);font-weight:700;">'+escapeHtml(s.uniqueId)+'</td><td>'+escapeHtml(s.name)+'</td><td>'+escapeHtml(s.designation||'—')+'</td><td>'+escapeHtml(s.phone||'—')+'</td><td>'+escapeHtml(s.shift||'—')+'</td>' +
+        '<td><button class="btn-sm btn-edit" onclick="openEditModal(\''+k+'\')">✏️</button><button class="btn-sm btn-del" onclick="deleteEmployee(\''+k+'\',\''+encodeURIComponent(s.name||'')+'\')">🗑️</button></td></tr>';
+      }).join('');
+    }
+
+    function deleteEmployee(key, n) { if (confirm('⚠️ "'+decodeURIComponent(n)+'" মুছবেন?')) db.ref('sabuj/attendance-employees/'+key).remove().then(function() { alert('✅ মুছে ফেলা হয়েছে!'); }); }
+
+    // =========== EDIT MODAL ===========
+    function openEditModal(key) {
+      var s = allEmployees[key]; if (!s) return;
+      var bv = function(v,o) { return s.bloodGroup===o?' selected':''; };
+      document.getElementById('editFormContent').innerHTML =
+        '<div class="form-grid">'+
+        '<div class="fg"><label>আইডি</label><input type="text" id="editId" value="'+escapeHtml(s.uniqueId)+'"></div>'+
+        '<div class="fg"><label>নাম</label><input type="text" id="editName" value="'+escapeHtml(s.name)+'"></div>'+
+        '<div class="fg"><label>পদবী</label><input type="text" id="editDesignation" value="'+escapeHtml(s.designation)+'"></div>'+
+        '<div class="fg"><label>পিতা</label><input type="text" id="editFather" value="'+escapeHtml(s.fatherName)+'"></div>'+
+        '<div class="fg"><label>মাতা</label><input type="text" id="editMother" value="'+escapeHtml(s.motherName)+'"></div>'+
+        '<div class="fg"><label>মোবাইল</label><input type="tel" id="editPhone" value="'+escapeHtml(s.phone)+'"></div>'+
+        '<div class="fg"><label>ঠিকানা</label><input type="text" id="editAddress" value="'+escapeHtml(s.address)+'"></div>'+
+        '<div class="fg"><label>রক্তের গ্রুপ</label><select id="editBlood"><option value="">--</option><option'+bv(s,'A+')+'>A+</option><option'+bv(s,'A-')+'>A-</option><option'+bv(s,'B+')+'>B+</option><option'+bv(s,'B-')+'>B-</option><option'+bv(s,'AB+')+'>AB+</option><option'+bv(s,'AB-')+'>AB-</option><option'+bv(s,'O+')+'>O+</option><option'+bv(s,'O-')+'>O-</option></select></div>'+
+        '<div class="fg"><label>শিফট</label><select id="editShift"><option value="">--</option><option value="সকাল"'+(s.shift==='সকাল'?' selected':'')+'>সকাল</option><option value="বিকাল"'+(s.shift==='বিকাল'?' selected':'')+'>বিকাল</option><option value="উভয়"'+(s.shift==='উভয়'?' selected':'')+'>উভয়</option></select></div>'+
+        '<div class="fg"><label>সকাল থেকে</label><input type="time" id="editMorningFrom" value="'+(s.morningFrom||'')+'"></div>'+
+        '<div class="fg"><label>সকাল পর্যন্ত</label><input type="time" id="editMorningTo" value="'+(s.morningTo||'')+'"></div>'+
+        '<div class="fg"><label>বিকাল থেকে</label><input type="time" id="editEveningFrom" value="'+(s.eveningFrom||'')+'"></div>'+
+        '<div class="fg"><label>বিকাল পর্যন্ত</label><input type="time" id="editEveningTo" value="'+(s.eveningTo||'')+'"></div>'+
+        '<div class="fg"><label>বেতন</label><input type="number" id="editSalary" value="'+(s.salary||'')+'"></div>'+
+        '</div><div class="fg"><label>উল্লেখ</label><textarea id="editRemarks">'+(s.remarks||'')+'</textarea></div>'+
+        '<div class="fg"><label>নতুন ছবি</label><input type="file" id="editPhotoInput" accept="image/*" style="font-size:12px;color:var(--text-muted);"></div>'+
+        '<button class="btn-primary" style="width:100%;margin-top:12px;" onclick="saveEditEmployee(\''+key+'\')">💾 আপডেট</button>';
+      document.getElementById('editModal').classList.add('show');
+    }
+    function closeEditModal() { document.getElementById('editModal').classList.remove('show'); }
+
+    function saveEditEmployee(key) {
+      var updates = {
+        uniqueId: document.getElementById('editId').value.trim().toUpperCase(),
+        name: document.getElementById('editName').value.trim(),
+        designation: document.getElementById('editDesignation').value.trim(),
+        fatherName: document.getElementById('editFather').value.trim(),
+        motherName: document.getElementById('editMother').value.trim(),
+        phone: document.getElementById('editPhone').value.trim(),
+        address: document.getElementById('editAddress').value.trim(),
+        bloodGroup: document.getElementById('editBlood').value,
+        shift: document.getElementById('editShift').value,
+        morningFrom: document.getElementById('editMorningFrom').value,
+        morningTo: document.getElementById('editMorningTo').value,
+        eveningFrom: document.getElementById('editEveningFrom').value,
+        eveningTo: document.getElementById('editEveningTo').value,
+        salary: document.getElementById('editSalary').value,
+        remarks: document.getElementById('editRemarks').value.trim()
+      };
+      if (!updates.uniqueId || !updates.name) return alert('❌ আইডি ও নাম আবশ্যক!');
+      var photoFile = document.getElementById('editPhotoInput').files[0];
+      var promise = Promise.resolve();
+      if (photoFile) {
+        promise = compressImage(photoFile, 500, 500, 0.75).then(function(compressed) {
+          return uploadToCloudinary(compressed);
+        }).then(function(url) { if (url) updates.photo = url; });
+      }
+      promise.then(function() {
+        db.ref('sabuj/attendance-employees/'+key).update(updates).then(function() { alert('✅ আপডেট সফল!'); closeEditModal(); }).catch(function(err) { alert('❌ '+err.message); });
+      });
+    }
+
+    // =========== EMPLOYEE ACCOUNTS ===========
+    function populateAccountSelect() {
+      var sel = document.getElementById('accEmpSelect');
+      sel.innerHTML = '<option value="">-- কর্মী নির্বাচন --</option>';
+      Object.entries(allEmployees).forEach(function(entry) {
+        var k=entry[0], e=entry[1];
+        sel.innerHTML += '<option value="'+k+'">'+escapeHtml(e.uniqueId)+' - '+escapeHtml(e.name)+'</option>';
+      });
+      renderAccountList();
+    }
+
+    function createEmployeeAccount() {
+      var empKey = document.getElementById('accEmpSelect').value;
+      var email = document.getElementById('accEmail').value.trim();
+      var pass = document.getElementById('accPass').value;
+      if (!empKey || !email || !pass) return alert('❌ সব ফিল্ড পূরণ করুন!');
+      if (pass.length < 6) return alert('❌ পাসওয়ার্ড কমপক্ষে ৬ অক্ষর!');
+
+      var emp = allEmployees[empKey];
+      if (!emp) return alert('❌ কর্মী পাওয়া যায়নি!');
+
+      var btn = document.getElementById('createAccBtn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> তৈরি হচ্ছে...';
+
+      // Save account info to Firebase (actual Firebase Auth account creation needs admin SDK)
+      // For now, we save email/pass mapping and use signInWithEmailAndPassword from dashboard
+      var accData = {
+        employeeKey: empKey,
+        uniqueId: emp.uniqueId,
+        name: emp.name,
+        email: email,
+        password: pass,
+        status: 'active',
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      };
+
+      // We'll use Firebase Auth to create the account
+      // Admin needs to create it — using a secondary auth approach
+      var secondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary_' + Date.now());
+      secondaryApp.auth().createUserWithEmailAndPassword(email, pass)
+        .then(function(cred) {
+          var uid = cred.user.uid;
+          accData.uid = uid;
+          // Save employee auth mapping
+          return db.ref('sabuj/employees_auth/' + uid).set({
+            employeeKey: empKey,
+            uniqueId: emp.uniqueId,
+            name: emp.name,
+            email: email,
+            status: 'active'
+          }).then(function() {
+            return db.ref('sabuj/employee-accounts/' + empKey).set(accData);
+          });
+        })
+        .then(function() {
+          alert('✅ কর্মী অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!\n\nইমেইল: ' + email + '\nপাসওয়ার্ড: ' + pass);
+          document.getElementById('accEmail').value = '';
+          document.getElementById('accPass').value = '';
+          btn.disabled = false; btn.textContent = '🔑 অ্যাকাউন্ট তৈরি করুন';
+          secondaryApp.delete();
+          renderAccountList();
+        })
+        .catch(function(err) {
+          alert('❌ অ্যাকাউন্ট তৈরিতে সমস্যা: ' + err.message);
+          btn.disabled = false; btn.textContent = '🔑 অ্যাকাউন্ট তৈরি করুন';
+          secondaryApp.delete();
+        });
+    }
+
+    function renderAccountList() {
+      db.ref('sabuj/employee-accounts').once('value', function(snap) {
+        var data = snap.val() || {};
+        var entries = Object.entries(data);
+        var tbody = document.getElementById('accountTableBody');
+        if (!entries.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">কোনো অ্যাকাউন্ট নেই</td></tr>'; return; }
+        tbody.innerHTML = entries.map(function(entry) {
+          var a = entry[1];
+          return '<tr><td style="color:var(--gold);font-weight:700;">'+escapeHtml(a.uniqueId)+'</td><td>'+escapeHtml(a.name)+'</td><td>'+escapeHtml(a.email)+'</td><td><span style="color:#4ade80;">✅ সক্রিয়</span></td></tr>';
+        }).join('');
+      });
+    }
+
+    // =========== TODAY ATTENDANCE ===========
+    function loadTodayAttendance() {
+      var today = new Date().toISOString().split('T')[0];
+      db.ref('sabuj/employee-attendance-records/'+today).on('value', function(snap) { todayRecords = snap.val() || {}; renderTodayAttendance(); updateOverview(); });
+    }
+
+    function renderAttendanceTable(records, tbodyId, countId, filterId) {
+      var sf = document.getElementById(filterId).value;
+      var entries = Object.entries(records);
+      if (sf) entries = entries.filter(function(e) { return e[1].shift === sf; });
+      document.getElementById(countId).textContent = entries.length + ' জন';
+      var tbody = document.getElementById(tbodyId);
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো উপস্থিতি নেই</td></tr>'; return; }
+      entries.sort(function(a,b) { return (b[1].timestamp||0) - (a[1].timestamp||0); });
+      tbody.innerHTML = entries.map(function(entry) {
+        var r = entry[1];
+        return '<tr class="'+(r.isLate?'late-row':'')+'">' +
+        '<td><img src="'+(r.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<td style="color:var(--gold);font-weight:700;">'+escapeHtml(r.uniqueId)+'</td><td>'+escapeHtml(r.name)+'</td><td>'+escapeHtml(r.designation||'—')+'</td><td>'+escapeHtml(r.shift||'—')+'</td><td style="color:#4ade80;font-weight:700;">'+escapeHtml(r.time||'—')+'</td>' +
+        '<td>'+(r.isLate ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '<span style="color:#4ade80;font-size:11px;">✅ সময়মতো</span>')+'</td></tr>';
+      }).join('');
+    }
+
+    function renderTodayAttendance() { renderAttendanceTable(todayRecords, 'todayTableBody', 'todayCount', 'todayFilterShift'); }
+
+    // =========== HISTORY ===========
+    function loadHistory() {
+      var date = document.getElementById('historyDate').value;
+      if (!date) return;
+      db.ref('sabuj/employee-attendance-records/'+date).once('value', function(snap) { historyRecords = snap.val() || {}; renderHistory(); });
+    }
+    function renderHistory() { renderAttendanceTable(historyRecords, 'historyTableBody', 'historyCount', 'historyFilterShift'); }
+
+    // =========== LEAVES ===========
+    function loadLeaves() {
+      db.ref('sabuj/employee-leaves').on('value', function(snap) {
+        allLeaves = snap.val() || {};
+        renderLeaves();
+      });
+    }
+
+    function renderLeaves() {
+      var filter = document.getElementById('leaveFilter').value;
+      var entries = Object.entries(allLeaves);
+      if (filter) entries = entries.filter(function(e) { return e[1].status === filter; });
+      entries.sort(function(a,b) { return (b[1].timestamp||0) - (a[1].timestamp||0); });
+      document.getElementById('leaveCount').textContent = entries.length + ' টি';
+      var container = document.getElementById('leavesList');
+      if (!entries.length) { container.innerHTML = '<p style="text-align:center;padding:20px;">কোনো ছুটির আবেদন নেই</p>'; return; }
+      container.innerHTML = entries.map(function(entry) {
+        var k=entry[0], l=entry[1];
+        var statusColor = l.status==='approved'?'#4ade80':(l.status==='rejected'?'#fca5a5':'#fbbf24');
+        var statusText = l.status==='approved'?'✅ অনুমোদিত':(l.status==='rejected'?'❌ বাতিল':'⏳ অপেক্ষমান');
+        return '<div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px;margin-bottom:12px;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+          '<strong style="color:var(--gold);">'+escapeHtml(l.employeeName)+' ('+escapeHtml(l.uniqueId)+')</strong>'+
+          '<span style="color:'+statusColor+';font-size:12px;font-weight:700;">'+statusText+'</span></div>'+
+          '<p style="font-size:13px;color:var(--text);margin-bottom:4px;">📅 '+escapeHtml(l.leaveDate||l.date||'—')+' | 🕐 শিফট: '+escapeHtml(l.leaveShift||'—')+'</p>'+
+          '<p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">💬 '+escapeHtml(l.reason||'কারণ উল্লেখ নেই')+'</p>'+
+          (l.status==='pending'?'<div style="display:flex;gap:8px;"><button class="btn-sm btn-edit" onclick="updateLeave(\''+k+'\',\'approved\')">✅ অনুমোদন</button><button class="btn-sm btn-del" onclick="updateLeave(\''+k+'\',\'rejected\')">❌ বাতিল</button></div>':'')+
+          '</div>';
+      }).join('');
+    }
+
+    function updateLeave(key, status) {
+      db.ref('sabuj/employee-leaves/'+key).update({ status: status, reviewedAt: firebase.database.ServerValue.TIMESTAMP })
+        .then(function() { alert(status==='approved'?'✅ ছুটি অনুমোদিত!':'❌ ছুটি বাতিল করা হয়েছে!'); })
+        .catch(function(err) { alert('❌ '+err.message); });
+    }
+
+    // =========== OVERVIEW ===========
+    function updateOverview() {
+      var total = Object.keys(allEmployees).length;
+      var present = Object.keys(todayRecords).length;
+      var late = Object.values(todayRecords).filter(function(r) { return r.isLate; }).length;
+      var rate = total > 0 ? Math.round(present / total * 100) : 0;
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statToday').textContent = present;
+      document.getElementById('statAbsent').textContent = Math.max(0, total - present);
+      document.getElementById('statLate').textContent = late;
+      document.getElementById('statRate').textContent = rate + '%';
+
+      // Count today's pending leaves
+      var todayStr = new Date().toISOString().split('T')[0];
+      var todayLeaves = Object.values(allLeaves).filter(function(l) { return (l.leaveDate||l.date) === todayStr; });
+      document.getElementById('statLeaves').textContent = todayLeaves.length;
+
+      var ms = Object.values(allEmployees).filter(function(e) { return e.shift==='সকাল'; }).length;
+      var es = Object.values(allEmployees).filter(function(e) { return e.shift==='বিকাল'; }).length;
+      var bs = Object.values(allEmployees).filter(function(e) { return e.shift==='উভয়'; }).length;
+      var mp = Object.values(todayRecords).filter(function(r) { return r.shift==='সকাল'; }).length;
+      var ep = Object.values(todayRecords).filter(function(r) { return r.shift==='বিকাল'; }).length;
+      var bp = Object.values(todayRecords).filter(function(r) { return r.shift==='উভয়'; }).length;
+
+      document.getElementById('overviewSummary').innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px;">'+
+        '<div style="background:rgba(34,197,94,0.08);padding:14px;border-radius:14px;text-align:center;border:1px solid rgba(34,197,94,0.15);"><p style="font-size:11px;color:#4ade80;margin:0;">☀️ সকাল</p><h3 style="color:#4ade80;margin:6px 0 2px;font-size:22px;">'+mp+'/'+ms+'</h3></div>'+
+        '<div style="background:rgba(59,130,246,0.08);padding:14px;border-radius:14px;text-align:center;border:1px solid rgba(59,130,246,0.15);"><p style="font-size:11px;color:#93c5fd;margin:0;">🌙 বিকাল</p><h3 style="color:#93c5fd;margin:6px 0 2px;font-size:22px;">'+ep+'/'+es+'</h3></div>'+
+        '<div style="background:rgba(168,85,247,0.08);padding:14px;border-radius:14px;text-align:center;border:1px solid rgba(168,85,247,0.15);"><p style="font-size:11px;color:#c084fc;margin:0;">🔄 উভয়</p><h3 style="color:#c084fc;margin:6px 0 2px;font-size:22px;">'+bp+'/'+bs+'</h3></div></div>';
+
+      var recent = Object.values(todayRecords).sort(function(a,b) { return (b.timestamp||0) - (a.timestamp||0); }).slice(0,5);
+      document.getElementById('recentAttendance').innerHTML = recent.length ? recent.map(function(r) {
+        return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
+        '<img src="'+(r.photo||'https://via.placeholder.com/38x38?text=👤')+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/38x38?text=👤\'">'+
+        '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+escapeHtml(r.name)+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+escapeHtml(r.uniqueId)+' | '+escapeHtml(r.designation||'')+'</span></div>'+
+        '<div style="text-align:right;"><span style="color:var(--gold);font-weight:700;font-size:13px;">'+escapeHtml(r.time||'')+'</span>'+(r.isLate?'<br><span class="late-badge" style="font-size:9px;">বিলম্বিত</span>':'')+'</div></div>';
+      }).join('') : '<p style="color:var(--text-muted);text-align:center;padding:20px;font-size:13px;">আজ কোনো উপস্থিতি নেই</p>';
+    }
+
+    // =========== ANALYTICS ===========
+    function loadAnalytics() {
+      var dates = [], counts = [], lateCounts = [];
+      var promises = [];
+      for (var i = 6; i >= 0; i--) {
+        (function(idx) {
+          var d = new Date(); d.setDate(d.getDate() - idx);
+          var ds = d.toISOString().split('T')[0];
+          dates.push(d.toLocaleDateString('bn-BD', { weekday:'short' }));
+          promises.push(db.ref('sabuj/employee-attendance-records/'+ds).once('value').then(function(snap) {
+            var data = snap.val() || {};
+            return { idx: 6-idx, count: Object.keys(data).length, late: Object.values(data).filter(function(r){return r.isLate;}).length };
+          }));
+        })(i);
+      }
+
+      Promise.all(promises).then(function(results) {
+        results.sort(function(a,b) { return a.idx - b.idx; });
+        results.forEach(function(r) { counts.push(r.count); lateCounts.push(r.late); });
+
+        if (weeklyChartInstance) weeklyChartInstance.destroy();
+        weeklyChartInstance = new Chart(document.getElementById('weeklyChart'), {
+          type: 'bar',
+          data: { labels: dates, datasets: [
+            { label: 'উপস্থিত', data: counts, backgroundColor: 'rgba(200,168,71,0.6)', borderColor: 'rgba(200,168,71,1)', borderWidth: 1, borderRadius: 6 },
+            { label: 'বিলম্বিত', data: lateCounts, backgroundColor: 'rgba(245,158,11,0.5)', borderColor: 'rgba(245,158,11,1)', borderWidth: 1, borderRadius: 6 }
+          ] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aab94', font: { family: 'Hind Siliguri' } } } }, scales: { x: { ticks: { color: '#6b8c76' }, grid: { color: 'rgba(255,255,255,0.03)' } }, y: { ticks: { color: '#6b8c76' }, grid: { color: 'rgba(255,255,255,0.03)' } } } }
+        });
+
+        // Shift chart
+        var mTotal = Object.values(allEmployees).filter(function(e){return e.shift==='সকাল';}).length;
+        var eTotal = Object.values(allEmployees).filter(function(e){return e.shift==='বিকাল';}).length;
+        var bTotal = Object.values(allEmployees).filter(function(e){return e.shift==='উভয়';}).length;
+        if (shiftChartInstance) shiftChartInstance.destroy();
+        shiftChartInstance = new Chart(document.getElementById('shiftChart'), {
+          type: 'doughnut',
+          data: { labels: ['সকাল', 'বিকাল', 'উভয়'], datasets: [{ data: [mTotal, eTotal, bTotal], backgroundColor: ['rgba(34,197,94,0.7)', 'rgba(59,130,246,0.7)', 'rgba(168,85,247,0.7)'], borderWidth: 2 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aab94', font: { family: 'Hind Siliguri' } } } } }
+        });
+
+        // Top employees
+        var now = new Date();
+        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        db.ref('sabuj/employee-attendance-records').orderByKey().startAt(monthStart).once('value').then(function(snap) {
+          var allDays = snap.val() || {};
+          var empAttCount = {};
+          Object.values(allDays).forEach(function(day) { Object.keys(day).forEach(function(ek) { empAttCount[ek] = (empAttCount[ek]||0) + 1; }); });
+          var sorted = Object.entries(empAttCount).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+          var topEl = document.getElementById('topEmployees');
+          if (sorted.length) {
+            var medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+            topEl.innerHTML = sorted.map(function(entry,i) {
+              var s = allEmployees[entry[0]];
+              if (!s) return '';
+              return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
+                '<span style="font-size:18px;">'+medals[i]+'</span>'+
+                '<img src="'+(s.photo||'https://via.placeholder.com/35x35?text=👤')+'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/35x35?text=👤\'">'+
+                '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+escapeHtml(s.name)+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+escapeHtml(s.uniqueId)+'</span></div>'+
+                '<span style="color:var(--gold);font-weight:700;font-size:14px;">'+entry[1]+' দিন</span></div>';
+            }).join('');
+          } else {
+            topEl.innerHTML = '<p style="text-align:center;padding:20px;">এই মাসে কোনো ডাটা নেই</p>';
+          }
+        });
+      });
+    }
+
+    // =========== EXPORT CSV ===========
+    function exportCSV(records, filename) {
+      var entries = Object.values(records);
+      if (!entries.length) return alert('❌ কোনো ডাটা নেই!');
+      var csv = '\uFEFF' + '"আইডি","নাম","পদবী","শিফট","উপস্থিতির সময়","স্ট্যাটাস"\n';
+      entries.forEach(function(r) {
+        csv += '"'+escapeHtml(r.uniqueId)+'","'+escapeHtml(r.name)+'","'+escapeHtml(r.designation||'')+'","'+escapeHtml(r.shift||'')+'","'+escapeHtml(r.time||'')+'","'+(r.isLate?'বিলম্বিত':'সময়মতো')+'"\n';
+      });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function exportTodayCSV() { exportCSV(todayRecords, 'employee-attendance-today-'+new Date().toISOString().split('T')[0]+'.csv'); }
+    function exportHistoryCSV() { exportCSV(historyRecords, 'employee-attendance-'+document.getElementById('historyDate').value+'.csv'); }
+
+    // =========== QR ===========
+    function generateEmpQR() {
+      var url = window.location.origin + '/employee-attendance.html';
+      document.getElementById('qrUrl').textContent = url;
+      db.ref('sabuj/general/logo').once('value', function(snap) { var logo = snap.val(); if (logo) { document.getElementById('qrLogo').src = logo; document.getElementById('qrLogo').style.display = 'inline-block'; } });
+      var qrDiv = document.getElementById('qrCanvas');
+      qrDiv.innerHTML = '';
+      try {
+        new QRCode(qrDiv, { text: url, width: 260, height: 260, colorDark: '#0d3d1f', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+        document.getElementById('qrOutput').style.display = 'block';
+      } catch(e) { alert('❌ QR ব্যর্থ!'); }
+    }
+
+    function getQrDataUrl() {
+      return new Promise(function(resolve, reject) {
+        var qrDiv = document.getElementById('qrCanvas');
+        var canvas = qrDiv.querySelector('canvas');
+        if (canvas) { try { resolve(canvas.toDataURL('image/png')); return; } catch(err) { reject(err); return; } }
+        var img = qrDiv.querySelector('img');
+        if (img && img.src) {
+          var tempImg = new Image();
+          tempImg.crossOrigin = 'anonymous';
+          tempImg.onload = function() {
+            var c = document.createElement('canvas'); c.width = tempImg.naturalWidth; c.height = tempImg.naturalHeight;
+            c.getContext('2d').drawImage(tempImg, 0, 0);
+            try { resolve(c.toDataURL('image/png')); } catch(err) { reject(err); }
+          };
+          tempImg.onerror = function() { reject(new Error('img load failed')); };
+          tempImg.src = img.src;
+        } else { reject(new Error('No QR found')); }
+      });
+    }
+
+    function downloadQR() {
+      getQrDataUrl().then(function(dataUrl) {
+        return fetch(dataUrl).then(function(r) { return r.blob(); });
+      }).then(function(blob) {
+        var objectUrl = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = objectUrl; a.download = 'SCTC-Employee-QR.png';
+        document.body.appendChild(a); a.click();
+        setTimeout(function() { URL.revokeObjectURL(objectUrl); if(a.parentNode) a.parentNode.removeChild(a); }, 1500);
+      }).catch(function() { alert('❌ ডাউনলোড ব্যর্থ!'); });
+    }
+
+    function printQR() {
+      getQrDataUrl().then(function(dataUrl) {
+        var w = window.open('', '_blank', 'width=500,height=600');
+        w.document.write('<html><head><title>Employee QR</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:Arial,sans-serif;text-align:center;}img{max-width:300px;}</style></head><body>');
+        w.document.write('<h2>সবুজ কম্পিউটার ট্রেনিং সেন্টার</h2><p>কর্মী উপস্থিতি QR কোড</p>');
+        w.document.write('<img src="'+dataUrl+'">');
+        w.document.write('<p style="font-size:12px;color:#666;margin-top:15px;">'+document.getElementById('qrUrl').textContent+'</p>');
+        w.document.write('</body></html>');
+        w.document.close();
+        setTimeout(function() { w.print(); }, 500);
+      }).catch(function() { alert('❌ প্রিন্ট ব্যর্থ!'); });
+    }
+
+    // =========== SETTINGS ===========
+    function saveGracePeriod() {
+      var val = parseInt(document.getElementById('gracePeriod').value);
+      if (isNaN(val) || val < 0) return alert('❌ সঠিক মান দিন!');
+      db.ref('sabuj/employee-attendance-settings/gracePeriod').set(val).then(function() { gracePeriodMinutes = val; alert('✅ সেভ হয়েছে!'); });
+    }
+
+    function saveAdminWhatsapp() {
+      var val = document.getElementById('adminWhatsapp').value.trim();
+      if (!val) return alert('❌ নম্বর দিন!');
+      db.ref('sabuj/employee-attendance-settings/adminWhatsapp').set(val).then(function() { alert('✅ সেভ হয়েছে!'); });
+    }
+
+    function copyLink() {
+      var input = document.getElementById('attendanceLink');
+      input.select();
+      document.execCommand('copy');
+      alert('✅ লিংক কপি হয়েছে!');
+    }
+  </script>
+</body>
+</html>
