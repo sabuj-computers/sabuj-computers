@@ -457,8 +457,8 @@
       loadStudents(); loadTodayAttendance(); loadTodayVisitors();
       const today = new Date();
       document.getElementById('todayDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
-      document.getElementById('historyDate').value = today.toISOString().split('T')[0];
-      document.getElementById('visitorDatePicker').value = today.toISOString().split('T')[0];
+      document.getElementById('historyDate').value = getLocalDateKey(today);
+      document.getElementById('visitorDatePicker').value = getLocalDateKey(today);
       document.getElementById('visitorDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
     }
 
@@ -680,7 +680,7 @@
     function renderHistory() { renderAttendanceTable(historyRecords, 'historyTableBody', 'historyCount', 'historyFilterBatch'); }
 
     // =========== VISITORS ===========
-    function loadTodayVisitors() { loadVisitorsForDate(new Date().toISOString().split('T')[0]); }
+    function loadTodayVisitors() { loadVisitorsForDate(getLocalDateKey()); }
     function loadVisitors() {
       const date = document.getElementById('visitorDatePicker').value;
       if (date) { document.getElementById('visitorDate').textContent = new Date(date).toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' }); loadVisitorsForDate(date); }
@@ -817,7 +817,7 @@
       const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
     }
-    function exportTodayCSV() { exportCSV(todayRecords, 'attendance-today-'+new Date().toISOString().split('T')[0]+'.csv'); }
+    function exportTodayCSV() { exportCSV(todayRecords, 'attendance-today-'+getLocalDateKey()+'.csv'); }
     function exportHistoryCSV() { exportCSV(historyRecords, 'attendance-'+document.getElementById('historyDate').value+'.csv'); }
 
     // =========== QR ===========

@@ -525,7 +525,7 @@
       if (!photoUrl) { btn.disabled = false; btn.innerHTML = '📝 জমা দিন'; return showVisitorError('❌ ছবি আপলোড ব্যর্থ!'); }
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = getLocalDateKey(now);
       const time = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit' });
 
       const visitor = {

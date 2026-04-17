@@ -473,7 +473,7 @@
       loadEmployees(); loadTodayAttendance(); loadLeaves();
       var today = new Date();
       document.getElementById('todayDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
-      document.getElementById('historyDate').value = today.toISOString().split('T')[0];
+      document.getElementById('historyDate').value = getLocalDateKey(today);
     }
 
     // =========== TAB ===========
@@ -844,7 +844,7 @@
       document.getElementById('statRate').textContent = rate + '%';
 
       // Count today's pending leaves
-      var todayStr = new Date().toISOString().split('T')[0];
+      var todayStr = getLocalDateKey();
       var todayLeaves = Object.values(allLeaves).filter(function(l) { return (l.leaveDate||l.date) === todayStr; });
       document.getElementById('statLeaves').textContent = todayLeaves.length;
 
@@ -951,7 +951,7 @@
       var a = document.createElement('a'); a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
     }
-    function exportTodayCSV() { exportCSV(todayRecords, 'employee-attendance-today-'+new Date().toISOString().split('T')[0]+'.csv'); }
+    function exportTodayCSV() { exportCSV(todayRecords, 'employee-attendance-today-'+getLocalDateKey()+'.csv'); }
     function exportHistoryCSV() { exportCSV(historyRecords, 'employee-attendance-'+document.getElementById('historyDate').value+'.csv'); }
 
     // =========== QR ===========

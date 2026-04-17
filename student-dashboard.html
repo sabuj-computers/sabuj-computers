@@ -574,7 +574,6 @@
       const myRecords = [];
 
       for (let d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
-        if (d.getDay() === 5) continue;
         totalDays++;
         const ds = getLocalDateKey(d);
         const dayRec = allRecords[ds];

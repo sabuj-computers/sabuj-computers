@@ -432,7 +432,6 @@
         var records = [];
 
         for (var d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
-          if (d.getDay() === 5) continue;
           totalDays++;
           var ds = getLocalDateKey(d);
           var dayRec = allRecords[ds];
