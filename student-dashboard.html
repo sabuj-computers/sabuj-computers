@@ -202,10 +202,16 @@
 
       <div class="tab-content" id="tab-attendance">
         <h3 style="color: var(--g1); margin-top: 0;">উপস্থিতি (Attendance)</h3>
-        <div style="text-align:center; padding:40px; background:#f7faf8; border-radius:12px; border:1px dashed #ccc;">
+        <div style="text-align:center; padding:30px 20px; background:linear-gradient(135deg,#f0f8f4,#e7f4ec); border-radius:12px; border:1px solid #b8dfc4; margin-bottom:15px;">
           <h2 style="color:var(--g2); font-size:48px; margin:0;" id="attPercent">০%</h2>
-          <p style="color:var(--muted); margin-top:5px; font-size:16px;" id="attText">মোট ক্লাস: ০ | উপস্থিতি: ০</p>
+          <p style="color:var(--muted); margin-top:5px; font-size:14px;" id="attText">এই মাসে মোট কর্মদিবস: ০ | উপস্থিতি: ০</p>
+          <p style="color:#d97706; margin-top:5px; font-size:13px; font-weight:600;" id="attLateText" style="display:none;"></p>
         </div>
+        <div id="attRecentBox" style="background:#fff; padding:15px; border-radius:12px; border:1px solid #e4ece7;">
+          <h4 style="color:var(--g1); margin:0 0 10px 0; font-size:15px;">📅 সাম্প্রতিক উপস্থিতি</h4>
+          <div id="attRecentList"><p style="color:var(--muted); font-size:13px; margin:0;">লোড হচ্ছে...</p></div>
+        </div>
+        <p style="color:var(--muted); font-size:11px; text-align:center; margin-top:10px;">⚙️ এই ডেটা QR স্ক্যান উপস্থিতি সিস্টেম থেকে নেওয়া। আপনার ফোন নম্বর দিয়ে ম্যাচ করা হয়েছে।</p>
       </div>
 
       <div class="tab-content" id="tab-results">
@@ -393,6 +399,8 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    // Tab-isolated session: এই tab এ logout করলে অন্য tab অপ্রভাবিত থাকবে
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){ console.warn('Persistence:', e); });
 
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
@@ -499,6 +507,71 @@
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
+    // ===== Attendance Sync (from QR attendance system) =====
+    let attendanceListenerActive = false;
+
+    function loadStudentAttendance(phone, nameBn) {
+      if (!phone) {
+        document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ ফোন নম্বর পাওয়া যায়নি</p>';
+        return;
+      }
+      db.ref('sabuj/attendance-students').once('value', function(snap) {
+        const all = snap.val() || {};
+        let foundKey = null;
+        Object.keys(all).forEach(function(k) {
+          const s = all[k];
+          if (s && s.phone && String(s.phone).replace(/\D/g,'') === String(phone).replace(/\D/g,'')) {
+            foundKey = k;
+          }
+        });
+        if (!foundKey) {
+          document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ আপনি QR অ্যাটেনডেন্স সিস্টেমে এখনো নিবন্ধিত নন। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
+          return;
+        }
+        if (attendanceListenerActive) return;
+        attendanceListenerActive = true;
+        db.ref('sabuj/attendance-records').on('value', function(allSnap) {
+          calculateStudentAttendance(allSnap.val() || {}, foundKey);
+        });
+      });
+    }
+
+    function calculateStudentAttendance(allRecords, studentKey) {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      let totalDays = 0, presentDays = 0, lateDays = 0;
+      const myRecords = [];
+
+      for (let d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
+        if (d.getDay() === 5) continue;
+        totalDays++;
+        const ds = d.toISOString().split('T')[0];
+        const dayRec = allRecords[ds];
+        if (dayRec && dayRec[studentKey]) {
+          const r = dayRec[studentKey];
+          presentDays++;
+          if (r.isLate) lateDays++;
+          myRecords.push({ date: ds, time: r.time || '', isLate: !!r.isLate });
+        }
+      }
+
+      const percent = totalDays > 0 ? Math.round((presentDays/totalDays)*100) : 0;
+      document.getElementById('attPercent').textContent = percent + '%';
+      document.getElementById('attText').textContent = 'এই মাসে মোট কর্মদিবস: ' + totalDays + ' | উপস্থিতি: ' + presentDays;
+      const lateEl = document.getElementById('attLateText');
+      if (lateEl) {
+        if (lateDays > 0) { lateEl.textContent = '⏰ বিলম্বিত: ' + lateDays + ' দিন'; lateEl.style.display = 'block'; }
+        else { lateEl.style.display = 'none'; }
+      }
+
+      myRecords.sort(function(a,b) { return b.date.localeCompare(a.date); });
+      const html = myRecords.slice(0,10).map(function(r) {
+        const dateLabel = new Date(r.date).toLocaleDateString('bn-BD', { day:'numeric', month:'short' });
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span style="color:#444;font-weight:600;">'+dateLabel+'</span><span style="color:#666;">'+r.time+'</span><span style="color:'+(r.isLate?'#d97706':'#16a34a')+';font-weight:600;font-size:12px;">'+(r.isLate?'⏰ বিলম্বিত':'✅ সময়মতো')+'</span></div>';
+      }).join('');
+      document.getElementById('attRecentList').innerHTML = html || '<p style="color:var(--muted); font-size:13px; margin:0;">এই মাসে কোনো উপস্থিতি রেকর্ড নেই</p>';
+    }
+
     let intentionalLogout = false;
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -554,12 +627,8 @@
                     <p><strong>ভর্তির তারিখ:</strong> ${new Date(appData.submittedAt).toLocaleDateString('bn-BD')}</p>
                   `;
 
-                  // Attendance Tab
-                  const attTotal = parseInt(appData.attendance?.total || 0);
-                  const attPresent = parseInt(appData.attendance?.present || 0);
-                  const attPercent = attTotal > 0 ? Math.round((attPresent / attTotal) * 100) : 0;
-                  document.getElementById('attPercent').textContent = attPercent + '%';
-                  document.getElementById('attText').textContent = `মোট ক্লাস: ${attTotal} | উপস্থিতি: ${attPresent}`;
+                  // Attendance Tab — Sync from real QR attendance records
+                  loadStudentAttendance(authData.phone, appData.personal?.nameBn);
 
                   // Results Tab
                   document.getElementById('examResultText').textContent = appData.exam?.result || 'প্রকাশিত হয়নি';

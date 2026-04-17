@@ -412,46 +412,43 @@
       }
     });
 
+    var attendanceRealtimeActive = false;
     function loadAttendanceRecords(empKey) {
-      var now = new Date();
-      var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      var totalDays = 0;
-      var presentDays = 0;
-      var lateDays = 0;
-      var records = [];
-      var promises = [];
+      if (attendanceRealtimeActive) return;
+      attendanceRealtimeActive = true;
+      // Realtime listener on full attendance-records — auto-updates when new attendance is recorded
+      db.ref('sabuj/employee-attendance-records').on('value', function(allSnap) {
+        var allRecords = allSnap.val() || {};
+        var now = new Date();
+        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        var totalDays = 0, presentDays = 0, lateDays = 0;
+        var records = [];
 
-      for (var d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
-        if (d.getDay() === 5) continue; // Skip Friday
-        totalDays++;
-        var ds = d.toISOString().split('T')[0];
-        (function(dateStr) {
-          promises.push(db.ref('sabuj/employee-attendance-records/' + dateStr + '/' + empKey).once('value').then(function(snap) {
-            if (snap.exists()) {
-              var rec = snap.val();
-              presentDays++;
-              if (rec.isLate) lateDays++;
-              records.push({ date: dateStr, time: rec.time || '', isLate: rec.isLate || false });
-            }
-          }));
-        })(ds);
-      }
+        for (var d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
+          if (d.getDay() === 5) continue; // Skip Friday
+          totalDays++;
+          var ds = d.toISOString().split('T')[0];
+          var dayRec = allRecords[ds];
+          if (dayRec && dayRec[empKey]) {
+            var rec = dayRec[empKey];
+            presentDays++;
+            if (rec.isLate) lateDays++;
+            records.push({ date: ds, time: rec.time || '', isLate: rec.isLate || false });
+          }
+        }
 
-      Promise.all(promises).then(function() {
         var percent = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
         document.getElementById('attPercent').textContent = percent + '%';
         document.getElementById('attSummary').textContent = 'মোট কর্মদিবস: ' + totalDays + ' | উপস্থিতি: ' + presentDays + ' | বিলম্বিত: ' + lateDays;
         document.getElementById('dashAttCount').textContent = presentDays;
         document.getElementById('dashLateCount').textContent = lateDays;
 
-        // Recent records
         records.sort(function(a,b) { return b.date.localeCompare(a.date); });
         var recentHtml = records.slice(0,5).map(function(r) {
           return '<div class="att-record"><span class="date">'+r.date+'</span><span class="time">'+r.time+'</span><span class="status">'+(r.isLate?'<span style="color:#d97706;">⏰ বিলম্বিত</span>':'<span style="color:#16a34a;">✅ সময়মতো</span>')+'</span></div>';
         }).join('');
         document.getElementById('dashRecentAtt').innerHTML = recentHtml || '<p style="color:var(--muted);">এই মাসে কোনো রেকর্ড নেই</p>';
 
-        // Full record list
         var fullHtml = records.map(function(r) {
           return '<div class="att-record"><span class="date">'+r.date+'</span><span class="time">'+r.time+'</span><span class="status">'+(r.isLate?'<span style="color:#d97706;">⏰ বিলম্বিত</span>':'<span style="color:#16a34a;">✅ সময়মতো</span>')+'</span></div>';
         }).join('');
