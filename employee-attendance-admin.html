@@ -754,8 +754,16 @@
     }
 
     // =========== TODAY ATTENDANCE ===========
+    function getLocalDateKey(date) {
+      var d = date ? new Date(date) : new Date();
+      var year = d.getFullYear();
+      var month = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
     function loadTodayAttendance() {
-      var today = new Date().toISOString().split('T')[0];
+      var today = getLocalDateKey();
       db.ref('sabuj/employee-attendance-records/'+today).on('value', function(snap) { todayRecords = snap.val() || {}; renderTodayAttendance(); updateOverview(); });
     }
 
@@ -869,7 +877,7 @@
       for (var i = 6; i >= 0; i--) {
         (function(idx) {
           var d = new Date(); d.setDate(d.getDate() - idx);
-          var ds = d.toISOString().split('T')[0];
+          var ds = getLocalDateKey(d);
           dates.push(d.toLocaleDateString('bn-BD', { weekday:'short' }));
           promises.push(db.ref('sabuj/employee-attendance-records/'+ds).once('value').then(function(snap) {
             var data = snap.val() || {};
@@ -905,7 +913,7 @@
 
         // Top employees
         var now = new Date();
-        var monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        var monthStart = getLocalDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
         db.ref('sabuj/employee-attendance-records').orderByKey().startAt(monthStart).once('value').then(function(snap) {
           var allDays = snap.val() || {};
           var empAttCount = {};

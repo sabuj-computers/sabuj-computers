@@ -510,33 +510,64 @@
     // ===== Attendance Sync (from QR attendance system) =====
     let attendanceListenerActive = false;
 
-    function loadStudentAttendance(phone, nameBn) {
-      if (!phone) {
-        document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ ফোন নম্বর পাওয়া যায়নি</p>';
-        return;
+    function getLocalDateKey(date) {
+      const d = date ? new Date(date) : new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
+    function normalizeDigits(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
+
+    function normalizeText(value) {
+      return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    function findAttendanceStudentEntry(allStudents, phone, personal) {
+      const phoneKey = normalizeDigits(phone);
+      const nameKey = normalizeText(personal?.nameBn || personal?.name || '');
+      const fatherKey = normalizeText(personal?.fatherName || '');
+      let fallbackMatch = null;
+
+      for (const [key, student] of Object.entries(allStudents)) {
+        if (!student) continue;
+
+        if (phoneKey && normalizeDigits(student.phone) === phoneKey) {
+          return { key, student };
+        }
+
+        const studentNameKey = normalizeText(student.name);
+        const studentFatherKey = normalizeText(student.fatherName);
+        if (!fallbackMatch && nameKey && studentNameKey === nameKey && (!fatherKey || studentFatherKey === fatherKey)) {
+          fallbackMatch = { key, student };
+        }
       }
+
+      return fallbackMatch;
+    }
+
+    function loadStudentAttendance(phone, personal) {
       db.ref('sabuj/attendance-students').once('value', function(snap) {
         const all = snap.val() || {};
-        let foundKey = null;
-        Object.keys(all).forEach(function(k) {
-          const s = all[k];
-          if (s && s.phone && String(s.phone).replace(/\D/g,'') === String(phone).replace(/\D/g,'')) {
-            foundKey = k;
-          }
-        });
-        if (!foundKey) {
-          document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ আপনি QR অ্যাটেনডেন্স সিস্টেমে এখনো নিবন্ধিত নন। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
+        const match = findAttendanceStudentEntry(all, phone, personal);
+
+        if (!match) {
+          document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ QR attendance profile match পাওয়া যায়নি। অ্যাডমিন attendance list e phone/name check করুন।</p>';
           return;
         }
+
         if (attendanceListenerActive) return;
         attendanceListenerActive = true;
         db.ref('sabuj/attendance-records').on('value', function(allSnap) {
-          calculateStudentAttendance(allSnap.val() || {}, foundKey);
+          calculateStudentAttendance(allSnap.val() || {}, match.key, match.student.uniqueId || '');
         });
       });
     }
 
-    function calculateStudentAttendance(allRecords, studentKey) {
+    function calculateStudentAttendance(allRecords, studentKey, studentUniqueId) {
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       let totalDays = 0, presentDays = 0, lateDays = 0;
@@ -545,13 +576,20 @@
       for (let d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
         if (d.getDay() === 5) continue;
         totalDays++;
-        const ds = d.toISOString().split('T')[0];
+        const ds = getLocalDateKey(d);
         const dayRec = allRecords[ds];
-        if (dayRec && dayRec[studentKey]) {
-          const r = dayRec[studentKey];
+        let record = dayRec ? dayRec[studentKey] : null;
+
+        if (!record && dayRec && studentUniqueId) {
+          record = Object.values(dayRec).find(function(item) {
+            return item && item.uniqueId === studentUniqueId;
+          }) || null;
+        }
+
+        if (record) {
           presentDays++;
-          if (r.isLate) lateDays++;
-          myRecords.push({ date: ds, time: r.time || '', isLate: !!r.isLate });
+          if (record.isLate) lateDays++;
+          myRecords.push({ date: ds, time: record.time || '', isLate: !!record.isLate });
         }
       }
 
@@ -597,7 +635,6 @@
               editPhotoBtn.style.display = 'flex';
               currentAppId = authData.applicationId;
               
-              // Listen to real-time updates for this student
               db.ref('sabuj/applications/' + authData.applicationId).off();
               db.ref('sabuj/applications/' + authData.applicationId).on('value', appSnap => {
                 const appData = appSnap.val();
@@ -606,14 +643,12 @@
                   const courseName = appData.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
                   document.getElementById('studentCourse').textContent = 'কোর্স: ' + courseName;
                   
-                  // Hide Reg Card for BTEB
                   if(appData.enrollment?.courseId === 'BTEB') {
                     document.getElementById('regCardBtn').style.display = 'none';
                   } else {
                     document.getElementById('regCardBtn').style.display = 'flex';
                   }
                   
-                  // Profile Tab
                   document.getElementById('profileDetails').innerHTML = `
                     <p><strong>নাম:</strong> ${appData.personal?.nameBn}</p>
                     <p><strong>পিতার নাম:</strong> ${appData.personal?.fatherName}</p>
@@ -621,16 +656,15 @@
                     <p><strong>ঠিকানা:</strong> ${appData.address?.present?.village}, ${appData.address?.present?.upazila}, ${appData.address?.present?.district}</p>
                   `;
 
-                  // Course Tab
                   document.getElementById('courseDetails').innerHTML = `
                     <p><strong>কোর্স:</strong> ${courseName}</p>
                     <p><strong>ভর্তির তারিখ:</strong> ${new Date(appData.submittedAt).toLocaleDateString('bn-BD')}</p>
                   `;
 
-                  // Attendance Tab — Sync from real QR attendance records
-                  loadStudentAttendance(authData.phone, appData.personal?.nameBn);
+                  loadStudentAttendance(authData.phone, appData.personal || {});
 
                   // Results Tab
+
                   document.getElementById('examResultText').textContent = appData.exam?.result || 'প্রকাশিত হয়নি';
 
                   // Payments Tab

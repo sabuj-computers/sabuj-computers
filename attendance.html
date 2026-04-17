@@ -379,6 +379,14 @@
       setTimeout(() => el.classList.remove('show'), 5000);
     }
 
+    function getLocalDateKey(date) {
+      const d = date ? new Date(date) : new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
     function findStudent() {
       const id = document.getElementById('studentIdInput').value.trim().toUpperCase();
       if (!id) return showError('❌ আইডি লিখুন!');
@@ -394,7 +402,7 @@
         foundStudent = student;
         foundStudentKey = key;
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateKey();
         db.ref('sabuj/attendance-records/' + today + '/' + key).once('value', attSnap => {
           if (attSnap.exists()) {
             const rec = attSnap.val();
@@ -428,7 +436,7 @@
       btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = getLocalDateKey(now);
       const time = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit' });
       const late = isLate(foundStudent);
 

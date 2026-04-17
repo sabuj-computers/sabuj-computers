@@ -639,8 +639,16 @@
     }
 
     // =========== TODAY ===========
+    function getLocalDateKey(date) {
+      const d = date ? new Date(date) : new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
     function loadTodayAttendance() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateKey();
       db.ref('sabuj/attendance-records/'+today).on('value', snap => { todayRecords = snap.val() || {}; renderTodayAttendance(); updateOverview(); });
     }
 
@@ -733,7 +741,7 @@
       const lateCounts = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
+        const ds = getLocalDateKey(d);
         dates.push(d.toLocaleDateString('bn-BD', { weekday:'short' }));
         const snap = await db.ref('sabuj/attendance-records/'+ds).once('value');
         const data = snap.val() || {};
@@ -769,7 +777,7 @@
 
       // Top students this month
       const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const monthStart = getLocalDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
       const studentAttCount = {};
       const snap = await db.ref('sabuj/attendance-records').orderByKey().startAt(monthStart).once('value');
       const allDays = snap.val() || {};

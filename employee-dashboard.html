@@ -412,11 +412,18 @@
       }
     });
 
+    function getLocalDateKey(date) {
+      var d = date ? new Date(date) : new Date();
+      var year = d.getFullYear();
+      var month = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
     var attendanceRealtimeActive = false;
     function loadAttendanceRecords(empKey) {
       if (attendanceRealtimeActive) return;
       attendanceRealtimeActive = true;
-      // Realtime listener on full attendance-records — auto-updates when new attendance is recorded
       db.ref('sabuj/employee-attendance-records').on('value', function(allSnap) {
         var allRecords = allSnap.val() || {};
         var now = new Date();
@@ -425,12 +432,19 @@
         var records = [];
 
         for (var d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
-          if (d.getDay() === 5) continue; // Skip Friday
+          if (d.getDay() === 5) continue;
           totalDays++;
-          var ds = d.toISOString().split('T')[0];
+          var ds = getLocalDateKey(d);
           var dayRec = allRecords[ds];
-          if (dayRec && dayRec[empKey]) {
-            var rec = dayRec[empKey];
+          var rec = dayRec ? dayRec[empKey] : null;
+
+          if (!rec && dayRec && currentEmpData && currentEmpData.uniqueId) {
+            rec = Object.values(dayRec).find(function(item) {
+              return item && item.uniqueId === currentEmpData.uniqueId;
+            }) || null;
+          }
+
+          if (rec) {
             presentDays++;
             if (rec.isLate) lateDays++;
             records.push({ date: ds, time: rec.time || '', isLate: rec.isLate || false });

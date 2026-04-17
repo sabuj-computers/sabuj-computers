@@ -209,6 +209,14 @@
     setInterval(updateClock, 1000);
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
+    function getLocalDateKey(date) {
+      var d = date ? new Date(date) : new Date();
+      var year = d.getFullYear();
+      var month = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return year + '-' + month + '-' + day;
+    }
+
     function isLate(employee) {
       var now = new Date();
       var currentHour = now.getHours();
@@ -259,7 +267,7 @@
         foundEmployee = employee;
         foundEmployeeKey = key;
 
-        var today = new Date().toISOString().split('T')[0];
+        var today = getLocalDateKey();
         db.ref('sabuj/employee-attendance-records/' + today + '/' + key).once('value', function(attSnap) {
           if (attSnap.exists()) {
             var rec = attSnap.val();
@@ -298,7 +306,7 @@
       btn.innerHTML = '<span class="spinner"></span> সেভ হচ্ছে...';
 
       var now = new Date();
-      var today = now.toISOString().split('T')[0];
+      var today = getLocalDateKey(now);
       var time = now.toLocaleTimeString('bn-BD', { hour:'2-digit', minute:'2-digit' });
       var late = isLate(foundEmployee);
 
