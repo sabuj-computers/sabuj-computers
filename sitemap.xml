@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Homepage - Highest Priority -->
+  <!-- Homepage - Main entry (home.html is the primary page; root redirects here) -->
   <url>
-    <loc>https://sabujcomputers.pro.bd/</loc>
-    <lastmod>2026-04-20</lastmod>
+    <loc>https://sabujcomputers.pro.bd/home.html</loc>
+    <lastmod>2026-04-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Home page (alternate path) -->
+  <!-- Root URL (redirects to home.html) -->
   <url>
-    <loc>https://sabujcomputers.pro.bd/home.html</loc>
-    <lastmod>2026-04-20</lastmod>
+    <loc>https://sabujcomputers.pro.bd/</loc>
+    <lastmod>2026-04-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
