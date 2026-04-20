@@ -55,18 +55,18 @@
 <meta property="og:locale" content="bn_BD">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="https://sabujcomputers.pro.bd/">
-<meta property="og:image" content="https://sabujcomputers.pro.bd/icon-512.png">
-<meta property="og:image:secure_url" content="https://sabujcomputers.pro.bd/icon-512.png">
-<meta property="og:image:type" content="image/png">
+<meta property="og:image" content="https://sabujcomputers.pro.bd/og-image.jpg">
+<meta property="og:image:secure_url" content="https://sabujcomputers.pro.bd/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার লোগো">
+<meta property="og:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - প্রিমিয়াম ব্রান্ড ব্যানার">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত">
 <meta name="twitter:description" content="বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। ফাউন্ডেশন কোর্স, অনলাইন সেবা ও দ্রুত চাকরির সুযোগ।">
-<meta name="twitter:image" content="https://sabujcomputers.pro.bd/icon-512.png">
+<meta name="twitter:image" content="https://sabujcomputers.pro.bd/og-image.jpg">
 <meta name="twitter:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
 
 <link rel="canonical" href="https://sabujcomputers.pro.bd/">
@@ -815,13 +815,57 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 
 
 @media(max-width:768px){
-  #hamBtn{display:block!important}
-  #mainNav{display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(13,61,31,.97);z-index:9998;align-items:center;justify-content:center;gap:20px;padding:40px}
-  #mainNav.nav-open{display:flex!important}
-  #mainNav a{font-size:18px;color:#fff;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.15);width:100%;text-align:center;letter-spacing:.5px}
-  #hamBtn{display:flex!important;flex-direction:column;justify-content:center}
-  #navCloseBtn{display:block!important}
+  /* Reserve space for hamburger so brand text doesn't overlap */
+  .hdr-top{padding-right:64px!important}
+  .brand-name{font-size:17px!important;line-height:1.15!important}
+  #hdrTagline{font-size:11px!important}
+  /* Hamburger: solid background pill so it stays visible over glass/blur header */
+  #hamBtn{
+    display:flex!important;flex-direction:column;justify-content:center;align-items:center;
+    width:42px;height:42px;border-radius:12px!important;
+    background:rgba(13,61,31,.85)!important;
+    box-shadow:0 4px 12px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.15);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    right:12px!important;padding:0!important;
+  }
+  #hamBtn span{width:20px!important;margin:2.5px 0!important;border-radius:2px}
+  /* Fullscreen menu overlay — fully opaque, escapes header stacking context via body class */
+  #mainNav{display:none}
+  @keyframes navFade{from{opacity:0}to{opacity:1}}
+  @keyframes navItem{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  #mainNav.nav-open{
+    display:flex!important;flex-direction:column;
+    position:fixed!important;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;height:100dvh;
+    background:#0d3d1f!important;
+    background:linear-gradient(160deg,#0d3d1f 0%,#0a2d17 100%)!important;
+    z-index:2147483646!important;
+    align-items:stretch;justify-content:flex-start;gap:0;
+    padding:72px 20px 40px;margin:0;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    isolation:isolate;
+    animation:navFade .25s ease-out;
+  }
+  #mainNav.nav-open a{font-size:17px;color:#fff!important;padding:16px 12px;border-bottom:1px solid rgba(255,255,255,.15);width:100%;text-align:center;letter-spacing:.5px;background:transparent;opacity:0;animation:navItem .35s ease-out forwards}
+  #mainNav.nav-open a:nth-child(2){animation-delay:.05s}
+  #mainNav.nav-open a:nth-child(3){animation-delay:.1s}
+  #mainNav.nav-open a:nth-child(4){animation-delay:.15s}
+  #mainNav.nav-open a:nth-child(5){animation-delay:.2s}
+  #mainNav.nav-open a:nth-child(6){animation-delay:.25s}
+  #mainNav.nav-open a:nth-child(7){animation-delay:.3s}
+  #mainNav.nav-open a:nth-child(8){animation-delay:.35s}
+  #mainNav.nav-open a:nth-child(9){animation-delay:.4s}
+  #mainNav.nav-open a:last-child{border-bottom:none}
+  #navCloseBtn{display:none}
+  #mainNav.nav-open #navCloseBtn{display:block!important;position:fixed!important;top:14px;right:14px;z-index:2147483647;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:8px 14px;font-family:'Hind Siliguri';font-size:14px;cursor:pointer;animation:none;opacity:1}
   .hdr-contact-mobile{display:block!important}
+  /* Lock body scroll without jumping (no position:fixed — that resets scroll) */
+  body.nav-open-lock{overflow:hidden!important;touch-action:none!important}
+  body.nav-open-lock #scrollTopBtn,body.nav-open-lock .dm-toggle,body.nav-open-lock .wa-btn{display:none!important}
+}
+@media(max-width:380px){
+  .brand-name{font-size:15px!important}
+  .logo-circle,.logo-circle img{width:46px!important;height:46px!important;font-size:22px!important}
+  #hamBtn{width:38px;height:38px;right:10px!important}
 }
 /* ===== MOBILE CARD OVERFLOW FIX ===== */
 @media(max-width:480px){
@@ -4349,17 +4393,25 @@ function toggleNoticeNew(i){
 
 function toggleNav(){
   const nav=document.getElementById('mainNav');
-  const open=nav.classList.toggle('nav-open');
-  document.body.style.overflow=open?'hidden':'';
+  const isOpen=nav.classList.contains('nav-open');
+  if(isOpen){closeNav();return;}
+  // Move nav to <body> last child so it escapes header's stacking context
+  if(nav.parentElement!==document.body){document.body.appendChild(nav);}
+  nav.classList.add('nav-open');
+  document.body.classList.add('nav-open-lock');
+}
+function closeNav(){
+  const nav=document.getElementById('mainNav');
+  nav.classList.remove('nav-open');
+  document.body.classList.remove('nav-open-lock');
 }
 
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('#mainNav a').forEach(function(a){
-    a.addEventListener('click',function(){
-      document.getElementById('mainNav').classList.remove('nav-open');
-      document.body.style.overflow='';
-    });
+    a.addEventListener('click',closeNav);
   });
+  // ESC key closes menu
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
 });
 
 // ==========================================
