@@ -260,7 +260,7 @@
           <h3>➕ নতুন শিক্ষার্থী যোগ করুন</h3>
           <div style="text-align:center;margin-bottom:14px;">
             <div class="photo-upload-area" onclick="document.getElementById('stuPhotoInput').click()">
-              <img id="stuPhotoPreview" src="" style="display:none;">
+              <img id="stuPhotoPreview" src="" alt="শিক্ষার্থীর ছবি প্রিভিউ" style="display:none;">
               <span id="stuPhotoPlaceholder">📸</span>
             </div>
             <input type="file" id="stuPhotoInput" accept="image/*" style="display:none;" onchange="previewStudentPhoto(this)">
@@ -344,7 +344,7 @@
           <div style="text-align:center;margin-bottom:14px;"><button class="btn-primary" onclick="generateAttendanceQR()">🔄 QR কোড জেনারেট করুন</button></div>
           <div class="qr-output" id="qrOutput" style="display:none;">
             <div id="printQrArea">
-              <div style="margin-bottom:12px;"><img id="qrLogo" src="" style="width:50px;height:50px;border-radius:50%;display:none;" crossorigin="anonymous"><h3 style="color:var(--g1);margin:8px 0 4px;">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h3><p style="font-size:12px;color:#666;">উপস্থিতি দিতে QR কোড স্ক্যান করুন</p></div>
+              <div style="margin-bottom:12px;"><img id="qrLogo" src="" alt="সবুজ কম্পিউটার্স লোগো" style="width:50px;height:50px;border-radius:50%;display:none;" crossorigin="anonymous"><h3 style="color:var(--g1);margin:8px 0 4px;">সবুজ কম্পিউটার ট্রেনিং সেন্টার</h3><p style="font-size:12px;color:#666;">উপস্থিতি দিতে QR কোড স্ক্যান করুন</p></div>
               <div id="qrCanvas"></div>
               <p style="font-size:11px;color:var(--text-muted);margin-top:8px;" id="qrUrl"></p>
             </div>
@@ -361,7 +361,7 @@
         <div class="card">
           <h3>🏷️ লোগো পরিবর্তন</h3>
           <div class="logo-upload-section">
-            <img id="currentLogo" src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" crossorigin="anonymous">
+            <img id="currentLogo" src="https://res.cloudinary.com/dwyxep1kq/image/upload/v1723444833/sctc-logo_m9y81c.png" alt="বর্তমান প্রতিষ্ঠানের লোগো" crossorigin="anonymous">
             <div><p style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px;">বর্তমান লোগো</p><input type="file" id="logoUploadInput" accept="image/*" onchange="uploadNewLogo(this)" style="font-size:12px;color:var(--text-muted);"></div>
           </div>
           <button class="btn-primary" id="logoSaveBtn" onclick="saveNewLogo()" style="display:none;width:100%;">💾 লোগো সেভ করুন</button>
@@ -586,7 +586,7 @@
       const tbody = document.getElementById('studentTableBody');
       if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো শিক্ষার্থী নেই</td></tr>'; return; }
       tbody.innerHTML = entries.map(([k,s]) =>
-        '<tr><td><img src="'+(s.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<tr><td><img src="'+(s.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(s.name||'শিক্ষার্থী')+' এর ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
         '<td style="color:var(--gold);font-weight:700;">'+(s.uniqueId||'—')+'</td><td>'+(s.name||'—')+'</td><td>'+(s.phone||'—')+'</td><td>'+(s.batch||'—')+'</td><td>'+(s.timeFrom||'')+'-'+(s.timeTo||'')+'</td>' +
         '<td><button class="btn-sm btn-edit" onclick="openEditModal(\''+k+'\')">✏️</button><button class="btn-sm btn-del" onclick="deleteStudent(\''+k+'\',\''+encodeURIComponent(s.name||'')+'\')">🗑️</button></td></tr>'
       ).join('');
@@ -667,7 +667,7 @@
       entries.sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
       tbody.innerHTML = entries.map(([k,r]) =>
         '<tr class="'+(r.isLate?'late-row':'')+'">' +
-        '<td><img src="'+(r.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+        '<td><img src="'+(r.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(r.name||'শিক্ষার্থী')+' এর উপস্থিতি ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
         '<td style="color:var(--gold);font-weight:700;">'+(r.uniqueId||'—')+'</td><td>'+(r.name||'—')+'</td><td>'+(r.batch||'—')+'</td>' +
         '<td>'+(r.timeFrom||'')+'-'+(r.timeTo||'')+'</td><td style="color:#4ade80;font-weight:700;">'+(r.time||'—')+'</td>' +
         '<td>'+(r.isLate ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '<span style="color:#4ade80;font-size:11px;">✅ সময়মতো</span>')+'</td></tr>'
@@ -699,7 +699,7 @@
         const tbody = document.getElementById('visitorTableBody');
         if (!entries.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">কোনো অতিথি নেই</td></tr>'; return; }
         tbody.innerHTML = entries.map(([k,v]) =>
-          '<tr><td><img src="'+(v.photo||'https://via.placeholder.com/32x32?text=👤')+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+          '<tr><td><img src="'+(v.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(v.name||'অতিথি')+' এর ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
           '<td>'+(v.name||'—')+'</td><td>'+(v.mobile||'—')+'</td><td>'+(v.address||'—')+'</td><td>'+(v.batch||'—')+'</td><td>'+(v.time||'—')+'</td></tr>'
         ).join('');
       });
@@ -732,7 +732,7 @@
       const recent = Object.values(todayRecords).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).slice(0,5);
       document.getElementById('recentAttendance').innerHTML = recent.length ? recent.map(r =>
         '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
-        '<img src="'+(r.photo||'https://via.placeholder.com/38x38?text=👤')+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/38x38?text=👤\'">'+
+        '<img src="'+(r.photo||'https://via.placeholder.com/38x38?text=👤')+'" alt="'+(r.name||'শিক্ষার্থী')+' এর সাম্প্রতিক উপস্থিতি ছবি" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/38x38?text=👤\'">'+
         '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+(r.name||'—')+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+(r.uniqueId||'')+' | '+(r.batch||'')+'</span></div>'+
         '<div style="text-align:right;"><span style="color:var(--gold);font-weight:700;font-size:13px;">'+(r.time||'')+'</span>'+(r.isLate?'<br><span class="late-badge" style="font-size:9px;">বিলম্বিত</span>':'')+'</div></div>'
       ).join('') : '<p style="color:var(--text-muted);text-align:center;padding:20px;font-size:13px;">আজ কোনো উপস্থিতি নেই</p>';
@@ -800,7 +800,7 @@
           const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
           return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
             '<span style="font-size:18px;">'+medals[i]+'</span>'+
-            '<img src="'+(s.photo||'https://via.placeholder.com/35x35?text=👤')+'" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/35x35?text=👤\'">'+
+            '<img src="'+(s.photo||'https://via.placeholder.com/35x35?text=👤')+'" alt="'+(s.name||'শিক্ষার্থী')+' এর প্রোফাইল ছবি" style="width:35px;height:35px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/35x35?text=👤\'">'+
             '<div style="flex:1;"><strong style="color:var(--text);font-size:13px;">'+(s.name||'—')+'</strong><br><span style="font-size:11px;color:var(--text-muted);">'+(s.uniqueId||'')+'</span></div>'+
             '<span style="color:var(--gold);font-weight:700;font-size:14px;">'+count+' দিন</span></div>';
         }).join('');
