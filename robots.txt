@@ -1,4 +1,61 @@
+# Sabuj Computer Training Center - robots.txt
+# https://sabujcomputers.pro.bd/
+
 User-agent: *
 Allow: /
+Allow: /home.html
+Allow: /admission-form.html
+Allow: /portal.html
+Allow: /verify.html
+Allow: /attendance.html
 
+# Block private/admin pages from indexing
+Disallow: /admin-dashboard.html
+Disallow: /attendance-admin.html
+Disallow: /employee-attendance-admin.html
+Disallow: /employee-attendance.html
+Disallow: /employee-dashboard.html
+Disallow: /student-dashboard.html
+
+# Block service worker
+Disallow: /sw.js
+
+# Major search engine bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Sitemap location
 Sitemap: https://sabujcomputers.pro.bd/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

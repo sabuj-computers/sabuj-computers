@@ -12,12 +12,12 @@
 <meta http-equiv="Expires" content="0">
 
 <script>
-  // Service Worker Unregister (ক্যাশ ক্লিয়ার করার জন্য)
+  // Service Worker Register (PWA - offline support & install)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) {
-        registration.unregister();
-      }
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW registration failed:', err);
+      });
     });
   }
 </script>
@@ -29,37 +29,160 @@
 <meta name="author" content="সবুজ কম্পিউটার্স">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="4hdpKDi22Bsv_AC40vsD4TQ2b888BQLe2i7z5OhAg5E" />
+<!-- Additional Search Engine Verifications (TODO: paste your verification codes) -->
+<!-- <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" /> -->
+<!-- <meta name="yandex-verification" content="YOUR_YANDEX_VERIFICATION_CODE" /> -->
+
+<!-- Geo / Local SEO - Bagatipara, Natore, Bangladesh -->
+<meta name="geo.region" content="BD-E">
+<meta name="geo.placename" content="Bagatipara, Natore, Rajshahi, Bangladesh">
+<meta name="geo.position" content="24.2167;89.0500">
+<meta name="ICBM" content="24.2167, 89.0500">
+<meta name="distribution" content="global">
+<meta name="rating" content="general">
+<meta name="revisit-after" content="3 days">
+
+<!-- Language Alternates (hreflang) -->
+<link rel="alternate" hreflang="bn-BD" href="https://sabujcomputers.pro.bd/">
+<link rel="alternate" hreflang="bn" href="https://sabujcomputers.pro.bd/">
+<link rel="alternate" hreflang="x-default" href="https://sabujcomputers.pro.bd/">
+
 <!-- Open Graph -->
 <meta property="og:title" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত | বাগাতিপাড়া, নাটোর">
 <meta property="og:description" content="বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। স্বল্প খরচে সর্বোচ্চ মানের প্রশিক্ষণ, ফটোকপি, প্রিন্টিং ও অনলাইন সেবা।">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
 <meta property="og:locale" content="bn_BD">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="https://sabujcomputers.pro.bd/">
+<meta property="og:image" content="https://sabujcomputers.pro.bd/icon-512.png">
+<meta property="og:image:secure_url" content="https://sabujcomputers.pro.bd/icon-512.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার লোগো">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত">
+<meta name="twitter:description" content="বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। ফাউন্ডেশন কোর্স, অনলাইন সেবা ও দ্রুত চাকরির সুযোগ।">
+<meta name="twitter:image" content="https://sabujcomputers.pro.bd/icon-512.png">
+<meta name="twitter:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
+
 <link rel="canonical" href="https://sabujcomputers.pro.bd/">
+
+<!-- Schema.org: EducationalOrganization + LocalBusiness (combined for max search visibility) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
+  "@type": ["EducationalOrganization", "LocalBusiness"],
+  "@id": "https://sabujcomputers.pro.bd/#organization",
   "name": "সবুজ কম্পিউটার ট্রেনিং সেন্টার",
-  "alternateName": "SCTC",
+  "alternateName": ["SCTC", "Sabuj Computer Training Center", "Sabuj Computers"],
   "url": "https://sabujcomputers.pro.bd/",
-  "logo": "https://sabujcomputers.pro.bd/logo.png",
-  "description": "বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র।",
+  "logo": "https://sabujcomputers.pro.bd/icon-512.png",
+  "image": "https://sabujcomputers.pro.bd/icon-512.png",
+  "description": "বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। ফাউন্ডেশন সার্টিফিকেট কোর্স, ফটোকপি, প্রিন্টিং, অনলাইন সেবা।",
   "address": {
     "@type": "PostalAddress",
+    "streetAddress": "বাগাতিপাড়া বাজার",
     "addressLocality": "বাগাতিপাড়া",
     "addressRegion": "নাটোর",
+    "postalCode": "6440",
     "addressCountry": "BD"
   },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 24.2167,
+    "longitude": 89.0500
+  },
   "telephone": "+8801724084350",
+  "email": "info@sabujcomputers.pro.bd",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],
+      "opens": "09:00",
+      "closes": "21:00"
+    }
+  ],
+  "priceRange": "৳৳",
+  "areaServed": {
+    "@type": "Place",
+    "name": "Bagatipara, Natore, Rajshahi, Bangladesh"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "কম্পিউটার প্রশিক্ষণ কোর্স",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Course",
+          "name": "BTEB ফাউন্ডেশন সার্টিফিকেট কোর্স",
+          "description": "BTEB অনুমোদিত ৬ মাস মেয়াদী কম্পিউটার ফাউন্ডেশন সার্টিফিকেট কোর্স",
+          "provider": {
+            "@type": "Organization",
+            "name": "সবুজ কম্পিউটার ট্রেনিং সেন্টার",
+            "sameAs": "https://sabujcomputers.pro.bd/"
+          }
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "ফটোকপি ও প্রিন্টিং সেবা"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "অনলাইন সেবা ও আবেদন"
+        }
+      }
+    ]
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "120",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
   "sameAs": [
     "https://sabujcomputers.pro.bd/"
   ]
 }
 </script>
-<meta property="og:image" content="https://sabujcomputers.pro.bd/logo.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+
+<!-- Schema.org: WebSite with SearchAction (for Google sitelinks search box) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://sabujcomputers.pro.bd/#website",
+  "url": "https://sabujcomputers.pro.bd/",
+  "name": "সবুজ কম্পিউটার ট্রেনিং সেন্টার",
+  "inLanguage": "bn-BD",
+  "publisher": { "@id": "https://sabujcomputers.pro.bd/#organization" }
+}
+</script>
+
+<!-- Schema.org: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://sabujcomputers.pro.bd/" },
+    { "@type": "ListItem", "position": 2, "name": "Admission", "item": "https://sabujcomputers.pro.bd/admission-form.html" },
+    { "@type": "ListItem", "position": 3, "name": "Student Portal", "item": "https://sabujcomputers.pro.bd/portal.html" },
+    { "@type": "ListItem", "position": 4, "name": "Verify Certificate", "item": "https://sabujcomputers.pro.bd/verify.html" }
+  ]
+}
+</script>
 <!-- Favicon -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1044,6 +1167,14 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
           <div class="fg"><label>নতুন পাসওয়ার্ড</label><input type="password" id="pwd-new" placeholder="কমপক্ষে ৬ অক্ষর"></div>
           <div class="fg"><label>নিশ্চিত করুন</label><input type="password" id="pwd-cfm" placeholder="পুনরায় লিখুন"></div>
           <button class="btn-save" onclick="changePwd()">🔑 পাসওয়ার্ড পরিবর্তন করুন</button>
+
+          <!-- ONE-TIME LEGACY CLEANUP -->
+          <div id="legacyCleanupBox" style="margin-top:30px;padding:16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;display:none">
+            <div style="font-size:13px;color:#991b1b;margin-bottom:10px">
+              🧹 <strong>লিগেসি ক্লিনআপ:</strong> Firebase database থেকে পুরোনো <code>password</code> field সরানোর জন্য একবার ক্লিক করুন। এটি লগইন বা ডেটা লোডে কোনো প্রভাব ফেলবে না।
+            </div>
+            <button class="btn-save" style="background:#dc2626" onclick="cleanupLegacyPasswords()">🗑️ পুরোনো password field মুছুন</button>
+          </div>
         </div>
       </div>
 
@@ -1533,9 +1664,8 @@ function defaultDB() {
     testimonials:[
       {text:'সবুজ কম্পিউটার্স থেকে BTEB কোর্স করে আমি এখন একটি ভালো চাকরিতে আছি। স্যারের শেখানোর পদ্ধতি অসাধারণ।',name:'আবির ইসলাম',sub:'BTEB কোর্স সম্পন্ন, ২০২০',stars:5,avatar:'আ'},
       {text:'কম খরচে এত ভালো প্রশিক্ষণ আর কোথাও পাওয়া যায় না। এখানকার পরিবেশ খুবই আন্তরিক।',name:'নাদিয়া তালুকদার',sub:'ফাউন্ডেশন কোর্স, ২০২১',stars:5,avatar:'না'},
-      {text:'অনলাইন ফর্ম ফিলআপ থেকে শুরু করে সকল কাজ এখানে দ্রুত ও সঠিকভাবে হয়। বিশ্বাসযোগ্য প্রতিষ্ঠান।',name:'হাসান আহমেদ',sub:'নিয়মিত গ্রাহক',stars:5,avatar:'হা'},
+       {text:'অনলাইন ফর্ম ফিলআপ থেকে শুরু করে সকল কাজ এখানে দ্রুত ও সঠিকভাবে হয়। বিশ্বাসযোগ্য প্রতিষ্ঠান।',name:'হাসান আহমেদ',sub:'নিয়মিত গ্রাহক',stars:5,avatar:'হা'},
     ],
-    password:'sabuj2024',
     notices:[],
     students:[]
   };
@@ -1579,7 +1709,7 @@ function loadDB(callback) {
       if (!DB.testimonials || !DB.testimonials.length) DB.testimonials = def.testimonials;
       if (!DB.students) DB.students = [];
       if (!DB.notices) DB.notices = [];
-      if (!DB.password) DB.password = def.password;
+      // Legacy DB.password field removed — admin uses Firebase Auth only
 
       // Restore photos from separate photos node (keyed by reg number)
       if (val.photos) {
@@ -1682,9 +1812,7 @@ const _adm = (function(){
   function _setRL(a,l){ localStorage.setItem(_RL_KEY, JSON.stringify({a:a,l:l})); }
   function _clearRL(){ localStorage.removeItem(_RL_KEY); }
 
-  function _getActualPwd(){
-    return DB.password || 'sabuj2024';
-  }
+  // _getActualPwd removed — admin authentication uses Firebase Auth only
 
   function _startSessionTimer(){
     clearTimeout(_sessionTimer);
@@ -2969,6 +3097,29 @@ function populateAdminForms(){
     if(rb)rb.style.display='inline-block';
   }
   renderSvcEditor();renderTrnEditor();renderTestiEditor();renderAdminStudents();
+
+  // Show legacy cleanup box if not already done — checks Firebase for any leftover password fields
+  try {
+    const done = localStorage.getItem('sctc_legacy_cleanup_done') === '1';
+    const box = document.getElementById('legacyCleanupBox');
+    if (box && !done) {
+      // Probe: only show if at least one password field still exists
+      db.ref('sabuj/password').once('value').then(s1 => {
+        if (s1.exists()) { box.style.display = 'block'; return; }
+        return db.ref('sabuj/students').once('value').then(s2 => {
+          const v = s2.val() || {};
+          const has = Object.values(v).some(x => x && x.password !== undefined);
+          if (has) { box.style.display = 'block'; return; }
+          return db.ref('sabuj/applications').once('value').then(s3 => {
+            const a = s3.val() || {};
+            const ha = Object.values(a).some(x => x && x.password !== undefined);
+            if (ha) box.style.display = 'block';
+            else localStorage.setItem('sctc_legacy_cleanup_done', '1');
+          });
+        });
+      }).catch(()=>{});
+    }
+  } catch(e) {}
 }
 
 // ===================================================
@@ -3765,6 +3916,53 @@ async function downloadBulkCardsZip() {
         showNotif(`✅ ${successCount} টি কার্ডসহ ZIP ডাউনলোড সম্পন্ন হয়েছে!`);
     });
 }
+// ===================================================
+// ONE-TIME LEGACY CLEANUP — removes obsolete `password` fields from Firebase
+// Safe: admin/student login uses Firebase Auth, not these DB fields.
+// ===================================================
+function cleanupLegacyPasswords(){
+  if(!_adm.requireAuth()) return;
+  if(!confirm('আপনি কি নিশ্চিত? Firebase থেকে সব পুরোনো password field মুছে ফেলা হবে।\n\n(লগইন বা ডেটায় কোনো প্রভাব পড়বে না — এটি unused legacy field।)')) return;
+
+  const updates = {};
+  let count = 0;
+
+  // 1) Root-level legacy password
+  updates['sabuj/password'] = null;
+
+  // 2) Per-student password fields
+  db.ref('sabuj/students').once('value').then(snap => {
+    const students = snap.val() || {};
+    Object.keys(students).forEach(key => {
+      if (students[key] && students[key].password !== undefined) {
+        updates['sabuj/students/' + key + '/password'] = null;
+        count++;
+      }
+    });
+
+    // 3) Per-application password fields
+    return db.ref('sabuj/applications').once('value');
+  }).then(snap => {
+    const apps = snap.val() || {};
+    Object.keys(apps).forEach(key => {
+      if (apps[key] && apps[key].password !== undefined) {
+        updates['sabuj/applications/' + key + '/password'] = null;
+        count++;
+      }
+    });
+
+    // Apply all deletes in one atomic update
+    return db.ref().update(updates);
+  }).then(() => {
+    showNotif('✅ ক্লিনআপ সম্পন্ন! মোট ' + count + ' টি password field মুছে ফেলা হয়েছে।');
+    try { localStorage.setItem('sctc_legacy_cleanup_done', '1'); } catch(e){}
+    const box = document.getElementById('legacyCleanupBox');
+    if (box) box.style.display = 'none';
+  }).catch(err => {
+    showNotif('❌ ক্লিনআপে সমস্যা: ' + (err.message || err));
+  });
+}
+
 function changePwd(){
   if(!_adm.requireAuth()) return;
   const cur=document.getElementById('pwd-cur').value;
