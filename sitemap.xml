@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Homepage - Highest Priority -->
   <url>
@@ -8,11 +7,6 @@
     <lastmod>2026-04-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <image:image>
-      <image:loc>https://sabujcomputers.pro.bd/icon-512.png</image:loc>
-      <image:title>Sabuj Computer Training Center - SCTC</image:title>
-      <image:caption>BTEB approved computer training center, Bagatipara, Natore</image:caption>
-    </image:image>
   </url>
 
   <!-- Home page (alternate path) -->
