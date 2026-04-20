@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:image="http://www.google.com/schemas/sitemap-image/0.9">
 
   <!-- Homepage - Highest Priority -->
@@ -11,8 +10,8 @@
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://sabujcomputers.pro.bd/icon-512.png</image:loc>
-      <image:title>সবুজ কম্পিউটার ট্রেনিং সেন্টার - SCTC</image:title>
-      <image:caption>BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র, বাগাতিপাড়া, নাটোর</image:caption>
+      <image:title>Sabuj Computer Training Center - SCTC</image:title>
+      <image:caption>BTEB approved computer training center, Bagatipara, Natore</image:caption>
     </image:image>
   </url>
 
@@ -21,7 +20,7 @@
     <loc>https://sabujcomputers.pro.bd/home.html</loc>
     <lastmod>2026-04-20</lastmod>
     <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <priority>0.9</priority>
   </url>
 
   <!-- Admission Form - Important for conversions -->
@@ -54,44 +53,6 @@
     <lastmod>2026-04-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-
-  <!-- Section anchors on homepage for deep linking -->
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#about</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#services</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#training</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#notices</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#gallery</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://sabujcomputers.pro.bd/home.html#contact</loc>
-    <lastmod>2026-04-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
 
 </urlset>
