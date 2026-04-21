@@ -104,7 +104,7 @@
       <p style="color: #6b8c76; margin-bottom: 25px;">শিক্ষার্থীর আইডি (Registration ID) দিয়ে নিচের বক্সে সার্চ করুন অথবা QR কোড স্ক্যান করুন।</p>
       
       <div class="search-box">
-        <input type="text" id="certId" placeholder="যেমন: SCTC-APP-2026-1234">
+        <input type="text" id="certId" placeholder="Registration No, সনদ নম্বর বা শিক্ষার্থী আইডি">
         <button onclick="verifyCert()">যাচাই করুন</button>
       </div>
       
@@ -291,7 +291,12 @@
       document.getElementById('loader').style.display = 'block';
       document.getElementById('resultBox').style.display = 'none';
 
-      var certIdUpper = certId.toUpperCase();
+      // Normalize: trim, collapse whitespace, uppercase. Also strip common separators
+      // for a secondary "loose" comparison (handles "SCTC/2025/001" vs "SCTC-2025-001").
+      function norm(v) { return String(v == null ? '' : v).trim().replace(/\s+/g,'').toUpperCase(); }
+      function loose(v) { return norm(v).replace(/[\-_\/\.\\]/g,''); }
+      var certIdUpper = norm(certId);
+      var certIdLoose = loose(certId);
 
       Promise.all([
         db.ref('sabuj/applications').once('value'),
@@ -307,14 +312,27 @@
         var foundApp = null, foundAppId = null;
         if (apps[certId]) { foundApp = apps[certId]; foundAppId = certId; }
 
-        // 2. Search applications by Reg No / Cert No
+        // 2. Search applications by Reg No / Sonod (Certificate) No — normalized + loose match
+        var matchedByCert = false; // certificate number diye match holo kina (status check skip korar jonno)
         if (!foundApp) {
           for (var key in apps) {
             var a = apps[key];
             if (!a) continue;
-            var regMatch = a.regNo && String(a.regNo).toUpperCase() === certIdUpper;
-            var certMatch = a.certificate && a.certificate.sonodNo && String(a.certificate.sonodNo).toUpperCase() === certIdUpper;
-            if (regMatch || certMatch) { foundApp = a; foundAppId = key; break; }
+            var regVal  = a.regNo ? norm(a.regNo) : '';
+            var certVal = (a.certificate && a.certificate.sonodNo) ? norm(a.certificate.sonodNo) : '';
+            var regValLoose  = regVal  ? loose(regVal)  : '';
+            var certValLoose = certVal ? loose(certVal) : '';
+
+            var regMatch  = regVal  && (regVal  === certIdUpper || regValLoose  === certIdLoose);
+            var certMatch = certVal && (certVal === certIdUpper || certValLoose === certIdLoose);
+            // Also match application key loosely (e.g., user types without dashes)
+            var keyMatch  = !regMatch && !certMatch && loose(key) === certIdLoose;
+
+            if (regMatch || certMatch || keyMatch) {
+              foundApp = a; foundAppId = key;
+              if (certMatch) matchedByCert = true;
+              break;
+            }
           }
         }
 
@@ -322,9 +340,9 @@
         var attendanceUniqueId = null;
         var attStudentEntry = null;
         for (var sk in attStudents) {
-          var s = attStudents[sk];
-          if (s && s.uniqueId && String(s.uniqueId).toUpperCase() === certIdUpper) {
-            attStudentEntry = s; attendanceUniqueId = s.uniqueId; break;
+          var st = attStudents[sk];
+          if (st && st.uniqueId && (norm(st.uniqueId) === certIdUpper || loose(st.uniqueId) === certIdLoose)) {
+            attStudentEntry = st; attendanceUniqueId = st.uniqueId; break;
           }
         }
         // If matched in attendance, link to application via linkedAppId or phone
@@ -350,9 +368,24 @@
           }
         }
 
-        if (foundApp && (foundApp.status === 'approved' || foundApp.status === 'active')) {
-          // If the search term IS the application ID (not regNo/sonod), tell student to use uniqueId
-          if (certId === foundAppId && attendanceUniqueId) {
+        // Accept as a valid student if:
+        //  - status is approved/active/completed/graduated/passed, OR
+        //  - a certificate has been issued (sonodNo exists), OR
+        //  - matched explicitly by certificate/registration number (admin-issued data)
+        var st = foundApp && foundApp.status ? String(foundApp.status).toLowerCase() : '';
+        var hasSonod = !!(foundApp && foundApp.certificate && foundApp.certificate.sonodNo);
+        var validStatuses = ['approved','active','completed','graduated','passed','enrolled'];
+        var isValidStudent = foundApp && (
+          validStatuses.indexOf(st) !== -1 ||
+          hasSonod ||
+          matchedByCert ||
+          (foundApp.regNo && norm(foundApp.regNo) === certIdUpper)
+        );
+
+        if (isValidStudent) {
+          // If user typed the raw Application ID (not regNo/sonod), and a uniqueId exists,
+          // gently redirect them to use the proper student ID.
+          if (certId === foundAppId && attendanceUniqueId && !matchedByCert) {
             renderApprovedAppRedirect(foundApp, foundAppId, attendanceUniqueId);
           } else {
             renderStudent(foundApp, foundAppId, attendanceUniqueId);
@@ -369,8 +402,9 @@
         // 4. Employee match
         var foundEmp = null;
         for (var ek in attEmployees) {
-          if (attEmployees[ek] && attEmployees[ek].uniqueId && String(attEmployees[ek].uniqueId).toUpperCase() === certIdUpper) {
-            foundEmp = attEmployees[ek]; break;
+          var e = attEmployees[ek];
+          if (e && e.uniqueId && (norm(e.uniqueId) === certIdUpper || loose(e.uniqueId) === certIdLoose)) {
+            foundEmp = e; break;
           }
         }
         if (foundEmp) { renderEmployee(foundEmp); return; }
