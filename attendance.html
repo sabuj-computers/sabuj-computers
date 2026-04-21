@@ -568,6 +568,53 @@
       el.textContent = msg; el.classList.add('show');
       setTimeout(() => el.classList.remove('show'), 5000);
     }
+
+    // ============ QR AUTO-FILL ============
+    // Supports per-student URLs like /attendance.html?id=SCTC-2026-0042
+    // Falls back to localStorage of last successful ID for returning users on same browser.
+    (function autoFillFromQR() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let scannedId = (params.get('id') || params.get('uid') || '').trim().toUpperCase();
+        const fromUrl = !!scannedId;
+        if (!scannedId) {
+          const saved = localStorage.getItem('sctc_last_attendance_id');
+          if (saved) scannedId = saved.trim().toUpperCase();
+        }
+        if (!scannedId) return;
+
+        const input = document.getElementById('studentIdInput');
+        if (input) {
+          input.value = scannedId;
+          input.style.background = 'rgba(34,197,94,0.08)';
+          input.style.borderColor = '#16a34a';
+        }
+
+        const step1 = document.getElementById('step1');
+        if (step1 && !document.getElementById('autoFillBadge')) {
+          const badge = document.createElement('div');
+          badge.id = 'autoFillBadge';
+          badge.style.cssText = 'background:linear-gradient(135deg,#dcfce7,#bbf7d0);color:#166534;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:13px;font-weight:600;text-align:center;border:1px solid #86efac;';
+          badge.innerHTML = (fromUrl ? '✅ QR স্ক্যান সফল!' : '💾 আগের আইডি পাওয়া গেছে।') + ' আইডি: <strong style="font-family:monospace;">'+scannedId+'</strong>';
+          step1.insertBefore(badge, step1.firstChild);
+        }
+
+        if (fromUrl) {
+          setTimeout(() => { try { findStudent(); } catch(e) {} }, 600);
+        }
+      } catch(e) { /* ignore */ }
+    })();
+
+    // Save successful ID to localStorage after confirm
+    const _origConfirm = confirmAttendance;
+    confirmAttendance = function() {
+      try {
+        if (foundStudent && foundStudent.uniqueId) {
+          localStorage.setItem('sctc_last_attendance_id', foundStudent.uniqueId);
+        }
+      } catch(e) {}
+      return _origConfirm.apply(this, arguments);
+    };
   </script>
 </body>
 </html>

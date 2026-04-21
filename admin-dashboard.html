@@ -18,6 +18,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="/admin-shared.js"></script>
 
   <style>
     :root { --g1: #0d3d1f; --g2: #1a6b35; --bg: #f2f8f4; --sidebar: #0a2e17; --muted: #6b8c76; --text: #1e3028; }
@@ -176,6 +177,7 @@
       <li class="nav-item" onclick="switchTab('library')">📚 Library</li>
       <li class="nav-item" onclick="switchTab('settings')">⚙️ Settings</li>
       <li class="nav-item" onclick="switchTab('backup')">💾 Backup</li>
+      <li class="nav-item" onclick="switchTab('audit')">📜 Audit Log</li>
     </ul>
   </div>
 
@@ -499,6 +501,37 @@
         </div>
       </div>
 
+      <!-- 12. Audit Log -->
+      <div class="tab-content" id="tab-audit">
+        <div class="card">
+          <h3 style="margin-top:0;">📜 অ্যাডমিন কার্যক্রমের ইতিহাস (Audit Log)</h3>
+          <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">কে কখন কোন রেকর্ড delete/restore/approve/reject/activate করেছে তার সম্পূর্ণ লগ। শেষ ২০০টি কাজ দেখানো হচ্ছে।</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <input type="text" id="auditSearch" placeholder="🔍 actor / action / target..." style="flex:1;min-width:200px;padding:8px 12px;border-radius:8px;border:1px solid #ddd;font-family:inherit;">
+            <select id="auditFilter" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;">
+              <option value="">সব action</option>
+              <option value="delete">delete-*</option>
+              <option value="restore">restore</option>
+              <option value="bulk">bulk-*</option>
+              <option value="approve">approve-*</option>
+              <option value="reject">reject-*</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto;max-height:600px;overflow-y:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+              <thead style="position:sticky;top:0;background:#f8fafc;z-index:1;"><tr>
+                <th style="text-align:left;padding:10px;border-bottom:2px solid #e2e8f0;">সময়</th>
+                <th style="text-align:left;padding:10px;border-bottom:2px solid #e2e8f0;">কে</th>
+                <th style="text-align:left;padding:10px;border-bottom:2px solid #e2e8f0;">কাজ</th>
+                <th style="text-align:left;padding:10px;border-bottom:2px solid #e2e8f0;">টার্গেট</th>
+                <th style="text-align:left;padding:10px;border-bottom:2px solid #e2e8f0;">বিস্তারিত</th>
+              </tr></thead>
+              <tbody id="auditTbody"><tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -751,6 +784,41 @@
       document.getElementById('topbarTitle').textContent = tabId.charAt(0).toUpperCase() + tabId.slice(1);
       // Close sidebar on mobile
       document.querySelector('.sidebar').classList.remove('open');
+      if (tabId === 'audit') initAuditLog();
+    }
+
+    // ============ AUDIT LOG VIEWER ============
+    var auditUnsub = null, auditAll = [];
+    function initAuditLog() {
+      if (auditUnsub) return; // already streaming
+      if (!window.SctcAudit) { document.getElementById('auditTbody').innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:#dc2626;">Shared module load failed</td></tr>'; return; }
+      var search = document.getElementById('auditSearch');
+      var filter = document.getElementById('auditFilter');
+      if (search) search.oninput = renderAudit;
+      if (filter) filter.onchange = renderAudit;
+      auditUnsub = SctcAudit.streamRecent(function(items){ auditAll = items; renderAudit(); }, 200);
+    }
+    function renderAudit() {
+      var tbody = document.getElementById('auditTbody'); if (!tbody) return;
+      var q = ((document.getElementById('auditSearch')||{}).value||'').trim().toLowerCase();
+      var f = (document.getElementById('auditFilter')||{}).value||'';
+      var rows = auditAll.filter(function(r){
+        if (f && !(r.action||'').includes(f)) return false;
+        if (!q) return true;
+        var blob = ((r.actor||'')+' '+(r.action||'')+' '+(r.target||'')+' '+JSON.stringify(r.data||'')).toLowerCase();
+        return blob.includes(q);
+      });
+      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:#94a3b8;">কোনো লগ নেই</td></tr>'; return; }
+      tbody.innerHTML = rows.map(function(r){
+        var t = r.at ? new Date(r.at).toLocaleString('bn-BD') : '—';
+        var actionColor = (r.action||'').indexOf('delete')===0 ? '#dc2626' : (r.action||'').indexOf('restore')===0 ? '#16a34a' : (r.action||'').indexOf('approve')===0 ? '#0d3d1f' : (r.action||'').indexOf('reject')===0 ? '#b45309' : '#475569';
+        var detail = r.data ? (r.data.label || r.data.count!==undefined ? (r.data.label||(r.data.count+' টি')) : (r.data.from?(r.data.from+' → '+r.data.to):'')) : '';
+        return '<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-family:monospace;font-size:11px;color:#64748b;">'+t+'</td>'+
+          '<td style="padding:8px;font-size:12px;">'+(r.actor||'—')+'</td>'+
+          '<td style="padding:8px;"><span style="background:'+actionColor+'15;color:'+actionColor+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">'+(r.action||'—')+'</span></td>'+
+          '<td style="padding:8px;font-family:monospace;font-size:11px;color:#475569;word-break:break-all;">'+(r.target||'—')+'</td>'+
+          '<td style="padding:8px;font-size:12px;color:#64748b;">'+detail+'</td></tr>';
+      }).join('');
     }
 
     // Load Applications

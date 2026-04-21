@@ -16,6 +16,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/admin-shared.js"></script>
 
   <style>
     :root { --g1:#0d3d1f; --g2:#1a6b35; --gold:#c8a847; --gold2:#f0d860; --bg:#060f0a; --sidebar-bg:#0a1a10; --glass:rgba(255,255,255,0.04); --glass2:rgba(255,255,255,0.07); --glass-border:rgba(200,168,71,0.12); --text:#e8f5ec; --text-muted:#6b8c76; }
@@ -256,40 +257,70 @@
 
       <!-- STUDENTS -->
       <div class="tab-content" id="tab-students">
-        <div class="card">
-          <h3>➕ নতুন শিক্ষার্থী যোগ করুন</h3>
-          <div style="text-align:center;margin-bottom:14px;">
-            <div class="photo-upload-area" onclick="document.getElementById('stuPhotoInput').click()">
-              <img id="stuPhotoPreview" src="" alt="শিক্ষার্থীর ছবি প্রিভিউ" style="display:none;">
-              <span id="stuPhotoPlaceholder">📸</span>
-            </div>
-            <input type="file" id="stuPhotoInput" accept="image/*" style="display:none;" onchange="previewStudentPhoto(this)">
-            <p style="font-size:11px;color:var(--text-muted);">ছবি আপলোড করুন</p>
-          </div>
-          <div class="form-grid">
-            <div class="fg"><label>ইউনিক আইডি *</label><input type="text" id="stuId" placeholder="যেমন: SCTC-001"></div>
-            <div class="fg"><label>নাম *</label><input type="text" id="stuName" placeholder="পূর্ণ নাম"></div>
-            <div class="fg"><label>পিতার নাম</label><input type="text" id="stuFather" placeholder="পিতার নাম"></div>
-            <div class="fg"><label>মাতার নাম</label><input type="text" id="stuMother" placeholder="মাতার নাম"></div>
-            <div class="fg"><label>মোবাইল *</label><input type="tel" id="stuPhone" placeholder="০১XXXXXXXXX"></div>
-            <div class="fg"><label>ঠিকানা</label><input type="text" id="stuAddress" placeholder="গ্রাম/শহর, উপজেলা"></div>
-            <div class="fg"><label>রক্তের গ্রুপ</label><select id="stuBlood"><option value="">--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
-            <div class="fg"><label>সিজন/সেশন</label><input type="text" id="stuSeason" placeholder="জানু-জুন ২০২৬"></div>
-            <div class="fg"><label>ব্যাচ *</label><select id="stuBatch"><option value="">--</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select></div>
-            <div class="fg"><label>সময় থেকে</label><input type="time" id="stuTimeFrom"></div>
-            <div class="fg"><label>সময় পর্যন্ত</label><input type="time" id="stuTimeTo"></div>
-            <div class="fg"><label>কোর্স</label><input type="text" id="stuCourse" placeholder="BTEB / Foundation"></div>
-          </div>
-          <button class="btn-primary" id="saveStudentBtn" onclick="saveStudent()" style="width:100%;margin-top:8px;">💾 শিক্ষার্থী সেভ করুন</button>
+
+        <!-- Auto-synced students that need batch/time -->
+        <div class="card" id="pendingSyncCard" style="display:none;border:1.5px solid rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(217,119,6,0.05));">
+          <h3 style="color:#fbbf24;">⚙️ ব্যাচ ও সময় বসাতে হবে <span id="pendingSyncCount" style="font-size:12px;background:rgba(245,158,11,0.2);padding:2px 10px;border-radius:99px;margin-left:8px;">0</span></h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">নিচের শিক্ষার্থীরা মূল ওয়েবসাইট থেকে স্বয়ংক্রিয়ভাবে সিঙ্ক হয়েছে — শুধু ব্যাচ ও ক্লাস সময় বসিয়ে দিন, তাহলে তারা উপস্থিতি দিতে পারবে।</p>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>নাম</th><th>মোবাইল</th><th>আইডি</th><th>অ্যাকশন</th></tr></thead><tbody id="pendingSyncTbody"></tbody></table></div>
         </div>
+        <!-- Manual Add (Collapsible) -->
         <div class="card">
-          <h3>📋 শিক্ষার্থী তালিকা</h3>
+          <h3 style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="toggleManualAdd()">
+            <span>➕ ম্যানুয়ালি শিক্ষার্থী যোগ করুন</span>
+            <span id="manualAddToggle" style="font-size:14px;color:var(--text-muted);">▼ খুলুন</span>
+          </h3>
+          <div id="manualAddBody" style="display:none;margin-top:14px;">
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">⚠️ যেসব শিক্ষার্থী মূল ওয়েবসাইটে আবেদন করেননি (যেমন বহিরাগত / বিশেষ ক্ষেত্র), তাদের জন্য।</p>
+            <div style="text-align:center;margin-bottom:14px;">
+              <div class="photo-upload-area" onclick="document.getElementById('stuPhotoInput').click()">
+                <img id="stuPhotoPreview" src="" alt="শিক্ষার্থীর ছবি প্রিভিউ" style="display:none;">
+                <span id="stuPhotoPlaceholder">📸</span>
+              </div>
+              <input type="file" id="stuPhotoInput" accept="image/*" style="display:none;" onchange="previewStudentPhoto(this)">
+              <p style="font-size:11px;color:var(--text-muted);">ছবি আপলোড করুন</p>
+            </div>
+            <div class="form-grid">
+              <div class="fg"><label>ইউনিক আইডি *</label><input type="text" id="stuId" placeholder="যেমন: SCTC-001"></div>
+              <div class="fg"><label>নাম *</label><input type="text" id="stuName" placeholder="পূর্ণ নাম"></div>
+              <div class="fg"><label>পিতার নাম</label><input type="text" id="stuFather" placeholder="পিতার নাম"></div>
+              <div class="fg"><label>মাতার নাম</label><input type="text" id="stuMother" placeholder="মাতার নাম"></div>
+              <div class="fg"><label>মোবাইল *</label><input type="tel" id="stuPhone" placeholder="০১XXXXXXXXX"></div>
+              <div class="fg"><label>ঠিকানা</label><input type="text" id="stuAddress" placeholder="গ্রাম/শহর, উপজেলা"></div>
+              <div class="fg"><label>রক্তের গ্রুপ</label><select id="stuBlood"><option value="">--</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+              <div class="fg"><label>সিজন/সেশন</label><input type="text" id="stuSeason" placeholder="জানু-জুন ২০২৬"></div>
+              <div class="fg"><label>ব্যাচ *</label><select id="stuBatch"><option value="">--</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select></div>
+              <div class="fg"><label>সময় থেকে</label><input type="time" id="stuTimeFrom"></div>
+              <div class="fg"><label>সময় পর্যন্ত</label><input type="time" id="stuTimeTo"></div>
+              <div class="fg"><label>কোর্স</label><input type="text" id="stuCourse" placeholder="BTEB / Foundation"></div>
+            </div>
+            <button class="btn-primary" id="saveStudentBtn" onclick="saveStudent()" style="width:100%;margin-top:8px;">💾 শিক্ষার্থী সেভ করুন</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📋 অ্যাটেনডেন্স শিক্ষার্থী তালিকা <span style="font-size:11px;color:var(--text-muted);font-weight:normal;">(মূল ওয়েবসাইটের সাথে সিঙ্ক)</span></h3>
           <div class="filter-bar">
-            <input type="text" id="stuSearchInput" placeholder="🔍 নাম বা আইডি..." oninput="renderStudentList()">
+            <input type="text" id="stuSearchInput" placeholder="🔍 নাম, আইডি বা Reg..." oninput="renderStudentList()">
             <select id="stuFilterBatch" onchange="renderStudentList()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
+            <select id="stuFilterSource" onchange="renderStudentList()">
+              <option value="">সব উৎস</option>
+              <option value="synced">🔗 মূল অ্যাডমিন থেকে</option>
+              <option value="manual">✏️ ম্যানুয়াল</option>
+            </select>
             <span class="filter-count" id="stuCount">0 জন</span>
           </div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>মোবাইল</th><th>ব্যাচ</th><th>সময়</th><th>অ্যাকশন</th></tr></thead><tbody id="studentTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+          <div id="bulkActivateBar" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(217,119,6,0.08));border:1px solid rgba(245,158,11,0.3);padding:10px 14px;border-radius:12px;margin-bottom:10px;display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="color:#fbbf24;font-weight:700;font-size:13px;"><span id="bulkSelCount">0</span>টি নির্বাচিত</span>
+            <input type="text" id="bulkIdPrefix" placeholder="ID prefix (যেমন SCTC-)" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;width:160px;">
+            <input type="number" id="bulkIdStart" placeholder="শুরু #" min="1" value="1" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;width:80px;">
+            <select id="bulkBatch" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;"><option value="">ব্যাচ —</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
+            <input type="time" id="bulkTimeFrom" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;">
+            <input type="time" id="bulkTimeTo" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;">
+            <button class="btn-sm btn-edit" onclick="bulkActivateSelected()" style="background:linear-gradient(135deg,#0d3d1f,#16a34a);color:#fff;font-weight:700;">⚡ এক ক্লিকে Activate</button>
+            <button class="btn-sm" onclick="clearBulkSelection()" style="background:#475569;color:#fff;">✕ বাতিল</button>
+          </div>
+          <div style="overflow-x:auto;"><table><thead><tr><th style="width:32px;"><input type="checkbox" id="bulkAllCb" onchange="toggleBulkAll(this)" title="সব pending সিলেক্ট করুন"></th><th>ছবি</th><th>আইডি</th><th>নাম</th><th>মোবাইল</th><th>ব্যাচ</th><th>সময়</th><th>উৎস</th><th>অ্যাকশন</th></tr></thead><tbody id="studentTableBody"><tr><td colspan="9" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -304,14 +335,14 @@
             <select id="todayFilterBatch" onchange="renderTodayAttendance()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
             <span class="filter-count" id="todayCount">0 জন</span>
           </div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="todayTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead><tbody id="todayTableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
         </div>
       </div>
 
       <!-- HISTORY -->
       <div class="tab-content" id="tab-history">
         <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
             <h3 style="margin:0;">📜 তারিখ অনুযায়ী উপস্থিতি</h3>
             <button class="btn-sm btn-export" onclick="exportHistoryCSV()">📤 CSV</button>
           </div>
@@ -320,7 +351,16 @@
             <select id="historyFilterBatch" onchange="renderHistory()"><option value="">সব ব্যাচ</option><option value="সকাল">সকাল</option><option value="বিকাল">বিকাল</option></select>
             <span class="filter-count" id="historyCount">0 জন</span>
           </div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">তারিখ নির্বাচন করুন</td></tr></tbody></table></div>
+          <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);padding:10px 14px;border-radius:12px;margin-top:10px;">
+            <div style="color:#fca5a5;font-weight:700;font-size:12px;margin-bottom:8px;">⚠️ Date Range Bulk Delete</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+              <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">From</label><input type="date" id="rangeFrom" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;"></div>
+              <div><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:3px;">To</label><input type="date" id="rangeTo" style="padding:6px 10px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);font-size:12px;"></div>
+              <button class="btn-sm btn-del" onclick="bulkDeleteAttendanceRange()" style="font-weight:700;">🗑️ Range Delete</button>
+              <span style="font-size:11px;color:var(--text-muted);">Undo 7s এর মধ্যে।</span>
+            </div>
+          </div>
+          <div style="overflow-x:auto;margin-top:10px;"><table><thead><tr><th>ছবি</th><th>আইডি</th><th>নাম</th><th>ব্যাচ</th><th>সময়</th><th>উপস্থিতি</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-muted);">তারিখ নির্বাচন করুন</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -332,7 +372,7 @@
             <input type="date" id="visitorDatePicker" onchange="loadVisitors()">
             <span class="filter-count" id="visitorCount">0 জন</span>
           </div>
-          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>নাম</th><th>মোবাইল</th><th>ঠিকানা</th><th>ব্যাচ</th><th>সময়</th></tr></thead><tbody id="visitorTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>ছবি</th><th>নাম</th><th>মোবাইল</th><th>ঠিকানা</th><th>ব্যাচ</th><th>সময়</th><th>অ্যাকশন</th></tr></thead><tbody id="visitorTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -371,10 +411,68 @@
           <div class="fg"><label>Grace Period (মিনিট)</label><input type="number" id="gracePeriod" value="10" min="0" max="60" style="max-width:120px;"></div>
           <button class="btn-primary" onclick="saveGracePeriod()" style="margin-top:8px;">💾 সেভ করুন</button>
         </div>
+
+        <!-- ============ HOLIDAY MANAGEMENT ============ -->
+        <div class="card">
+          <h3>🎉 সরকারি ছুটি ব্যবস্থাপনা</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">যেসব দিন অ্যাটেনডেন্স গণনা থেকে বাদ যাবে (ঈদ, দুর্গা পূজা, স্বাধীনতা দিবস ইত্যাদি)। শুক্রবার স্বয়ংক্রিয়ভাবে বাদ যায়।</p>
+          <div class="form-grid" style="grid-template-columns:1fr 2fr auto;gap:8px;align-items:end;">
+            <div class="fg"><label>তারিখ *</label><input type="date" id="holidayDate"></div>
+            <div class="fg"><label>ছুটির নাম *</label><input type="text" id="holidayName" placeholder="যেমন: ঈদ-উল-ফিতর"></div>
+            <button class="btn-primary" onclick="addHoliday()" style="height:42px;">➕ যোগ করুন</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn-primary" style="background:linear-gradient(135deg,#0d3d1f,#1a6b35);" onclick="bulkImportBDHolidays()">🇧🇩 বাংলাদেশের সরকারি ছুটি Import করুন</button>
+            <select id="bulkYearSelect" style="padding:8px;border-radius:6px;border:1px solid #ddd;"></select>
+          </div>
+          <div style="overflow-x:auto;margin-top:14px;">
+            <table>
+              <thead><tr><th>তারিখ</th><th>ছুটির নাম</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="holidayTableBody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============ LEAVE APPLICATIONS ============ -->
+        <div class="card">
+          <h3>📝 ছুটির আবেদন ব্যবস্থাপনা <span id="leavePendingBadge" style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;display:none;margin-left:6px;">0</span></h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">শিক্ষার্থীদের ব্যক্তিগত ছুটির আবেদন। অনুমোদিত ছুটি অ্যাটেনডেন্স গণনা থেকে বাদ যাবে।</p>
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <button class="btn-sm" onclick="filterLeaves('pending')" id="lvFilterP" style="background:#fbbf24;color:#000;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;">⏳ অপেক্ষমান</button>
+            <button class="btn-sm" onclick="filterLeaves('approved')" id="lvFilterA" style="background:#e2e8f0;color:#000;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;">✅ অনুমোদিত</button>
+            <button class="btn-sm" onclick="filterLeaves('rejected')" id="lvFilterR" style="background:#e2e8f0;color:#000;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;">❌ বাতিল</button>
+            <button class="btn-sm" onclick="filterLeaves('all')" id="lvFilterAll" style="background:#e2e8f0;color:#000;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;">🗂️ সব</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>শিক্ষার্থী</th><th>তারিখ</th><th>কারণ</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
+              <tbody id="leaveTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="card">
           <h3>🔗 অ্যাটেনডেন্স পেজ লিংক</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">শিক্ষার্থীদের সাথে শেয়ার করুন:</p>
           <div style="display:flex;gap:8px;"><input type="text" id="attendanceLink" readonly style="flex:1;padding:10px;border:1.5px solid var(--glass-border);border-radius:10px;font-family:'Hind Siliguri';font-size:12px;background:var(--glass);color:var(--text);"><button class="btn-primary" onclick="copyLink()">📋 কপি</button></div>
+        </div>
+      </div>
+
+      <!-- PERSONAL QR MODAL -->
+      <div class="modal-overlay" id="personalQrModal">
+        <div class="modal-content" style="max-width:420px;">
+          <button class="modal-close" onclick="closePersonalQrModal()">✕</button>
+          <h3 style="color:var(--gold);margin-bottom:6px;">📱 ব্যক্তিগত QR কোড</h3>
+          <p id="personalQrName" style="color:var(--text-muted);font-size:13px;margin-bottom:14px;"></p>
+          <div style="text-align:center;background:#fff;padding:18px;border-radius:14px;border:3px solid var(--gold);">
+            <div id="personalQrCanvas" style="display:flex;justify-content:center;"></div>
+            <p id="personalQrId" style="margin:10px 0 0;color:#0d3d1f;font-weight:700;font-family:monospace;"></p>
+            <p id="personalQrUrl" style="margin:6px 0 0;font-size:10px;color:#666;word-break:break-all;"></p>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;">
+            <button class="btn-primary" style="flex:1;" onclick="downloadPersonalQR()">⬇️ ডাউনলোড</button>
+            <button class="btn-primary" style="flex:1;background:linear-gradient(135deg,#3b82f6,#60a5fa);" onclick="printPersonalQR()">🖨️ প্রিন্ট</button>
+          </div>
         </div>
       </div>
 
@@ -389,6 +487,8 @@
       <div id="editFormContent"></div>
     </div>
   </div>
+
+
 
   <script>
     // =========== FIREBASE ===========
@@ -411,12 +511,14 @@
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dblafxhgc/auto/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'eopkol2t';
 
-    let allStudents = {};
+    let allStudents = {};         // sabuj/attendance-students
+    let approvedApps = {};        // sabuj/applications (status=approved/active)
     let todayRecords = {};
     let historyRecords = {};
     let gracePeriodMinutes = 10;
     let weeklyChartInstance = null;
     let batchChartInstance = null;
+    
 
     // =========== AUTH ===========
     function doLogin() {
@@ -459,12 +561,99 @@
         if (snap.exists()) { gracePeriodMinutes = snap.val(); document.getElementById('gracePeriod').value = gracePeriodMinutes; }
       });
 
-      loadStudents(); loadTodayAttendance(); loadTodayVisitors();
+      loadStudents(); loadApprovedApps(); loadTodayAttendance(); loadTodayVisitors(); loadHolidays();
       const today = new Date();
       document.getElementById('todayDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
       document.getElementById('historyDate').value = getLocalDateKey(today);
       document.getElementById('visitorDatePicker').value = getLocalDateKey(today);
       document.getElementById('visitorDate').textContent = today.toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+    }
+
+    // =========== LIVE SYNC FROM MAIN ADMIN (mirror, no auto-write) ===========
+    // Approved applications are rendered as virtual rows directly. No duplicate
+    // attendance-students record is created until admin assigns Unique ID + batch.
+    function loadApprovedApps() {
+      db.ref('sabuj/applications').on('value', snap => {
+        const data = snap.val() || {};
+        approvedApps = {};
+        for (const k in data) {
+          if (data[k] && (data[k].status === 'approved' || data[k].status === 'active')) {
+            approvedApps[k] = data[k];
+          }
+        }
+        renderStudentList();
+        updateOverview();
+      });
+    }
+
+    function isAppLinked(appId, app) {
+      if (app && app.attendanceUniqueId) return true;
+      const phone = app && app.personal && app.personal.phone;
+      const phoneDigits = phone ? String(phone).replace(/\D/g,'') : '';
+      const regNo = app && app.regNo ? String(app.regNo).trim().toUpperCase() : '';
+      for (const k in allStudents) {
+        const s = allStudents[k];
+        if (!s) continue;
+        if (s.linkedAppId === appId) return true;
+        if (regNo && s.linkedRegNo && String(s.linkedRegNo).trim().toUpperCase() === regNo) return true;
+        if (regNo && s.uniqueId && String(s.uniqueId).trim().toUpperCase() === regNo) return true;
+        if (phoneDigits && s.phone && String(s.phone).replace(/\D/g,'') === phoneDigits) return true;
+      }
+      return false;
+    }
+
+    // Pending card kept hidden — replaced by inline yellow rows in main table
+    function renderPendingSync() {
+      const card = document.getElementById('pendingSyncCard');
+      if (card) card.style.display = 'none';
+    }
+
+    // One-click: create attendance-students record from an approved app
+    async function quickActivateApp(appId) {
+      const app = approvedApps[appId];
+      if (!app) return alert('❌ আবেদন পাওয়া যায়নি');
+      const p = app.personal || {};
+      const addr = (app.address && app.address.present) || {};
+      const suggestedId = (app.regNo && String(app.regNo).trim()) || appId;
+      const uniqueId = prompt('🆔 ইউনিক আইডি দিন (বা OK চাপুন রেজি নং ব্যবহার করতে):', suggestedId);
+      if (!uniqueId) return;
+      const cleanId = uniqueId.trim().toUpperCase();
+      if (Object.values(allStudents).find(s => s && (s.uniqueId||'').toUpperCase() === cleanId)) {
+        return alert('❌ এই আইডি ইতিমধ্যে বরাদ্দ আছে!');
+      }
+      const courseName = app.enrollment && app.enrollment.courseId === 'BTEB'
+        ? 'Computer Office Application (BTEB)'
+        : 'Computer Office Application (Foundation)';
+      const student = {
+        uniqueId: cleanId,
+        name: p.nameBn || p.nameEn || '',
+        photo: p.photo || '',
+        fatherName: p.fatherName || '',
+        motherName: p.motherName || '',
+        phone: p.phone || '',
+        address: [addr.village, addr.upazila, addr.district].filter(Boolean).join(', '),
+        bloodGroup: p.bloodGroup || '',
+        season: (app.enrollment && app.enrollment.session) || '',
+        batch: '', timeFrom: '', timeTo: '',
+        course: courseName,
+        linkedAppId: appId,
+        linkedRegNo: app.regNo || '',
+        source: 'synced',
+        addedAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      try {
+        await db.ref('sabuj/attendance-students').push(student);
+        await db.ref('sabuj/applications/' + appId + '/attendanceUniqueId').set(cleanId).catch(()=>{});
+        alert('✅ আইডি বরাদ্দ হলো! এখন ব্যাচ ও সময় বসান।');
+      } catch(e) { alert('❌ ' + e.message); }
+    }
+
+    function toggleManualAdd() {
+      const body = document.getElementById('manualAddBody');
+      const toggle = document.getElementById('manualAddToggle');
+      const open = body.style.display === 'none';
+      body.style.display = open ? 'block' : 'none';
+      toggle.textContent = open ? '▲ বন্ধ করুন' : '▼ খুলুন';
     }
 
     // =========== TAB ===========
@@ -557,6 +746,7 @@
         batch, timeFrom: document.getElementById('stuTimeFrom').value,
         timeTo: document.getElementById('stuTimeTo').value,
         course: document.getElementById('stuCourse').value.trim(),
+        source: 'manual',
         addedAt: firebase.database.ServerValue.TIMESTAMP
       };
 
@@ -573,26 +763,176 @@
     }
 
     function loadStudents() {
-      db.ref('sabuj/attendance-students').on('value', snap => { allStudents = snap.val() || {}; renderStudentList(); updateOverview(); });
+      db.ref('sabuj/attendance-students').on('value', snap => { allStudents = snap.val() || {}; renderStudentList(); updateOverview(); renderPendingSync(); });
     }
+
+    // Render = registered students + approved apps not yet linked (virtual rows)
+    // ===== Bulk selection state (only for pending/virtual rows) =====
+    var bulkSel = (window.SctcSelect && SctcSelect.create('students')) || { has:function(){return false;}, toggle:function(){}, add:function(){}, clear:function(){}, values:function(){return [];}, size:function(){return 0;} };
+
+    function refreshBulkBar() {
+      var bar = document.getElementById('bulkActivateBar');
+      var n = bulkSel.size();
+      document.getElementById('bulkSelCount').textContent = n;
+      bar.style.display = n > 0 ? 'flex' : 'none';
+    }
+    function toggleBulkPick(appId, cb) { bulkSel.toggle(appId); refreshBulkBar(); }
+    function toggleBulkAll(cb) {
+      bulkSel.clear();
+      if (cb.checked) {
+        Object.entries(approvedApps).forEach(function(e){ if (!isAppLinked(e[0], e[1])) bulkSel.add(e[0]); });
+      }
+      refreshBulkBar();
+      renderStudentList();
+    }
+    function clearBulkSelection() { bulkSel.clear(); refreshBulkBar(); renderStudentList(); var c = document.getElementById('bulkAllCb'); if (c) c.checked = false; }
 
     function renderStudentList() {
       const search = (document.getElementById('stuSearchInput').value || '').trim().toLowerCase();
       const bf = document.getElementById('stuFilterBatch').value;
-      let entries = Object.entries(allStudents);
-      if (search) entries = entries.filter(([k,s]) => (s.name||'').toLowerCase().includes(search) || (s.uniqueId||'').toLowerCase().includes(search));
-      if (bf) entries = entries.filter(([k,s]) => s.batch === bf);
+      const sourceFilter = (document.getElementById('stuFilterSource') || {}).value || '';
+
+      let realRows = Object.entries(allStudents).map(([k,s]) => ({
+        kind:'student', key:k, s,
+        name:s.name||'', uniqueId:s.uniqueId||'', regNo:s.linkedRegNo||'',
+        phone:s.phone||'', batch:s.batch||'', source:s.source||'manual'
+      }));
+
+      let virtualRows = [];
+      Object.entries(approvedApps).forEach(([appId, app]) => {
+        if (isAppLinked(appId, app)) return;
+        const p = app.personal || {};
+        virtualRows.push({
+          kind:'app', key:appId, app,
+          name:p.nameBn || p.nameEn || '',
+          uniqueId:'', regNo:app.regNo||'',
+          phone:p.phone||'', batch:'', source:'pending'
+        });
+      });
+
+      let entries = realRows.concat(virtualRows);
+      if (search) entries = entries.filter(r => r.name.toLowerCase().includes(search) || r.uniqueId.toLowerCase().includes(search) || (r.regNo||'').toLowerCase().includes(search) || (r.phone||'').includes(search));
+      if (bf) entries = entries.filter(r => r.batch === bf);
+      if (sourceFilter) entries = entries.filter(r => r.source === sourceFilter || (sourceFilter==='synced' && r.source==='pending'));
+
       document.getElementById('stuCount').textContent = entries.length + ' জন';
       const tbody = document.getElementById('studentTableBody');
-      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো শিক্ষার্থী নেই</td></tr>'; return; }
-      tbody.innerHTML = entries.map(([k,s]) =>
-        '<tr><td><img src="'+(s.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(s.name||'শিক্ষার্থী')+' এর ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
-        '<td style="color:var(--gold);font-weight:700;">'+(s.uniqueId||'—')+'</td><td>'+(s.name||'—')+'</td><td>'+(s.phone||'—')+'</td><td>'+(s.batch||'—')+'</td><td>'+(s.timeFrom||'')+'-'+(s.timeTo||'')+'</td>' +
-        '<td><button class="btn-sm btn-edit" onclick="openEditModal(\''+k+'\')">✏️</button><button class="btn-sm btn-del" onclick="deleteStudent(\''+k+'\',\''+encodeURIComponent(s.name||'')+'\')">🗑️</button></td></tr>'
-      ).join('');
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);">কোনো শিক্ষার্থী নেই</td></tr>'; return; }
+
+      tbody.innerHTML = entries.map(r => {
+        if (r.kind === 'app') {
+          const p = r.app.personal || {};
+          const photo = p.photo || 'https://via.placeholder.com/32x32?text=👤';
+          const checked = bulkSel.has(r.key) ? ' checked' : '';
+          return '<tr style="background:rgba(245,158,11,0.06);">'+
+            '<td><input type="checkbox"'+checked+' onchange="toggleBulkPick(\''+r.key+'\',this)"></td>'+
+            '<td><img src="'+photo+'" alt="'+r.name+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(245,158,11,0.4);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>'+
+            '<td><span style="background:rgba(245,158,11,0.2);color:#fbbf24;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;">⚠️ ID দিন</span><br><span style="font-size:10px;color:var(--text-muted);font-family:monospace;">Reg: '+(r.regNo||'—')+'</span></td>'+
+            '<td>'+r.name+'</td><td>'+r.phone+'</td><td>—</td><td>—</td>'+
+            '<td><span style="background:rgba(245,158,11,0.15);color:#fbbf24;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;">🔗 মূল ওয়েবসাইট</span></td>'+
+            '<td><button class="btn-sm btn-edit" onclick="quickActivateApp(\''+r.key+'\')" title="ইউনিক আইডি বরাদ্দ করুন" style="background:linear-gradient(135deg,#d97706,#f59e0b);color:#fff;">🆔 ID বরাদ্দ</button></td></tr>';
+        }
+        const s = r.s;
+        const srcBadge = s.source === 'synced'
+          ? '<span style="background:rgba(34,197,94,0.15);color:#4ade80;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;">🔗 সিঙ্ক</span>'
+          : '<span style="background:rgba(200,168,71,0.15);color:var(--gold);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;">✏️ ম্যানুয়াল</span>';
+        // Live mirror: prefer linked app's live data
+        let dispName = s.name||'—', dispPhone = s.phone||'—', dispPhoto = s.photo;
+        if (s.linkedAppId && approvedApps[s.linkedAppId]) {
+          const lp = approvedApps[s.linkedAppId].personal || {};
+          dispName = lp.nameBn || lp.nameEn || dispName;
+          dispPhone = lp.phone || dispPhone;
+          dispPhoto = lp.photo || dispPhoto;
+        }
+        const photo = dispPhoto || 'https://via.placeholder.com/32x32?text=👤';
+        // CORS-safe preload (warm cache for QR/PDF canvas to avoid taint)
+        if (window.SctcImage && dispPhoto) SctcImage.preload(dispPhoto);
+        return '<tr><td>—</td><td><img src="'+photo+'" alt="'+dispName+' এর ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
+          '<td style="color:var(--gold);font-weight:700;">'+(s.uniqueId||'—')+'</td><td>'+dispName+'</td><td>'+dispPhone+'</td><td>'+(s.batch||'—')+'</td><td>'+(s.timeFrom||'')+'-'+(s.timeTo||'')+'</td>' +
+          '<td>'+srcBadge+'</td>' +
+          '<td>'+
+            '<button class="btn-sm btn-edit" onclick="openPersonalQrModal(\''+r.key+'\')" title="ব্যক্তিগত QR" style="background:linear-gradient(135deg,#0d3d1f,#1a6b35);color:#fff;">📱</button>'+
+            '<button class="btn-sm btn-edit" onclick="openEditModal(\''+r.key+'\')">✏️</button>'+
+            '<button class="btn-sm btn-del" onclick="deleteStudent(\''+r.key+'\',\''+encodeURIComponent(s.name||'')+'\')">🗑️</button>'+
+          '</td></tr>';
+      }).join('');
     }
 
-    function deleteStudent(key, n) { if (confirm('⚠️ "'+decodeURIComponent(n)+'" মুছবেন?')) db.ref('sabuj/attendance-students/'+key).remove().then(() => alert('✅ মুছে ফেলা হয়েছে!')); }
+    function deleteStudent(key, n) {
+      var label = decodeURIComponent(n);
+      SctcDelete.withUndo({
+        refPath: 'sabuj/attendance-students/' + key,
+        label: label,
+        confirmText: '⚠️ "' + label + '" মুছবেন? (5 সেকেন্ডে undo করতে পারবেন)',
+        auditAction: 'delete-student',
+        auditTarget: 'attendance-students/' + key
+      });
+    }
+
+    // ===== Bulk activate selected pending apps =====
+    async function bulkActivateSelected() {
+      var ids = bulkSel.values();
+      if (!ids.length) return SctcToast.show('❌ কাউকে নির্বাচন করেননি', { variant:'danger' });
+      var prefix = (document.getElementById('bulkIdPrefix').value || '').trim().toUpperCase();
+      var startNum = parseInt(document.getElementById('bulkIdStart').value || '1', 10) || 1;
+      var batch = document.getElementById('bulkBatch').value;
+      var tFrom = document.getElementById('bulkTimeFrom').value;
+      var tTo = document.getElementById('bulkTimeTo').value;
+      if (!prefix && !ids.every(function(id){ return approvedApps[id] && approvedApps[id].regNo; })) {
+        return SctcToast.show('❌ ID prefix দিন (অথবা সবার Reg No থাকতে হবে)', { variant:'danger' });
+      }
+      if (!confirm('⚡ ' + ids.length + ' জনকে activate করবেন?\nID format: ' + (prefix ? prefix + String(startNum).padStart(3,'0') + ' …' : 'Reg No অনুযায়ী') + '\nব্যাচ: ' + (batch||'খালি') + ' | সময়: ' + (tFrom||'—') + '-' + (tTo||'—'))) return;
+      var made = 0, failed = 0;
+      for (var i = 0; i < ids.length; i++) {
+        var appId = ids[i];
+        var app = approvedApps[appId];
+        if (!app) { failed++; continue; }
+        var p = app.personal || {};
+        var addr = (app.address && app.address.present) || {};
+        var uniqueId = prefix ? (prefix + String(startNum + i).padStart(3, '0')) : (String(app.regNo || appId).trim().toUpperCase());
+        var dup = Object.values(allStudents).some(function(s){ return s && (s.uniqueId||'').toUpperCase() === uniqueId; });
+        if (dup) { failed++; continue; }
+        var courseName = app.enrollment && app.enrollment.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
+        var student = {
+          uniqueId: uniqueId,
+          name: p.nameBn || p.nameEn || '',
+          photo: p.photo || '',
+          fatherName: p.fatherName || '',
+          motherName: p.motherName || '',
+          phone: p.phone || '',
+          address: [addr.village, addr.upazila, addr.district].filter(Boolean).join(', '),
+          bloodGroup: p.bloodGroup || '',
+          season: (app.enrollment && app.enrollment.session) || '',
+          batch: batch || '',
+          timeFrom: tFrom || '',
+          timeTo: tTo || '',
+          course: courseName,
+          linkedAppId: appId,
+          linkedRegNo: app.regNo || '',
+          source: 'synced',
+          addedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        try {
+          await db.ref('sabuj/attendance-students').push(student);
+          await db.ref('sabuj/applications/' + appId + '/attendanceUniqueId').set(uniqueId).catch(function(){});
+          made++;
+        } catch (e) { failed++; }
+      }
+      SctcAudit.log('bulk-activate', 'attendance-students', { count: made, failed: failed, prefix: prefix, batch: batch });
+      SctcToast.show('✅ ' + made + ' জন activate হলো' + (failed ? ' (' + failed + ' ব্যর্থ)' : ''), { variant: failed ? 'warn' : 'success' });
+      bulkSel.clear(); refreshBulkBar();
+      var allCb = document.getElementById('bulkAllCb'); if (allCb) allCb.checked = false;
+    }
+
+    // ===== Date-range bulk delete (history) =====
+    function bulkDeleteAttendanceRange() {
+      var from = document.getElementById('rangeFrom').value;
+      var to = document.getElementById('rangeTo').value;
+      if (!from || !to) return SctcToast.show('❌ from + to দুটোই দিন', { variant:'danger' });
+      if (!confirm('⚠️ ' + from + ' থেকে ' + to + ' পর্যন্ত সব উপস্থিতি মুছবেন?\nএটি বহু রেকর্ড একসাথে মুছবে। (7s এর মধ্যে undo করা যাবে)')) return;
+      if (!confirm('🚨 আবার নিশ্চিত? এই কাজ ফেরানো যাবে শুধু 7 সেকেন্ডের toast থেকে।')) return;
+      SctcDelete.range('sabuj/attendance-records', from, to).catch(function(e){ SctcToast.show('❌ '+e.message, { variant:'danger' }); });
+    }
 
     // =========== EDIT MODAL ===========
     function openEditModal(key) {
@@ -640,7 +980,30 @@
         const url = await uploadToCloudinary(compressed);
         if (url) updates.photo = url;
       }
-      db.ref('sabuj/attendance-students/'+key).update(updates).then(() => { alert('✅ আপডেট সফল!'); closeEditModal(); }).catch(err => alert('❌ '+err.message));
+      try {
+        await db.ref('sabuj/attendance-students/'+key).update(updates);
+        // === Two-way sync: push back to main applications node if linked ===
+        const cur = allStudents[key] || {};
+        const linkedAppId = cur.linkedAppId;
+        if (linkedAppId) {
+          const appPersonal = {
+            nameBn: updates.name,
+            fatherName: updates.fatherName,
+            motherName: updates.motherName,
+            phone: updates.phone,
+            bloodGroup: updates.bloodGroup
+          };
+          if (updates.photo) appPersonal.photo = updates.photo;
+          // Strip undefined/empty so we don't blow away existing values
+          Object.keys(appPersonal).forEach(k => { if (appPersonal[k] === undefined || appPersonal[k] === '') delete appPersonal[k]; });
+          const appUpdates = {};
+          Object.keys(appPersonal).forEach(k => { appUpdates['sabuj/applications/'+linkedAppId+'/personal/'+k] = appPersonal[k]; });
+          appUpdates['sabuj/applications/'+linkedAppId+'/attendanceUniqueId'] = updates.uniqueId;
+          await db.ref().update(appUpdates).catch(()=>{});
+        }
+        alert('✅ আপডেট সফল!' + (linkedAppId ? '\n🔗 মূল ওয়েবসাইটেও সিঙ্ক হয়েছে।' : ''));
+        closeEditModal();
+      } catch(err) { alert('❌ '+err.message); }
     }
 
     // =========== TODAY ===========
@@ -657,24 +1020,37 @@
       db.ref('sabuj/attendance-records/'+today).on('value', snap => { todayRecords = snap.val() || {}; renderTodayAttendance(); updateOverview(); });
     }
 
-    function renderAttendanceTable(records, tbodyId, countId, filterId) {
+    function renderAttendanceTable(records, tbodyId, countId, filterId, dateKey) {
       const bf = document.getElementById(filterId).value;
       let entries = Object.entries(records);
       if (bf) entries = entries.filter(([k,r]) => r.batch === bf);
       document.getElementById(countId).textContent = entries.length + ' জন';
       const tbody = document.getElementById(tbodyId);
-      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো উপস্থিতি নেই</td></tr>'; return; }
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);">কোনো উপস্থিতি নেই</td></tr>'; return; }
       entries.sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
       tbody.innerHTML = entries.map(([k,r]) =>
         '<tr class="'+(r.isLate?'late-row':'')+'">' +
         '<td><img src="'+(r.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(r.name||'শিক্ষার্থী')+' এর উপস্থিতি ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
         '<td style="color:var(--gold);font-weight:700;">'+(r.uniqueId||'—')+'</td><td>'+(r.name||'—')+'</td><td>'+(r.batch||'—')+'</td>' +
         '<td>'+(r.timeFrom||'')+'-'+(r.timeTo||'')+'</td><td style="color:#4ade80;font-weight:700;">'+(r.time||'—')+'</td>' +
-        '<td>'+(r.isLate ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '<span style="color:#4ade80;font-size:11px;">✅ সময়মতো</span>')+'</td></tr>'
+        '<td>'+(r.isLate ? '<span class="late-badge">⏰ বিলম্বিত</span>' : '<span style="color:#4ade80;font-size:11px;">✅ সময়মতো</span>')+'</td>'+
+        '<td><button class="btn-sm btn-del" onclick="deleteAttendanceRecord(\''+dateKey+'\',\''+k+'\',\''+encodeURIComponent(r.name||'')+'\')">🗑️</button></td></tr>'
       ).join('');
     }
 
-    function renderTodayAttendance() { renderAttendanceTable(todayRecords, 'todayTableBody', 'todayCount', 'todayFilterBatch'); }
+    function deleteAttendanceRecord(dateKey, recordKey, encName) {
+      if (!dateKey) return SctcToast.show('❌ তারিখ পাওয়া যায়নি', { variant:'danger' });
+      var label = decodeURIComponent(encName) + ' (' + dateKey + ')';
+      SctcDelete.withUndo({
+        refPath: 'sabuj/attendance-records/' + dateKey + '/' + recordKey,
+        label: label,
+        confirmText: '🗑️ "' + label + '" এর উপস্থিতি মুছবেন? (5 সেকেন্ডে undo করতে পারবেন)',
+        auditAction: 'delete-attendance',
+        auditTarget: 'attendance-records/' + dateKey + '/' + recordKey
+      });
+    }
+
+    function renderTodayAttendance() { renderAttendanceTable(todayRecords, 'todayTableBody', 'todayCount', 'todayFilterBatch', getLocalDateKey()); }
 
     // =========== HISTORY ===========
     function loadHistory() {
@@ -682,7 +1058,7 @@
       if (!date) return;
       db.ref('sabuj/attendance-records/'+date).once('value', snap => { historyRecords = snap.val() || {}; renderHistory(); });
     }
-    function renderHistory() { renderAttendanceTable(historyRecords, 'historyTableBody', 'historyCount', 'historyFilterBatch'); }
+    function renderHistory() { renderAttendanceTable(historyRecords, 'historyTableBody', 'historyCount', 'historyFilterBatch', document.getElementById('historyDate').value); }
 
     // =========== VISITORS ===========
     function loadTodayVisitors() { loadVisitorsForDate(getLocalDateKey()); }
@@ -691,17 +1067,29 @@
       if (date) { document.getElementById('visitorDate').textContent = new Date(date).toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' }); loadVisitorsForDate(date); }
     }
     function loadVisitorsForDate(date) {
-      db.ref('sabuj/attendance-visitors/'+date).once('value', snap => {
+      db.ref('sabuj/attendance-visitors/'+date).on('value', snap => {
         const data = snap.val() || {};
         const entries = Object.entries(data);
         document.getElementById('visitorCount').textContent = entries.length + ' জন';
         document.getElementById('statVisitors').textContent = entries.length;
         const tbody = document.getElementById('visitorTableBody');
-        if (!entries.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">কোনো অতিথি নেই</td></tr>'; return; }
+        if (!entries.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">কোনো অতিথি নেই</td></tr>'; return; }
         tbody.innerHTML = entries.map(([k,v]) =>
           '<tr><td><img src="'+(v.photo||'https://via.placeholder.com/32x32?text=👤')+'" alt="'+(v.name||'অতিথি')+' এর ছবি" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(200,168,71,0.3);" crossorigin="anonymous" onerror="this.src=\'https://via.placeholder.com/32x32?text=👤\'"></td>' +
-          '<td>'+(v.name||'—')+'</td><td>'+(v.mobile||'—')+'</td><td>'+(v.address||'—')+'</td><td>'+(v.batch||'—')+'</td><td>'+(v.time||'—')+'</td></tr>'
+          '<td>'+(v.name||'—')+'</td><td>'+(v.mobile||'—')+'</td><td>'+(v.address||'—')+'</td><td>'+(v.batch||'—')+'</td><td>'+(v.time||'—')+'</td>'+
+          '<td><button class="btn-sm btn-del" onclick="deleteVisitor(\''+date+'\',\''+k+'\',\''+encodeURIComponent(v.name||'')+'\')">🗑️</button></td></tr>'
         ).join('');
+      });
+    }
+
+    function deleteVisitor(dateKey, recordKey, encName) {
+      var label = decodeURIComponent(encName);
+      SctcDelete.withUndo({
+        refPath: 'sabuj/attendance-visitors/' + dateKey + '/' + recordKey,
+        label: label + ' (অতিথি)',
+        confirmText: '🗑️ "' + label + '" অতিথির লগ মুছবেন? (5s undo)',
+        auditAction: 'delete-visitor',
+        auditTarget: 'attendance-visitors/' + dateKey + '/' + recordKey
       });
     }
 
@@ -956,6 +1344,283 @@
       db.ref('sabuj/attendance-settings/gracePeriod').set(val).then(() => { gracePeriodMinutes = val; alert('✅ সেভ হয়েছে!'); });
     }
     function copyLink() { navigator.clipboard.writeText(document.getElementById('attendanceLink').value).then(() => alert('✅ কপি হয়েছে!')); }
+
+    // =========== HOLIDAY MANAGEMENT ===========
+    let allHolidays = {}; // { 'YYYY-MM-DD': 'Holiday Name' }
+
+    function loadHolidays() {
+      db.ref('sabuj/attendance-holidays').on('value', snap => {
+        allHolidays = snap.val() || {};
+        renderHolidayList();
+      });
+    }
+
+    function renderHolidayList() {
+      const tbody = document.getElementById('holidayTableBody');
+      if (!tbody) return;
+      const entries = Object.entries(allHolidays).sort((a,b) => b[0].localeCompare(a[0]));
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);">এখনো কোনো ছুটি যোগ করা হয়নি</td></tr>'; return; }
+      tbody.innerHTML = entries.map(([date, name]) => {
+        const d = new Date(date);
+        const niceDate = d.toLocaleDateString('bn-BD', { day:'numeric', month:'long', year:'numeric', weekday:'short' });
+        return '<tr><td style="color:var(--gold);font-weight:700;font-family:monospace;">'+date+'<br><span style="font-size:10px;color:var(--text-muted);font-weight:normal;">'+niceDate+'</span></td>'+
+          '<td>'+escapeHtml(name)+'</td>'+
+          '<td><button class="btn-sm btn-del" onclick="deleteHoliday(\''+date+'\',\''+encodeURIComponent(name)+'\')">🗑️</button></td></tr>';
+      }).join('');
+    }
+
+    function addHoliday() {
+      const date = document.getElementById('holidayDate').value;
+      const name = document.getElementById('holidayName').value.trim();
+      if (!date || !name) return alert('❌ তারিখ ও নাম দুটোই দিন!');
+      if (allHolidays[date]) { if (!confirm('⚠️ এই তারিখে ছুটি আছে: "'+allHolidays[date]+'"। ওভাররাইট করবেন?')) return; }
+      db.ref('sabuj/attendance-holidays/'+date).set(name).then(() => {
+        alert('✅ ছুটি যোগ হয়েছে!');
+        document.getElementById('holidayDate').value = '';
+        document.getElementById('holidayName').value = '';
+      }).catch(err => alert('❌ '+err.message));
+    }
+
+    function deleteHoliday(date, encName) {
+      if (!confirm('⚠️ "'+decodeURIComponent(encName)+'" ('+date+') মুছবেন?')) return;
+      db.ref('sabuj/attendance-holidays/'+date).remove().then(() => alert('✅ মুছে ফেলা হয়েছে!'));
+    }
+
+    // =========== PERSONAL QR ===========
+    let currentPersonalQrId = '';
+    let currentPersonalQrName = '';
+    function openPersonalQrModal(studentKey) {
+      const s = allStudents[studentKey];
+      if (!s) return;
+      if (!s.uniqueId) return alert('❌ এই শিক্ষার্থীর Unique ID নেই! আগে ID বরাদ্দ করুন।');
+      currentPersonalQrId = s.uniqueId;
+      currentPersonalQrName = s.name || '';
+      document.getElementById('personalQrName').textContent = (s.name||'—') + ' • ' + s.uniqueId;
+      document.getElementById('personalQrId').textContent = 'আইডি: ' + s.uniqueId;
+      const url = window.location.origin + '/attendance.html?id=' + encodeURIComponent(s.uniqueId);
+      document.getElementById('personalQrUrl').textContent = url;
+      const div = document.getElementById('personalQrCanvas');
+      div.innerHTML = '';
+      try {
+        new QRCode(div, { text: url, width: 240, height: 240, colorDark: '#0d3d1f', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+      } catch(e) { alert('❌ QR জেনারেট ব্যর্থ!'); return; }
+      document.getElementById('personalQrModal').classList.add('show');
+    }
+    function closePersonalQrModal() { document.getElementById('personalQrModal').classList.remove('show'); }
+
+    function getPersonalQrDataUrl() {
+      return new Promise((resolve, reject) => {
+        const div = document.getElementById('personalQrCanvas');
+        const canvas = div.querySelector('canvas');
+        if (canvas) { try { resolve(canvas.toDataURL('image/png')); return; } catch(e){ reject(e); return; } }
+        const img = div.querySelector('img');
+        if (!img) { reject(new Error('QR not ready')); return; }
+        const ex = () => {
+          try {
+            if (img.src && img.src.indexOf('data:image/') === 0) return resolve(img.src);
+            const c = document.createElement('canvas');
+            c.width = img.naturalWidth || 240; c.height = img.naturalHeight || 240;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            resolve(c.toDataURL('image/png'));
+          } catch(e) { reject(e); }
+        };
+        if (img.complete && img.naturalWidth) ex(); else { img.onload = ex; img.onerror = () => reject(new Error('load fail')); }
+      });
+    }
+
+    async function downloadPersonalQR() {
+      try {
+        const dataUrl = await getPersonalQrDataUrl();
+        const blob = await (await fetch(dataUrl)).blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl; a.download = 'SCTC-QR-'+currentPersonalQrId+'.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+      } catch(e) { alert('❌ ডাউনলোড ব্যর্থ!'); }
+    }
+
+    async function printPersonalQR() {
+      try {
+        const dataUrl = await getPersonalQrDataUrl();
+        const url = document.getElementById('personalQrUrl').textContent;
+        const w = window.open('', '_blank', 'width=700,height=900');
+        if (!w) return alert('❌ Popup allow করুন!');
+        w.document.open();
+        w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>QR - '+escapeHtml(currentPersonalQrId)+'</title><style>body{margin:0;font-family:sans-serif;padding:30px;text-align:center;color:#0d3d1f;} h1{font-size:22px;margin:0 0 4px;} h2{font-size:18px;margin:0 0 4px;color:#c8a847;font-family:monospace;} p{font-size:13px;color:#475569;margin:4px 0;word-break:break-all;} .qr{max-width:340px;width:100%;border:8px solid #c8a847;border-radius:18px;padding:12px;background:#fff;margin:14px auto;}</style></head><body><h1>সবুজ কম্পিউটার ট্রেনিং সেন্টার</h1><p>ব্যক্তিগত উপস্থিতি QR</p><h2>'+escapeHtml(currentPersonalQrId)+'</h2><p>'+escapeHtml(currentPersonalQrName)+'</p><img class="qr" id="qi" src="'+dataUrl+'" alt="QR"><p>'+escapeHtml(url)+'</p></body></html>');
+        w.document.close();
+        const im = w.document.getElementById('qi');
+        const go = () => { w.focus(); setTimeout(() => w.print(), 200); };
+        if (im && im.complete) go(); else if (im) im.onload = go; else go();
+        w.onafterprint = () => w.close();
+      } catch(e) { alert('❌ প্রিন্ট ব্যর্থ!'); }
+    }
+
+    // =========== BULK IMPORT BD HOLIDAYS ===========
+    const BD_HOLIDAYS = {
+      2025: {
+        '2025-02-21': 'আন্তর্জাতিক মাতৃভাষা দিবস',
+        '2025-03-17': 'জাতির পিতার জন্মদিন ও শিশু দিবস',
+        '2025-03-26': 'স্বাধীনতা ও জাতীয় দিবস',
+        '2025-03-31': 'ঈদ-উল-ফিতর',
+        '2025-04-01': 'ঈদ-উল-ফিতর (২য় দিন)',
+        '2025-04-14': 'পহেলা বৈশাখ',
+        '2025-05-01': 'মে দিবস',
+        '2025-06-07': 'ঈদ-উল-আযহা',
+        '2025-06-08': 'ঈদ-উল-আযহা (২য় দিন)',
+        '2025-08-15': 'জাতীয় শোক দিবস',
+        '2025-10-02': 'দুর্গা পূজা (বিজয়া দশমী)',
+        '2025-12-16': 'বিজয় দিবস',
+        '2025-12-25': 'বড়দিন'
+      },
+      2026: {
+        '2026-02-21': 'আন্তর্জাতিক মাতৃভাষা দিবস',
+        '2026-03-17': 'জাতির পিতার জন্মদিন ও শিশু দিবস',
+        '2026-03-20': 'ঈদ-উল-ফিতর',
+        '2026-03-21': 'ঈদ-উল-ফিতর (২য় দিন)',
+        '2026-03-26': 'স্বাধীনতা ও জাতীয় দিবস',
+        '2026-04-14': 'পহেলা বৈশাখ',
+        '2026-05-01': 'মে দিবস',
+        '2026-05-27': 'ঈদ-উল-আযহা',
+        '2026-05-28': 'ঈদ-উল-আযহা (২য় দিন)',
+        '2026-08-15': 'জাতীয় শোক দিবস',
+        '2026-09-21': 'দুর্গা পূজা (বিজয়া দশমী)',
+        '2026-12-16': 'বিজয় দিবস',
+        '2026-12-25': 'বড়দিন'
+      },
+      2027: {
+        '2027-02-21': 'আন্তর্জাতিক মাতৃভাষা দিবস',
+        '2027-03-17': 'জাতির পিতার জন্মদিন ও শিশু দিবস',
+        '2027-03-10': 'ঈদ-উল-ফিতর',
+        '2027-03-11': 'ঈদ-উল-ফিতর (২য় দিন)',
+        '2027-03-26': 'স্বাধীনতা ও জাতীয় দিবস',
+        '2027-04-14': 'পহেলা বৈশাখ',
+        '2027-05-01': 'মে দিবস',
+        '2027-05-17': 'ঈদ-উল-আযহা',
+        '2027-05-18': 'ঈদ-উল-আযহা (২য় দিন)',
+        '2027-08-15': 'জাতীয় শোক দিবস',
+        '2027-10-09': 'দুর্গা পূজা (বিজয়া দশমী)',
+        '2027-12-16': 'বিজয় দিবস',
+        '2027-12-25': 'বড়দিন'
+      }
+    };
+
+    function populateBulkYearSelect() {
+      const sel = document.getElementById('bulkYearSelect');
+      if (!sel || sel.options.length) return;
+      const cur = new Date().getFullYear();
+      Object.keys(BD_HOLIDAYS).forEach(y => {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y + ' সাল';
+        if (parseInt(y) === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+
+    function bulkImportBDHolidays() {
+      const sel = document.getElementById('bulkYearSelect');
+      const year = sel ? sel.value : String(new Date().getFullYear());
+      const list = BD_HOLIDAYS[year];
+      if (!list) return alert('❌ এই বছরের ডেটা নেই!');
+      const existing = Object.keys(list).filter(d => allHolidays[d]).length;
+      const newOnes = Object.keys(list).length - existing;
+      if (!confirm('🇧🇩 ' + year + ' সালের ' + Object.keys(list).length + ' টি সরকারি ছুটি যোগ হবে।\n\n• নতুন: ' + newOnes + '\n• ইতিমধ্যে আছে: ' + existing + ' (overwrite হবে)\n\nচালিয়ে যাবেন?')) return;
+      const updates = {};
+      Object.entries(list).forEach(([date, name]) => { updates[date] = name; });
+      db.ref('sabuj/attendance-holidays').update(updates).then(() => {
+        alert('✅ ' + Object.keys(list).length + ' টি ছুটি যোগ হয়েছে!');
+      }).catch(err => alert('❌ ' + err.message));
+    }
+
+    // =========== LEAVE APPLICATIONS ===========
+    let allLeaves = {};
+    let leaveFilter = 'pending';
+
+    function loadLeaves() {
+      db.ref('sabuj/attendance-leaves').on('value', snap => {
+        allLeaves = snap.val() || {};
+        renderLeaveList();
+        updateLeaveBadge();
+      });
+    }
+
+    function updateLeaveBadge() {
+      const pending = Object.values(allLeaves).filter(l => l && l.status === 'pending').length;
+      const b = document.getElementById('leavePendingBadge');
+      if (!b) return;
+      if (pending > 0) { b.textContent = pending; b.style.display = 'inline-block'; }
+      else b.style.display = 'none';
+    }
+
+    function filterLeaves(f) {
+      leaveFilter = f;
+      ['P','A','R','All'].forEach(k => {
+        const el = document.getElementById('lvFilter'+k);
+        if (el) el.style.background = '#e2e8f0';
+      });
+      const map = { pending:'P', approved:'A', rejected:'R', all:'All' };
+      const active = document.getElementById('lvFilter'+map[f]);
+      if (active) active.style.background = f==='pending'?'#fbbf24':(f==='approved'?'#86efac':(f==='rejected'?'#fca5a5':'#cbd5e1'));
+      renderLeaveList();
+    }
+
+    function renderLeaveList() {
+      const tbody = document.getElementById('leaveTableBody');
+      if (!tbody) return;
+      let entries = Object.entries(allLeaves);
+      if (leaveFilter !== 'all') entries = entries.filter(([k,l]) => l && l.status === leaveFilter);
+      entries.sort((a,b) => (b[1].submittedAt||0) - (a[1].submittedAt||0));
+      if (!entries.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">কোনো আবেদন নেই</td></tr>'; return; }
+      tbody.innerHTML = entries.map(([id, l]) => {
+        const statusBadge = l.status === 'pending' ? '<span style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:10px;font-size:11px;">⏳ অপেক্ষমান</span>'
+          : l.status === 'approved' ? '<span style="background:#86efac;color:#064e3b;padding:2px 8px;border-radius:10px;font-size:11px;">✅ অনুমোদিত</span>'
+          : '<span style="background:#fca5a5;color:#7f1d1d;padding:2px 8px;border-radius:10px;font-size:11px;">❌ বাতিল</span>';
+        const dateRange = l.fromDate === l.toDate ? l.fromDate : (l.fromDate + ' → ' + l.toDate);
+        const actions = l.status === 'pending'
+          ? '<button class="btn-sm" onclick="approveLeave(\''+id+'\')" style="background:#16a34a;color:#fff;padding:4px 10px;border-radius:5px;border:none;cursor:pointer;margin-right:4px;">✅</button>'+
+            '<button class="btn-sm" onclick="rejectLeave(\''+id+'\')" style="background:#dc2626;color:#fff;padding:4px 10px;border-radius:5px;border:none;cursor:pointer;margin-right:4px;">❌</button>'+
+            '<button class="btn-sm" onclick="deleteLeave(\''+id+'\')" style="background:#64748b;color:#fff;padding:4px 8px;border-radius:5px;border:none;cursor:pointer;">🗑️</button>'
+          : '<button class="btn-sm" onclick="deleteLeave(\''+id+'\')" style="background:#64748b;color:#fff;padding:4px 8px;border-radius:5px;border:none;cursor:pointer;">🗑️</button>';
+        return '<tr><td><strong>'+escapeHtml(l.studentName||'—')+'</strong><br><span style="font-size:11px;color:var(--text-muted);font-family:monospace;">'+escapeHtml(l.uniqueId||l.phone||'—')+'</span></td>'+
+          '<td style="font-family:monospace;font-size:12px;">'+dateRange+'</td>'+
+          '<td style="font-size:12px;max-width:200px;">'+escapeHtml(l.reason||'—')+'</td>'+
+          '<td>'+statusBadge+'</td>'+
+          '<td>'+actions+'</td></tr>';
+      }).join('');
+    }
+
+    function approveLeave(id) {
+      const l = allLeaves[id]; if (!l) return;
+      if (!confirm('✅ "'+(l.studentName||'')+'" এর '+(l.fromDate)+(l.fromDate!==l.toDate?(' → '+l.toDate):'')+' ছুটি অনুমোদন করবেন?\nএই দিনগুলো অ্যাটেনডেন্স থেকে বাদ যাবে।')) return;
+      db.ref('sabuj/attendance-leaves/'+id).update({ status:'approved', reviewedAt: Date.now() })
+        .then(()=>{ SctcAudit.log('approve-leave', 'attendance-leaves/'+id, { student:l.studentName, from:l.fromDate, to:l.toDate }); SctcToast.show('✅ অনুমোদিত!', { variant:'success' }); });
+    }
+    function rejectLeave(id) {
+      const l = allLeaves[id]; if (!l) return;
+      if (!confirm('❌ "'+(l.studentName||'')+'" এর ছুটি বাতিল করবেন?')) return;
+      db.ref('sabuj/attendance-leaves/'+id).update({ status:'rejected', reviewedAt: Date.now() })
+        .then(()=>{ SctcAudit.log('reject-leave', 'attendance-leaves/'+id, { student:l.studentName }); SctcToast.show('✅ বাতিল হয়েছে', { variant:'warn' }); });
+    }
+    function deleteLeave(id) {
+      var l = allLeaves[id] || {};
+      var label = (l.studentName || '—') + ' এর ছুটি';
+      SctcDelete.withUndo({
+        refPath: 'sabuj/attendance-leaves/' + id,
+        label: label,
+        confirmText: '🗑️ "' + label + '" আবেদন মুছবেন? (5s undo)',
+        auditAction: 'delete-leave',
+        auditTarget: 'attendance-leaves/' + id
+      });
+    }
+
+    // Init holidays + leaves after auth
+    document.addEventListener('DOMContentLoaded', function() {
+      try { loadHolidays(); } catch(e) {}
+      try { loadLeaves(); } catch(e) {}
+      try { populateBulkYearSelect(); } catch(e) {}
+    });
   </script>
 </body>
 </html>

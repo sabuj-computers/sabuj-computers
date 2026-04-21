@@ -131,149 +131,270 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function verifyEmployee(empId) {
-      document.getElementById('certId').value = empId;
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('resultBox').style.display = 'none';
-
-      db.ref('sabuj/attendance-employees').once('value').then(function(snap) {
-        document.getElementById('loader').style.display = 'none';
-        var data = snap.val() || {};
-        var foundEmp = null;
-        for (var k in data) {
-          if (data[k].uniqueId === empId) { foundEmp = data[k]; break; }
-        }
-        var resultBox = document.getElementById('resultBox');
-        if (foundEmp) {
-          var imgHtml = foundEmp.photo
-            ? '<img src="' + foundEmp.photo + '" class="student-img" style="display:block;">'
-            : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👔</div>';
-          resultBox.className = 'result success';
-          resultBox.innerHTML =
-            '<div class="icon-large">✅</div>' +
-            '<h3 style="color:#166534;margin:0 0 15px 0;font-size:22px;">কর্মী যাচাই সফল!</h3>' +
-            '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:15px 0;">' +
-              imgHtml +
-              '<div style="background:#fff;color:var(--g1);padding:4px 14px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid #bbf7d0;">👔 প্রতিষ্ঠানের কর্মী</div>' +
-            '</div>' +
-            '<h2 style="margin:5px 0;color:var(--g1);font-size:24px;">' + (foundEmp.name || '—') + '</h2>' +
-            '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">কর্মী আইডি: ' + foundEmp.uniqueId + '</p>' +
-            (foundEmp.designation ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">পদবী: ' + foundEmp.designation + '</p>' : '') +
-            (foundEmp.shift ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">শিফট: ' + foundEmp.shift + '</p>' : '') +
-            '<div style="margin-top:20px;padding-top:15px;border-top:1px dashed #bbf7d0;">' +
-            '<p style="margin:0;color:#15803d;font-size:14px;">এই ব্যক্তি সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত কর্মী।</p>' +
-            '</div>';
-        } else {
-          resultBox.className = 'result error';
-          resultBox.innerHTML =
-            '<div class="icon-large">❌</div>' +
-            '<h3 style="color:#991b1b;margin:0 0 10px 0;font-size:22px;">কর্মী খুঁজে পাওয়া যায়নি!</h3>' +
-            '<p style="margin:0;color:#7f1d1d;font-size:15px;">এই কর্মী আইডিটি আমাদের রেকর্ডে নেই। দয়া করে কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>';
-        }
-        resultBox.style.display = 'block';
-      }).catch(function(error) {
-        document.getElementById('loader').style.display = 'none';
-        alert('সার্ভার এরর! দয়া করে একটু পর আবার চেষ্টা করুন।');
-        console.error(error);
-      });
+    function showError(title, msg) {
+      var resultBox = document.getElementById('resultBox');
+      resultBox.className = 'result error';
+      resultBox.innerHTML =
+        '<div class="icon-large">❌</div>' +
+        '<h3 style="color:#991b1b;margin:0 0 10px 0;font-size:22px;">' + title + '</h3>' +
+        '<p style="margin:0;color:#7f1d1d;font-size:15px;">' + msg + '</p>';
+      resultBox.style.display = 'block';
     }
 
-    function verifyCert(id = null) {
-      const certId = id || document.getElementById('certId').value.trim();
-      if(!certId) {
-        alert('অনুগ্রহ করে একটি আইডি বা সনদ নম্বর প্রদান করুন।');
-        return;
-      }
-      
+    function renderPendingApplication(app, appId) {
+      var resultBox = document.getElementById('resultBox');
+      var photo = app.personal && app.personal.photo;
+      var imgHtml = photo
+        ? '<img src="' + photo + '" class="student-img">'
+        : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#fef3c7;font-size:40px;color:#a0b5a8;">📋</div>';
+      var name = (app.personal && (app.personal.nameBn || app.personal.nameEn)) || '—';
+      var statusLabel = app.status === 'rejected' ? '❌ বাতিল হয়েছে' : (app.status === 'pending' ? '⏳ যাচাই অপেক্ষমান' : '⏳ প্রক্রিয়াধীন');
+      var statusColor = app.status === 'rejected' ? '#dc2626' : '#d97706';
+      var bgGrad = app.status === 'rejected'
+        ? 'linear-gradient(135deg, #fef2f2, #fee2e2)'
+        : 'linear-gradient(135deg, #fffbeb, #fef3c7)';
+      var borderClr = app.status === 'rejected' ? '#ef4444' : '#f59e0b';
+      var courseName = app.enrollment && app.enrollment.courseId === 'BTEB'
+        ? 'Computer Office Application (BTEB)'
+        : 'Computer Office Application (Foundation)';
+
+      resultBox.className = 'result';
+      resultBox.style.borderColor = borderClr;
+      resultBox.style.background = bgGrad;
+      resultBox.innerHTML =
+        '<div class="icon-large">📋</div>' +
+        '<h3 style="color:' + statusColor + ';margin:0 0 10px 0;font-size:22px;">আবেদন পাওয়া গেছে</h3>' +
+        '<div style="background:#fff;display:inline-block;padding:6px 16px;border-radius:99px;font-size:13px;font-weight:700;color:' + statusColor + ';border:1px solid ' + borderClr + ';margin-bottom:15px;">' + statusLabel + '</div>' +
+        '<div>' + imgHtml + '</div>' +
+        '<h2 style="margin:10px 0 5px;color:var(--g1);font-size:22px;">' + name + '</h2>' +
+        '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:15px;">📋 আবেদন আইডি: ' + appId + '</p>' +
+        '<p style="margin:5px 0 0;color:#6b8c76;font-size:14px;">📚 কোর্স: ' + courseName + '</p>' +
+        '<div style="margin-top:18px;padding:14px;background:#fff;border-radius:12px;border:1px dashed ' + borderClr + ';text-align:left;">' +
+          '<p style="margin:0 0 6px;color:' + statusColor + ';font-weight:700;font-size:14px;">ℹ️ অনুগ্রহ করে লক্ষ্য করুন:</p>' +
+          '<p style="margin:0;color:#444;font-size:13px;line-height:1.7;">' +
+            (app.status === 'rejected'
+              ? 'আপনার আবেদনটি বাতিল করা হয়েছে। বিস্তারিত জানতে অফিসে যোগাযোগ করুন অথবা পুনরায় আবেদন করুন।'
+              : 'আপনার আবেদনটি এখনও অনুমোদনের অপেক্ষায় রয়েছে। অনুমোদনের পর আপনি একটি <strong>শিক্ষার্থী আইডি (Unique ID)</strong> পাবেন। সেটি দিয়েই ভবিষ্যতে যাচাই করতে হবে।') +
+          '</p>' +
+        '</div>' +
+        '<a href="admission-form.html?app=' + encodeURIComponent(appId) + '" style="display:inline-block;margin-top:15px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:10px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">📄 আবেদন কপি দেখুন</a>';
+      resultBox.style.display = 'block';
+    }
+
+    function renderApprovedAppRedirect(app, appId, uniqueId) {
+      var resultBox = document.getElementById('resultBox');
+      var name = (app.personal && (app.personal.nameBn || app.personal.nameEn)) || '—';
+      resultBox.className = 'result';
+      resultBox.style.borderColor = '#3b82f6';
+      resultBox.style.background = 'linear-gradient(135deg, #eff6ff, #dbeafe)';
+      resultBox.innerHTML =
+        '<div class="icon-large">🎓</div>' +
+        '<h3 style="color:#1e40af;margin:0 0 10px 0;font-size:22px;">আপনার আবেদন অনুমোদিত হয়েছে!</h3>' +
+        '<p style="margin:0 0 15px;color:#1e3a8a;font-size:15px;">প্রিয় <strong>' + name + '</strong>, আপনি এখন একজন নিবন্ধিত শিক্ষার্থী।</p>' +
+        '<div style="background:#fff;padding:18px;border-radius:14px;border:2px dashed #3b82f6;margin:15px 0;">' +
+          '<p style="margin:0 0 6px;color:#475569;font-size:13px;">আপনার শিক্ষার্থী আইডি (Unique ID):</p>' +
+          '<p style="margin:0;color:#1e40af;font-size:24px;font-weight:800;letter-spacing:1px;font-family:monospace;">' + uniqueId + '</p>' +
+        '</div>' +
+        '<div style="background:#fff;padding:14px;border-radius:12px;border:1px dashed #93c5fd;text-align:left;margin-top:10px;">' +
+          '<p style="margin:0;color:#1e40af;font-weight:700;font-size:14px;">ℹ️ গুরুত্বপূর্ণ:</p>' +
+          '<p style="margin:6px 0 0;color:#444;font-size:13px;line-height:1.7;">এখন থেকে যাচাই, অ্যাটেনডেন্স ও পোর্টালের জন্য আপনার <strong>শিক্ষার্থী আইডি</strong> ব্যবহার করুন — পুরোনো Application ID নয়।</p>' +
+        '</div>' +
+        '<button onclick="verifyCert(\'' + uniqueId + '\')" style="margin-top:15px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border:none;padding:12px 26px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">🔍 শিক্ষার্থী আইডি দিয়ে যাচাই করুন</button>';
+      resultBox.style.display = 'block';
+    }
+
+    function renderEmployee(foundEmp) {
+      var resultBox = document.getElementById('resultBox');
+      var imgHtml = foundEmp.photo
+        ? '<img src="' + foundEmp.photo + '" class="student-img" style="display:block;">'
+        : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👔</div>';
+      resultBox.className = 'result success';
+      resultBox.innerHTML =
+        '<div class="icon-large">✅</div>' +
+        '<h3 style="color:#166534;margin:0 0 15px 0;font-size:22px;">কর্মী যাচাই সফল!</h3>' +
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:15px 0;">' +
+          imgHtml +
+          '<div style="background:#fff;color:var(--g1);padding:4px 14px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid #bbf7d0;">👔 প্রতিষ্ঠানের কর্মী</div>' +
+        '</div>' +
+        '<h2 style="margin:5px 0;color:var(--g1);font-size:24px;">' + (foundEmp.name || '—') + '</h2>' +
+        '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">কর্মী আইডি: ' + foundEmp.uniqueId + '</p>' +
+        (foundEmp.designation ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">পদবী: ' + foundEmp.designation + '</p>' : '') +
+        (foundEmp.shift ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">শিফট: ' + foundEmp.shift + '</p>' : '') +
+        '<div style="margin-top:20px;padding-top:15px;border-top:1px dashed #bbf7d0;">' +
+          '<p style="margin:0;color:#15803d;font-size:14px;">এই ব্যক্তি সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত কর্মী।</p>' +
+        '</div>';
+      resultBox.style.display = 'block';
+    }
+
+    function renderStudent(foundApp, foundAppId, attendanceUniqueId) {
+      var resultBox = document.getElementById('resultBox');
+      var courseName = foundApp.enrollment && foundApp.enrollment.courseId === 'BTEB'
+        ? 'Computer Office Application (BTEB)'
+        : 'Computer Office Application (Foundation)';
+      var photo = foundApp.personal && foundApp.personal.photo;
+      var imgHtml = photo
+        ? '<img src="' + photo + '" class="student-img">'
+        : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👤</div>';
+      var name = (foundApp.personal && (foundApp.personal.nameBn || foundApp.personal.nameEn)) || '—';
+      var regHtml = foundApp.regNo
+        ? '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">📝 Registration No: ' + foundApp.regNo + '</p>'
+        : '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">📋 Application ID: ' + foundAppId + '</p>';
+      var certHtml = (foundApp.certificate && foundApp.certificate.sonodNo)
+        ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">📜 সনদ নম্বর: ' + foundApp.certificate.sonodNo + '</p>'
+        : '';
+      var uniqueHtml = attendanceUniqueId
+        ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">🆔 শিক্ষার্থী আইডি: <strong style="color:var(--g1);">' + attendanceUniqueId + '</strong></p>'
+        : '';
+
+      resultBox.className = 'result success';
+      resultBox.innerHTML =
+        '<div class="icon-large">✅</div>' +
+        '<h3 style="color:#166534;margin:0 0 15px 0;font-size:22px;">যাচাই সফল!</h3>' +
+        imgHtml +
+        '<h2 style="margin:15px 0 5px;color:var(--g1);font-size:24px;">' + name + '</h2>' +
+        regHtml +
+        uniqueHtml +
+        certHtml +
+        '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">📚 কোর্স: ' + courseName + '</p>' +
+        '<div style="margin-top:20px;padding-top:15px;border-top:1px dashed #bbf7d0;">' +
+          '<p style="margin:0;color:#15803d;font-size:14px;">এই শিক্ষার্থী সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত ছাত্র/ছাত্রী।</p>' +
+        '</div>';
+      resultBox.style.display = 'block';
+    }
+
+    function renderAttendanceStudent(att) {
+      var resultBox = document.getElementById('resultBox');
+      var imgHtml = att.photo
+        ? '<img src="' + att.photo + '" class="student-img">'
+        : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👤</div>';
+      resultBox.className = 'result success';
+      resultBox.innerHTML =
+        '<div class="icon-large">✅</div>' +
+        '<h3 style="color:#166534;margin:0 0 15px 0;font-size:22px;">শিক্ষার্থী যাচাই সফল!</h3>' +
+        imgHtml +
+        '<h2 style="margin:15px 0 5px;color:var(--g1);font-size:24px;">' + (att.name || '—') + '</h2>' +
+        '<p style="margin:0;color:#4a6040;font-weight:bold;font-size:16px;">🆔 শিক্ষার্থী আইডি: ' + att.uniqueId + '</p>' +
+        (att.batch ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">ব্যাচ: ' + att.batch + '</p>' : '') +
+        (att.course ? '<p style="margin:5px 0 0;color:#6b8c76;font-size:15px;">কোর্স: ' + att.course + '</p>' : '') +
+        '<div style="margin-top:20px;padding-top:15px;border-top:1px dashed #bbf7d0;">' +
+          '<p style="margin:0;color:#15803d;font-size:14px;">এই শিক্ষার্থী সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত ছাত্র/ছাত্রী।</p>' +
+        '</div>';
+      resultBox.style.display = 'block';
+    }
+
+    // Master verify — searches applications + attendance-students + attendance-employees
+    function verifyCert(id) {
+      var certId = (id || document.getElementById('certId').value || '').trim();
+      if (!certId) { alert('অনুগ্রহ করে একটি আইডি বা সনদ নম্বর প্রদান করুন।'); return; }
+
       document.getElementById('certId').value = certId;
       document.getElementById('loader').style.display = 'block';
       document.getElementById('resultBox').style.display = 'none';
 
-      db.ref('sabuj/applications').once('value').then(snap => {
-        document.getElementById('loader').style.display = 'none';
-        const data = snap.val();
-        const resultBox = document.getElementById('resultBox');
-        
-        let foundApp = null;
-        let foundAppId = null;
+      var certIdUpper = certId.toUpperCase();
 
-        if (data) {
-          // Check if it's an application ID
-          if (data[certId]) {
-            foundApp = data[certId];
-            foundAppId = certId;
-          } else {
-            // Search by Certificate Number or Registration Number
-            for (const key in data) {
-              if ((data[key].certificate && data[key].certificate.sonodNo === certId) || 
-                  (data[key].regNo && data[key].regNo === certId)) {
-                foundApp = data[key];
-                foundAppId = key;
-                break;
+      Promise.all([
+        db.ref('sabuj/applications').once('value'),
+        db.ref('sabuj/attendance-students').once('value'),
+        db.ref('sabuj/attendance-employees').once('value')
+      ]).then(function(results) {
+        document.getElementById('loader').style.display = 'none';
+        var apps = results[0].val() || {};
+        var attStudents = results[1].val() || {};
+        var attEmployees = results[2].val() || {};
+
+        // 1. Direct application key match
+        var foundApp = null, foundAppId = null;
+        if (apps[certId]) { foundApp = apps[certId]; foundAppId = certId; }
+
+        // 2. Search applications by Reg No / Cert No
+        if (!foundApp) {
+          for (var key in apps) {
+            var a = apps[key];
+            if (!a) continue;
+            var regMatch = a.regNo && String(a.regNo).toUpperCase() === certIdUpper;
+            var certMatch = a.certificate && a.certificate.sonodNo && String(a.certificate.sonodNo).toUpperCase() === certIdUpper;
+            if (regMatch || certMatch) { foundApp = a; foundAppId = key; break; }
+          }
+        }
+
+        // 3. Search attendance-students by Unique ID
+        var attendanceUniqueId = null;
+        var attStudentEntry = null;
+        for (var sk in attStudents) {
+          var s = attStudents[sk];
+          if (s && s.uniqueId && String(s.uniqueId).toUpperCase() === certIdUpper) {
+            attStudentEntry = s; attendanceUniqueId = s.uniqueId; break;
+          }
+        }
+        // If matched in attendance, link to application via linkedAppId or phone
+        if (attStudentEntry && !foundApp) {
+          if (attStudentEntry.linkedAppId && apps[attStudentEntry.linkedAppId]) {
+            foundApp = apps[attStudentEntry.linkedAppId];
+            foundAppId = attStudentEntry.linkedAppId;
+          } else if (attStudentEntry.phone) {
+            for (var ak in apps) {
+              if (apps[ak] && apps[ak].personal && apps[ak].personal.phone === attStudentEntry.phone) {
+                foundApp = apps[ak]; foundAppId = ak; break;
               }
             }
           }
         }
+        // If app found, look up its attendance unique id (if not set yet)
+        if (foundApp && !attendanceUniqueId) {
+          for (var sk2 in attStudents) {
+            var s2 = attStudents[sk2];
+            if (s2 && (s2.linkedAppId === foundAppId || (s2.phone && foundApp.personal && s2.phone === foundApp.personal.phone))) {
+              attendanceUniqueId = s2.uniqueId || null; break;
+            }
+          }
+        }
 
-        // Check if data exists and status is approved/active
-        if(foundApp && (foundApp.status === 'approved' || foundApp.status === 'active')) {
-          const courseName = foundApp.enrollment?.courseId === 'BTEB' ? 'Computer Office Application (BTEB)' : 'Computer Office Application (Foundation)';
-          const imgHtml = foundApp.personal?.photo ? `<img src="${foundApp.personal.photo}" class="student-img">` : '<div class="student-img" style="display:flex;align-items:center;justify-content:center;background:#e4ece7;font-size:40px;color:#a0b5a8;">👤</div>';
-          const certNoHtml = foundApp.certificate?.sonodNo ? `<p style="margin: 5px 0 0; color: #6b8c76; font-size: 15px;">সনদ নম্বর: ${foundApp.certificate.sonodNo}</p>` : '';
-          
-          resultBox.className = 'result success';
-          resultBox.innerHTML = `
-            <div class="icon-large">✅</div>
-            <h3 style="color: #166534; margin: 0 0 15px 0; font-size: 22px;">সনদটি সঠিক ও ভেরিফাইড!</h3>
-            ${imgHtml}
-            <h2 style="margin: 15px 0 5px; color: var(--g1); font-size: 24px;">${foundApp.personal?.nameBn || foundApp.personal?.nameEn}</h2>
-            <p style="margin: 0; color: #4a6040; font-weight: bold; font-size: 16px;">${foundApp.regNo ? 'Registration No: ' + foundApp.regNo : 'Application ID: ' + foundAppId}</p>
-            ${certNoHtml}
-            <p style="margin: 5px 0 0; color: #6b8c76; font-size: 15px;">কোর্স: ${courseName}</p>
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #bbf7d0;">
-              <p style="margin: 0; color: #15803d; font-size: 14px;">এই শিক্ষার্থী সবুজ কম্পিউটার ট্রেনিং সেন্টারের একজন নিবন্ধিত ছাত্র/ছাত্রী।</p>
-            </div>
-          `;
-        } else {
-          // Fallback: try employee verification
-          db.ref('sabuj/attendance-employees').once('value').then(function(empSnap) {
-            var empData = empSnap.val() || {};
-            var foundEmp = null;
-            for (var k in empData) {
-              if (empData[k].uniqueId === certId) { foundEmp = empData[k]; break; }
-            }
-            if (foundEmp) {
-              verifyEmployee(certId);
-            } else {
-              resultBox.className = 'result error';
-              resultBox.innerHTML = `
-                <div class="icon-large">❌</div>
-                <h3 style="color: #991b1b; margin: 0 0 10px 0; font-size: 22px;">কোনো রেকর্ড পাওয়া যায়নি!</h3>
-                <p style="margin: 0; color: #7f1d1d; font-size: 15px;">দয়া করে সঠিক শিক্ষার্থী/কর্মী আইডি বা সনদ নম্বর প্রদান করুন অথবা কর্তৃপক্ষের সাথে যোগাযোগ করুন।</p>
-              `;
-              resultBox.style.display = 'block';
-            }
-          });
+        if (foundApp && (foundApp.status === 'approved' || foundApp.status === 'active')) {
+          // If the search term IS the application ID (not regNo/sonod), tell student to use uniqueId
+          if (certId === foundAppId && attendanceUniqueId) {
+            renderApprovedAppRedirect(foundApp, foundAppId, attendanceUniqueId);
+          } else {
+            renderStudent(foundApp, foundAppId, attendanceUniqueId);
+          }
           return;
         }
-        resultBox.style.display = 'block';
-      }).catch((error) => {
+
+        // Pending / under-review application — show "applicant copy" style info
+        if (foundApp && certId === foundAppId) {
+          renderPendingApplication(foundApp, foundAppId);
+          return;
+        }
+
+        // 4. Employee match
+        var foundEmp = null;
+        for (var ek in attEmployees) {
+          if (attEmployees[ek] && attEmployees[ek].uniqueId && String(attEmployees[ek].uniqueId).toUpperCase() === certIdUpper) {
+            foundEmp = attEmployees[ek]; break;
+          }
+        }
+        if (foundEmp) { renderEmployee(foundEmp); return; }
+
+        // 5. Standalone attendance student
+        if (attStudentEntry) { renderAttendanceStudent(attStudentEntry); return; }
+
+        showError('কোনো রেকর্ড পাওয়া যায়নি!', 'দয়া করে সঠিক Registration No, সনদ নম্বর, Application ID অথবা শিক্ষার্থী/কর্মী আইডি প্রদান করুন।');
+      }).catch(function(err) {
         document.getElementById('loader').style.display = 'none';
-        alert('সার্ভার এরর! দয়া করে একটু পর আবার চেষ্টা করুন।');
-        console.error(error);
+        console.error(err);
+        alert('সার্ভার এরর! দয়া করে একটু পর আবার চেষ্টা করুন।');
       });
     }
 
-    // Check URL params on load (For QR Code Scanning)
-    window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const empParam = urlParams.get('emp');
-      const certParam = urlParams.get('cert');
-      if(empParam) {
-        verifyEmployee(empParam);
-      } else if(certParam) {
-        verifyCert(certParam);
-      }
+    // Backward-compat for old QR codes using ?emp= param
+    function verifyEmployee(empId) { verifyCert(empId); }
+
+    window.onload = function() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var empParam = urlParams.get('emp');
+      var certParam = urlParams.get('cert') || urlParams.get('id');
+      if (empParam) verifyCert(empParam);
+      else if (certParam) verifyCert(certParam);
     };
   </script>
 

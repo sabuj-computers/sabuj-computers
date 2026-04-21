@@ -86,16 +86,16 @@
     .id-header-badge { display: inline-block; background: var(--gold); color: var(--g1); font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-top: 5px; letter-spacing: 1px; }
     .id-photo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #fff; margin: -50px auto 8px; background: #e4ece7; overflow: hidden; position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
     .id-body { padding: 0 20px 20px; }
-    .id-info-table { width: 100%; text-align: left; font-size: 12px; margin: 10px 0; border-collapse: collapse; }
-    .id-info-table td { padding: 4px 6px; }
+    .id-info-table { width: 100%; text-align: left; font-size: 12px; margin: 10px 0; border-collapse: collapse; table-layout: fixed; }
+    .id-info-table td { padding: 4px 6px; word-break: break-word; overflow-wrap: anywhere; }
     .id-info-table td:first-child { color: var(--muted); font-weight: 600; width: 80px; }
     .id-info-table td:last-child { color: var(--g1); font-weight: 700; }
     .id-qr { margin: 12px auto; width: 90px; height: 90px; padding: 5px; background: #fff; border: 2px solid #e4ece7; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
-    .id-footer { background: linear-gradient(135deg, var(--g1), var(--g2)); color: white; padding: 8px; font-size: 10px; margin-top: 10px; }
-    .id-card-back { width: 340px; margin: 20px auto 0; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.18); border: 2px solid var(--gold); text-align: center; position: relative; padding: 20px; }
+    .id-footer { background: linear-gradient(135deg, var(--g1), var(--g2)); color: white; padding: 8px; font-size: 10px; margin-top: 10px; word-break: break-word; }
+    .id-card-back { width: 340px; margin: 20px auto 0; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.18); border: 2px solid var(--gold); text-align: center; position: relative; padding: 20px; box-sizing: border-box; }
     .id-card-back::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), #e8b820, var(--gold)); }
     .id-back-title { color: var(--g1); font-weight: 700; font-size: 14px; margin: 0 0 10px; border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
-    .id-back-info { text-align: left; font-size: 12px; line-height: 1.8; color: #4a6040; }
+    .id-back-info { text-align: left; font-size: 12px; line-height: 1.7; color: #4a6040; word-break: break-word; overflow-wrap: anywhere; }
     .id-back-info strong { color: var(--g1); }
 
     /* Print Styles */
@@ -136,6 +136,10 @@
         <h2 id="studentName">লোড হচ্ছে...</h2>
         <p id="studentPhone">01XXXXXXXXX</p>
         <p id="studentCourse">কোর্স: লোড হচ্ছে...</p>
+        <p id="studentUniqueIdLine" style="margin:6px 0 0; display:none; font-size:13px;">
+          <span style="color:var(--muted);">উপস্থিতি ID:</span>
+          <span id="studentUniqueIdBadge" style="background:linear-gradient(135deg,#fef3c7,#fde68a); color:#854d0e; padding:3px 10px; border-radius:12px; font-weight:700; font-family:monospace; letter-spacing:0.5px; margin-left:4px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">—</span>
+        </p>
         <span id="studentStatus" class="badge">⏳ স্ট্যাটাস চেক করা হচ্ছে...</span>
       </div>
     </div>
@@ -202,6 +206,20 @@
 
       <div class="tab-content" id="tab-attendance">
         <h3 style="color: var(--g1); margin-top: 0;">উপস্থিতি (Attendance)</h3>
+        <div id="attUniqueIdBox" style="display:none; background:linear-gradient(135deg,#1a6b35,#2e9e52); color:#fff; padding:18px 20px; border-radius:14px; margin-bottom:15px; box-shadow:0 6px 18px rgba(26,107,53,0.25);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <p style="margin:0; font-size:12px; opacity:0.85;">আপনার উপস্থিতি ইউনিক আইডি</p>
+              <p id="attUniqueIdValue" style="margin:4px 0 0; font-size:22px; font-weight:800; font-family:monospace; letter-spacing:1px;">—</p>
+              <p id="attUniqueIdMeta" style="margin:4px 0 0; font-size:11px; opacity:0.85;"></p>
+            </div>
+            <button onclick="copyUniqueId()" style="background:rgba(255,255,255,0.2); color:#fff; border:1px solid rgba(255,255,255,0.4); padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">📋 কপি</button>
+          </div>
+          <p style="margin:10px 0 0; font-size:11px; opacity:0.9; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">⚙️ এই ID টি ব্যবহার করে QR স্ক্যান করে উপস্থিতি দিন।</p>
+        </div>
+        <div id="attNoIdBox" style="display:none; background:#fef3c7; border:1px solid #fde68a; color:#854d0e; padding:14px; border-radius:12px; margin-bottom:15px; font-size:13px;">
+          ⚠️ আপনার উপস্থিতি ইউনিক আইডি এখনো অ্যাডমিন কর্তৃক বরাদ্দ করা হয়নি। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।
+        </div>
         <div style="text-align:center; padding:30px 20px; background:linear-gradient(135deg,#f0f8f4,#e7f4ec); border-radius:12px; border:1px solid #b8dfc4; margin-bottom:15px;">
           <h2 style="color:var(--g2); font-size:48px; margin:0;" id="attPercent">০%</h2>
           <p style="color:var(--muted); margin-top:5px; font-size:14px;" id="attText">এই মাসে মোট কর্মদিবস: ০ | উপস্থিতি: ০</p>
@@ -211,6 +229,30 @@
           <h4 style="color:var(--g1); margin:0 0 10px 0; font-size:15px;">📅 সাম্প্রতিক উপস্থিতি</h4>
           <div id="attRecentList"><p style="color:var(--muted); font-size:13px; margin:0;">লোড হচ্ছে...</p></div>
         </div>
+
+        <!-- Mini Calendar -->
+        <div id="attCalendarBox" style="background:#fff; padding:15px; border-radius:12px; border:1px solid #e4ece7; margin-top:15px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h4 style="color:var(--g1); margin:0; font-size:15px;">🗓️ এই মাসের ক্যালেন্ডার</h4>
+            <div style="font-size:11px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap;">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;vertical-align:middle;margin-right:3px;"></span>উপস্থিত</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc2626;vertical-align:middle;margin-right:3px;"></span>অনুপস্থিত</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;vertical-align:middle;margin-right:3px;"></span>ছুটি</span>
+            </div>
+          </div>
+          <div id="attCalendar" style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; font-size:12px;"></div>
+        </div>
+
+        <!-- Leave Application Section -->
+        <div style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e4ece7; margin-top:15px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            <h4 style="color:var(--g1); margin:0; font-size:15px;">📝 ছুটির আবেদন</h4>
+            <button onclick="openLeaveForm()" style="background:linear-gradient(135deg,#1a6b35,#2e9e52); color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">➕ নতুন আবেদন</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin:0 0 10px;">নির্দিষ্ট দিনের জন্য ছুটির আবেদন করুন। অনুমোদিত হলে অ্যাটেনডেন্স গণনা থেকে বাদ যাবে।</p>
+          <div id="myLeavesList"><p style="color:var(--muted); font-size:12px; margin:0;">লোড হচ্ছে...</p></div>
+        </div>
+
         <p style="color:var(--muted); font-size:11px; text-align:center; margin-top:10px;">⚙️ এই ডেটা QR স্ক্যান উপস্থিতি সিস্টেম থেকে নেওয়া। আপনার ফোন নম্বর দিয়ে ম্যাচ করা হয়েছে।</p>
       </div>
 
@@ -325,10 +367,10 @@
           <!-- BACK SIDE -->
           <div class="id-card-back">
             <h4 class="id-back-title">📋 শর্তাবলী ও তথ্য</h4>
-            <div class="id-back-info">
-              <p style="margin:0 0 4px;"><strong>ঠিকানা:</strong> <span id="idAddress">—</span></p>
-              <p style="margin:0 0 4px;"><strong>রক্তের গ্রুপ:</strong> <span id="idBlood">—</span></p>
-              <p style="margin:0 0 4px;"><strong>জরুরি যোগাযোগ:</strong> <span id="idEmergencyPhone">+8801724084350</span></p>
+            <div class="id-back-info" style="word-break:break-word; overflow-wrap:anywhere;">
+              <p style="margin:0 0 4px; word-break:break-word; overflow-wrap:anywhere;"><strong>ঠিকানা:</strong> <span id="idAddress">—</span></p>
+              <p style="margin:0 0 4px; word-break:break-word;"><strong>রক্তের গ্রুপ:</strong> <span id="idBlood">—</span></p>
+              <p style="margin:0 0 4px; word-break:break-word;"><strong>জরুরি যোগাযোগ:</strong> <span id="idEmergencyPhone">+8801724084350</span></p>
               <hr style="border:0; border-top:1px dashed #ccc; margin:8px 0;">
               <ol style="padding-left:16px; margin:0; font-size:10.5px; line-height:1.7; color:#555;">
                 <li>এই কার্ড শুধুমাত্র প্রতিষ্ঠানের শিক্ষার্থীদের জন্য প্রযোজ্য।</li>
@@ -336,6 +378,12 @@
                 <li>হারিয়ে গেলে কর্তৃপক্ষকে জানান।</li>
                 <li>কোর্স শেষে কার্ড জমা দিতে হবে।</li>
               </ol>
+            </div>
+            <!-- Personal Attendance QR (auto-included on back when uniqueId assigned) -->
+            <div id="idAttQrBox" style="display:none; margin-top:12px; padding:12px 10px; background:linear-gradient(135deg,#f0f8f4,#e7f4ec); border-radius:10px; border:1px dashed var(--g2); text-align:center; overflow:hidden;">
+              <p style="margin:0 0 8px; font-size:10px; color:var(--g1); font-weight:700; line-height:1.3; word-break:break-word;">📱 ব্যক্তিগত উপস্থিতি QR — স্ক্যান করে উপস্থিতি দিন</p>
+              <div id="idAttQrCanvas" style="width:150px; height:150px; margin:0 auto; padding:6px; background:#fff; border:2px solid var(--g2); border-radius:8px; display:flex; align-items:center; justify-content:center; box-sizing:content-box; overflow:hidden;"></div>
+              <p id="idAttQrIdText" style="margin:8px 0 0; font-size:10px; color:var(--g1); font-weight:700; font-family:monospace; letter-spacing:0.5px; word-break:break-all; line-height:1.3;">—</p>
             </div>
             <div style="margin-top:12px; padding-top:10px; border-top:2px solid var(--gold); text-align:center;">
               <div id="idSignatureContainer" style="min-height:45px; display:flex; align-items:center; justify-content:center; margin-bottom:6px;">
@@ -364,7 +412,34 @@
     </div>
   </div>
 
-  <!-- Announcement Modal -->
+  <!-- Leave Application Modal -->
+  <div id="leaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:14px; max-width:440px; width:100%; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="color:var(--g1); margin:0; font-size:18px;">📝 ছুটির আবেদন</h3>
+        <button onclick="closeLeaveForm()" style="background:#fee2e2;color:#991b1b;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-weight:bold;">×</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 14px;">নির্দিষ্ট দিনের জন্য ছুটির আবেদন করুন। অ্যাডমিন অনুমোদন করলে এই দিনগুলো অ্যাটেনডেন্স থেকে বাদ যাবে।</p>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;color:#475569;font-weight:600;display:block;margin-bottom:4px;">শুরুর তারিখ *</label>
+        <input type="date" id="lvFromDate" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px;color:#475569;font-weight:600;display:block;margin-bottom:4px;">শেষ তারিখ (ঐচ্ছিক, একদিনের জন্য খালি রাখুন)</label>
+        <input type="date" id="lvToDate" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:#475569;font-weight:600;display:block;margin-bottom:4px;">কারণ *</label>
+        <textarea id="lvReason" rows="3" placeholder="যেমন: পারিবারিক অনুষ্ঠান, অসুস্থতা ইত্যাদি" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="submitLeave()" style="flex:1;background:linear-gradient(135deg,#1a6b35,#2e9e52);color:#fff;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer;">📤 জমা দিন</button>
+        <button onclick="closeLeaveForm()" style="background:#e5e7eb;color:#374151;border:none;padding:12px 20px;border-radius:8px;font-weight:600;cursor:pointer;">বাতিল</button>
+      </div>
+    </div>
+  </div>
+
+
   <div class="modal-overlay" id="announcementModal">
     <div class="modal-content">
       <button class="close-modal" onclick="closeAnnouncement()">×</button>
@@ -549,64 +624,265 @@
       return fallbackMatch;
     }
 
+    let currentStudentUniqueId = '';
+    let currentStudentAttKey = '';
+    let currentStudentPhone = '';
+
     function loadStudentAttendance(phone, personal) {
+      currentStudentPhone = phone || '';
       db.ref('sabuj/attendance-students').once('value', function(snap) {
-        const all = snap.val() || {};
-        const match = findAttendanceStudentEntry(all, phone, personal);
+        var all = snap.val() || {};
+        var match = findAttendanceStudentEntry(all, phone, personal);
 
         if (!match) {
-          document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ QR attendance profile match পাওয়া যায়নি। অ্যাডমিন attendance list e phone/name check করুন।</p>';
+          document.getElementById('attRecentList').innerHTML = '<p style="color:var(--muted); font-size:13px; margin:0;">⚠️ QR attendance profile match পাওয়া যায়নি। অ্যাডমিন attendance list e phone/name check করুন।</p>';
+          var nb = document.getElementById('attNoIdBox'); if (nb) nb.style.display = 'block';
           return;
         }
+
+        var uid = match.student.uniqueId || '';
+        currentStudentUniqueId = uid;
+        currentStudentAttKey = match.key;
+
+        if (uid) {
+          var ub = document.getElementById('attUniqueIdBox'); if (ub) ub.style.display = 'block';
+          var nb2 = document.getElementById('attNoIdBox'); if (nb2) nb2.style.display = 'none';
+          var v = document.getElementById('attUniqueIdValue'); if (v) v.textContent = uid;
+          var m = document.getElementById('attUniqueIdMeta'); if (m) m.textContent = (match.student.batch?'ব্যাচ: '+match.student.batch:'') + (match.student.name?' • '+match.student.name:'');
+          var badge = document.getElementById('studentUniqueIdBadge'); if (badge) badge.textContent = uid;
+          var bline = document.getElementById('studentUniqueIdLine'); if (bline) bline.style.display = 'block';
+          paintIdCardAttQR(uid);
+        } else {
+          var ub2 = document.getElementById('attUniqueIdBox'); if (ub2) ub2.style.display = 'none';
+          var nb3 = document.getElementById('attNoIdBox'); if (nb3) nb3.style.display = 'block';
+        }
+
+        loadStudentLeaves();
 
         if (attendanceListenerActive) return;
         attendanceListenerActive = true;
         db.ref('sabuj/attendance-records').on('value', function(allSnap) {
-          calculateStudentAttendance(allSnap.val() || {}, match.key, match.student.uniqueId || '');
+          calculateStudentAttendance(allSnap.val() || {}, match.key, uid);
         });
       });
     }
 
-    function calculateStudentAttendance(allRecords, studentKey, studentUniqueId) {
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      let totalDays = 0, presentDays = 0, lateDays = 0;
-      const myRecords = [];
+    function copyUniqueId() {
+      if (!currentStudentUniqueId) return alert('❌ Unique ID এখনো বরাদ্দ হয়নি!');
+      navigator.clipboard.writeText(currentStudentUniqueId).then(function(){ alert('✅ কপি হয়েছে: ' + currentStudentUniqueId); });
+    }
 
-      for (let d = new Date(monthStart); d <= now; d.setDate(d.getDate() + 1)) {
-        totalDays++;
-        const ds = getLocalDateKey(d);
-        const dayRec = allRecords[ds];
-        let record = dayRec ? dayRec[studentKey] : null;
+    function paintIdCardAttQR(uid) {
+      try {
+        var box = document.getElementById('idAttQrBox');
+        var canvas = document.getElementById('idAttQrCanvas');
+        var txt = document.getElementById('idAttQrIdText');
+        if (!box || !canvas) return;
+        if (canvas.dataset.uid === uid) return;
+        canvas.innerHTML = '';
+        // Use production domain so QR works even when scanned from preview/admin context.
+        // Falls back to current origin when running on a real custom domain.
+        var host = window.location.hostname;
+        var isPreview = /lovable\.app$|lovableproject\.com$|localhost|127\.0\.0\.1/.test(host);
+        var baseOrigin = isPreview ? 'https://sabujcomputers.pro.bd' : window.location.origin;
+        var url = baseOrigin + '/attendance.html?id=' + encodeURIComponent(uid);
+        // Pure black + level M for max scanner compatibility (H makes tiny dots at small sizes)
+        new QRCode(canvas, { text: url, width: 138, height: 138, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        canvas.dataset.uid = uid;
+        canvas.dataset.url = url;
+        if (txt) txt.textContent = uid;
+        box.style.display = 'block';
+      } catch(e) { console.warn('ID Card QR failed', e); }
+    }
 
-        if (!record && dayRec && studentUniqueId) {
-          record = Object.values(dayRec).find(function(item) {
-            return item && item.uniqueId === studentUniqueId;
-          }) || null;
-        }
+    // Student-side leave application
+    let myLeavesCache = {};
+    function loadStudentLeaves() {
+      if (!currentStudentPhone && !currentStudentUniqueId) return;
+      db.ref('sabuj/attendance-leaves').orderByChild('phone').equalTo(currentStudentPhone || null).on('value', function(snap) {
+        myLeavesCache = snap.val() || {};
+        renderMyLeaves();
+        if (window._lastAttRecords) calculateStudentAttendance(window._lastAttRecords, currentStudentAttKey, currentStudentUniqueId);
+      });
+    }
 
-        if (record) {
-          presentDays++;
-          if (record.isLate) lateDays++;
-          myRecords.push({ date: ds, time: record.time || '', isLate: !!record.isLate });
-        }
-      }
-
-      const percent = totalDays > 0 ? Math.round((presentDays/totalDays)*100) : 0;
-      document.getElementById('attPercent').textContent = percent + '%';
-      document.getElementById('attText').textContent = 'এই মাসে মোট কর্মদিবস: ' + totalDays + ' | উপস্থিতি: ' + presentDays;
-      const lateEl = document.getElementById('attLateText');
-      if (lateEl) {
-        if (lateDays > 0) { lateEl.textContent = '⏰ বিলম্বিত: ' + lateDays + ' দিন'; lateEl.style.display = 'block'; }
-        else { lateEl.style.display = 'none'; }
-      }
-
-      myRecords.sort(function(a,b) { return b.date.localeCompare(a.date); });
-      const html = myRecords.slice(0,10).map(function(r) {
-        const dateLabel = new Date(r.date).toLocaleDateString('bn-BD', { day:'numeric', month:'short' });
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span style="color:#444;font-weight:600;">'+dateLabel+'</span><span style="color:#666;">'+r.time+'</span><span style="color:'+(r.isLate?'#d97706':'#16a34a')+';font-weight:600;font-size:12px;">'+(r.isLate?'⏰ বিলম্বিত':'✅ সময়মতো')+'</span></div>';
+    function renderMyLeaves() {
+      var list = document.getElementById('myLeavesList');
+      if (!list) return;
+      var entries = Object.entries(myLeavesCache).sort(function(a,b){ return (b[1].submittedAt||0) - (a[1].submittedAt||0); });
+      if (!entries.length) { list.innerHTML = '<p style="color:var(--muted); font-size:12px; margin:0;">কোনো ছুটির আবেদন নেই</p>'; return; }
+      list.innerHTML = entries.map(function(e) {
+        var l = e[1];
+        var st = l.status === 'pending' ? '<span style="background:#fbbf24;color:#000;padding:2px 8px;border-radius:10px;font-size:10px;">⏳ অপেক্ষমান</span>'
+          : l.status === 'approved' ? '<span style="background:#86efac;color:#064e3b;padding:2px 8px;border-radius:10px;font-size:10px;">✅ অনুমোদিত</span>'
+          : '<span style="background:#fca5a5;color:#7f1d1d;padding:2px 8px;border-radius:10px;font-size:10px;">❌ বাতিল</span>';
+        var dr = l.fromDate === l.toDate ? l.fromDate : (l.fromDate + ' → ' + l.toDate);
+        return '<div style="padding:10px;border:1px solid #e4ece7;border-radius:8px;margin-bottom:6px;background:#f7faf8;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><strong style="font-size:12px;font-family:monospace;">'+dr+'</strong>'+st+'</div>'+
+          '<p style="margin:0;font-size:12px;color:#475569;">'+escapeHtmlSafe(l.reason||'—')+'</p>'+
+          '</div>';
       }).join('');
-      document.getElementById('attRecentList').innerHTML = html || '<p style="color:var(--muted); font-size:13px; margin:0;">এই মাসে কোনো উপস্থিতি রেকর্ড নেই</p>';
+    }
+
+    function escapeHtmlSafe(s) { return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+    function openLeaveForm() {
+      if (!currentStudentPhone) return alert('❌ আপনার অ্যাটেনডেন্স প্রোফাইল লোড হয়নি। কিছুক্ষণ অপেক্ষা করুন।');
+      document.getElementById('leaveModal').style.display = 'flex';
+      var today = new Date().toISOString().slice(0,10);
+      document.getElementById('lvFromDate').min = today;
+      document.getElementById('lvToDate').min = today;
+      document.getElementById('lvFromDate').value = '';
+      document.getElementById('lvToDate').value = '';
+      document.getElementById('lvReason').value = '';
+    }
+
+    function closeLeaveForm() { document.getElementById('leaveModal').style.display = 'none'; }
+
+    function submitLeave() {
+      var fromD = document.getElementById('lvFromDate').value;
+      var toD = document.getElementById('lvToDate').value || fromD;
+      var reason = document.getElementById('lvReason').value.trim();
+      if (!fromD) return alert('❌ শুরুর তারিখ দিন!');
+      if (!reason) return alert('❌ কারণ লিখুন!');
+      if (toD < fromD) return alert('❌ শেষ তারিখ শুরুর তারিখের আগে হতে পারে না!');
+      var ref = db.ref('sabuj/attendance-leaves').push();
+      var data = {
+        studentName: document.getElementById('studentName').textContent || '',
+        phone: currentStudentPhone || '',
+        uniqueId: currentStudentUniqueId || '',
+        fromDate: fromD,
+        toDate: toD,
+        reason: reason,
+        status: 'pending',
+        submittedAt: Date.now()
+      };
+      ref.set(data).then(function() {
+        alert('✅ আবেদন জমা হয়েছে! অ্যাডমিন অনুমোদন করলে আপনার অ্যাটেনডেন্সে প্রতিফলিত হবে।');
+        closeLeaveForm();
+      }).catch(function(err){ alert('❌ '+err.message); });
+    }
+
+    let cachedHolidays = null;
+    function ensureHolidaysLoaded(cb) {
+      if (cachedHolidays) return cb(cachedHolidays);
+      db.ref('sabuj/attendance-holidays').once('value', function(snap) {
+        cachedHolidays = snap.val() || {};
+        // Also subscribe for live updates so calendar refreshes
+        db.ref('sabuj/attendance-holidays').on('value', function(s) {
+          cachedHolidays = s.val() || {};
+        });
+        cb(cachedHolidays);
+      });
+    }
+
+    function buildApprovedLeaveDates(leavesObj) {
+      var set = {};
+      Object.values(leavesObj || {}).forEach(function(l) {
+        if (!l || l.status !== 'approved' || !l.fromDate) return;
+        var s = new Date(l.fromDate); var e = new Date(l.toDate || l.fromDate);
+        for (var d = new Date(s); d <= e; d.setDate(d.getDate()+1)) {
+          set[getLocalDateKey(d)] = l.reason || 'ব্যক্তিগত ছুটি';
+        }
+      });
+      return set;
+    }
+
+    function calculateStudentAttendance(allRecords, studentKey, studentUniqueId) {
+      window._lastAttRecords = allRecords;
+      ensureHolidaysLoaded(function(holidays) {
+        const approvedLeaves = buildApprovedLeaveDates(myLeavesCache);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        let totalDays = 0, presentDays = 0, lateDays = 0;
+        const myRecords = [];
+        const dayStatus = {};
+
+        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+          const ds = getLocalDateKey(d);
+          const isFriday = d.getDay() === 5;
+          const isHoliday = !!holidays[ds];
+          const isLeave = !!approvedLeaves[ds];
+          const isFuture = d > now;
+
+          if (isFuture) { dayStatus[ds] = { status: 'future' }; continue; }
+
+          // Look up attendance record for this day FIRST (works even on Friday/holiday/leave — extra/special class)
+          const dayRec = allRecords[ds];
+          let record = dayRec ? dayRec[studentKey] : null;
+          if (!record && dayRec && studentUniqueId) {
+            record = Object.values(dayRec).find(function(item) {
+              return item && item.uniqueId === studentUniqueId;
+            }) || null;
+          }
+
+          if (isFriday || isHoliday || isLeave) {
+            // Holiday — excluded from totalDays. But if student attended (extra class), still show as present (bonus).
+            const holidayName = isHoliday ? holidays[ds] : (isLeave ? '📝 ' + approvedLeaves[ds] : 'শুক্রবার');
+            if (record) {
+              presentDays++; // bonus present, not counted in totalDays
+              if (record.isLate) lateDays++;
+              myRecords.push({ date: ds, time: record.time || '', isLate: !!record.isLate });
+              dayStatus[ds] = { status: 'present', late: !!record.isLate, time: record.time || '', bonus: true, holidayName: holidayName };
+            } else {
+              dayStatus[ds] = { status: 'holiday', name: holidayName };
+            }
+            continue;
+          }
+
+          totalDays++;
+          if (record) {
+            presentDays++;
+            if (record.isLate) lateDays++;
+            myRecords.push({ date: ds, time: record.time || '', isLate: !!record.isLate });
+            dayStatus[ds] = { status: 'present', late: !!record.isLate, time: record.time || '' };
+          } else {
+            dayStatus[ds] = { status: 'absent' };
+          }
+        }
+
+        const percent = totalDays > 0 ? Math.round((presentDays/totalDays)*100) : 0;
+        document.getElementById('attPercent').textContent = percent + '%';
+        document.getElementById('attText').textContent = 'এই মাসে মোট কর্মদিবস: ' + totalDays + ' | উপস্থিতি: ' + presentDays;
+        const lateEl = document.getElementById('attLateText');
+        if (lateEl) {
+          if (lateDays > 0) { lateEl.textContent = '⏰ বিলম্বিত: ' + lateDays + ' দিন'; lateEl.style.display = 'block'; }
+          else { lateEl.style.display = 'none'; }
+        }
+
+        myRecords.sort(function(a,b) { return b.date.localeCompare(a.date); });
+        const html = myRecords.slice(0,10).map(function(r) {
+          const dateLabel = new Date(r.date).toLocaleDateString('bn-BD', { day:'numeric', month:'short' });
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><span style="color:#444;font-weight:600;">'+dateLabel+'</span><span style="color:#666;">'+r.time+'</span><span style="color:'+(r.isLate?'#d97706':'#16a34a')+';font-weight:600;font-size:12px;">'+(r.isLate?'⏰ বিলম্বিত':'✅ সময়মতো')+'</span></div>';
+        }).join('');
+        document.getElementById('attRecentList').innerHTML = html || '<p style="color:var(--muted); font-size:13px; margin:0;">এই মাসে কোনো উপস্থিতি রেকর্ড নেই</p>';
+
+        renderAttendanceCalendar(dayStatus, monthStart, monthEnd);
+      });
+    }
+
+    function renderAttendanceCalendar(dayStatus, monthStart, monthEnd) {
+      const cal = document.getElementById('attCalendar');
+      if (!cal) return;
+      const dayNames = ['রবি','সোম','মঙ্গল','বুধ','বৃহঃ','শুক্র','শনি'];
+      let html = dayNames.map(function(d) { return '<div style="text-align:center;font-weight:700;color:var(--muted);font-size:11px;padding:4px 0;">'+d+'</div>'; }).join('');
+      const firstDay = monthStart.getDay();
+      for (let i = 0; i < firstDay; i++) html += '<div></div>';
+      for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+        const ds = getLocalDateKey(d);
+        const info = dayStatus[ds] || { status: 'future' };
+        let bg = '#f1f5f9', color = '#94a3b8', title = ds, dot = '';
+        if (info.status === 'present') { bg = info.late ? 'rgba(217,119,6,0.15)' : 'rgba(22,163,74,0.18)'; color = info.late ? '#b45309' : '#15803d'; dot = info.bonus ? '★' : (info.late ? '⏰' : '✓'); title = ds + ' — উপস্থিত' + (info.bonus?' (অতিরিক্ত ক্লাস — '+(info.holidayName||'ছুটি')+')':'') + (info.late?' (বিলম্বিত)':'') + (info.time?' '+info.time:''); }
+        else if (info.status === 'absent') { bg = 'rgba(220,38,38,0.12)'; color = '#b91c1c'; dot = '✗'; title = ds + ' — অনুপস্থিত'; }
+        else if (info.status === 'holiday') { bg = '#e2e8f0'; color = '#64748b'; dot = '🎉'; title = ds + ' — ' + (info.name || 'ছুটি'); }
+        else { bg = '#fff'; color = '#cbd5e1'; }
+        html += '<div title="'+title+'" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:'+bg+';color:'+color+';border-radius:6px;font-weight:700;border:1px solid rgba(0,0,0,0.04);">'+
+          '<span style="font-size:13px;">'+d.getDate()+'</span>'+
+          (dot?'<span style="font-size:9px;line-height:1;">'+dot+'</span>':'')+
+          '</div>';
+      }
+      cal.innerHTML = html;
     }
 
     let intentionalLogout = false;
@@ -660,7 +936,7 @@
                     <p><strong>ভর্তির তারিখ:</strong> ${new Date(appData.submittedAt).toLocaleDateString('bn-BD')}</p>
                   `;
 
-                  loadStudentAttendance(authData.phone, appData.personal || {});
+                  loadStudentAttendance(authData.phone, appData.personal || {}, authData.applicationId);
 
                   // Results Tab
 
@@ -734,12 +1010,16 @@
                     if(snap.val()) document.getElementById('idLogo').src = snap.val();
                   });
                   
-                  // Generate QR (only once)
+                  // Generate QR (only once) — use production domain so it works when scanned
                   const qrContainer = document.getElementById("qrcode");
                   if(qrContainer.innerHTML === '') {
+                    const _h = window.location.hostname;
+                    const _isPrev = /lovable\.app$|lovableproject\.com$|localhost|127\.0\.0\.1/.test(_h);
+                    const _base = _isPrev ? 'https://sabujcomputers.pro.bd' : window.location.origin;
                     new QRCode(qrContainer, {
-                      text: window.location.origin + "/verify.html?cert=" + authData.applicationId,
-                      width: 90, height: 90
+                      text: _base + "/verify.html?cert=" + encodeURIComponent(authData.applicationId),
+                      width: 110, height: 110, colorDark: '#000000', colorLight: '#ffffff',
+                      correctLevel: QRCode.CorrectLevel.M
                     });
                   }
                 }

@@ -364,6 +364,53 @@
       btn.disabled = false;
       btn.innerHTML = '✅ উপস্থিতি নিশ্চিত করুন';
     }
+
+    // ============ QR AUTO-FILL ============
+    // Supports per-employee URLs like /employee-attendance.html?id=EMP-001
+    // Falls back to localStorage of last successful ID for returning users on same browser.
+    (function autoFillFromQR() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var scannedId = (params.get('id') || params.get('uid') || params.get('emp') || '').trim().toUpperCase();
+        var fromUrl = !!scannedId;
+        if (!scannedId) {
+          var saved = localStorage.getItem('sctc_last_emp_attendance_id');
+          if (saved) scannedId = saved.trim().toUpperCase();
+        }
+        if (!scannedId) return;
+
+        var input = document.getElementById('employeeIdInput');
+        if (input) {
+          input.value = scannedId;
+          input.style.background = 'rgba(34,197,94,0.10)';
+          input.style.borderColor = '#16a34a';
+        }
+
+        var step1 = document.getElementById('step1');
+        if (step1 && !document.getElementById('autoFillBadge')) {
+          var badge = document.createElement('div');
+          badge.id = 'autoFillBadge';
+          badge.style.cssText = 'background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.08));color:#86efac;padding:10px 14px;border-radius:12px;margin-bottom:14px;font-size:13px;font-weight:600;text-align:center;border:1px solid rgba(34,197,94,0.3);';
+          badge.innerHTML = (fromUrl ? '✅ QR স্ক্যান সফল!' : '💾 আগের আইডি পাওয়া গেছে।') + ' আইডি: <strong style="font-family:monospace;color:#fff;">'+scannedId+'</strong>';
+          step1.insertBefore(badge, step1.firstChild);
+        }
+
+        if (fromUrl) {
+          setTimeout(function() { try { findEmployee(); } catch(e) {} }, 600);
+        }
+      } catch(e) { /* ignore */ }
+    })();
+
+    // Save successful ID to localStorage after confirm
+    var _origConfirmEmp = confirmAttendance;
+    confirmAttendance = function() {
+      try {
+        if (foundEmployee && foundEmployee.uniqueId) {
+          localStorage.setItem('sctc_last_emp_attendance_id', foundEmployee.uniqueId);
+        }
+      } catch(e) {}
+      return _origConfirmEmp.apply(this, arguments);
+    };
   </script>
 </body>
 </html>
