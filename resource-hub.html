@@ -838,7 +838,7 @@ function sharePost(id){
 
 // ====== ADMIN: AUTH ======
 let clickCount = 0, clickTimer = null;
-$("#secretTrigger").addEventListener("click", () => {
+function handleAdminTrigger(){
   clickCount++;
   clearTimeout(clickTimer);
   clickTimer = setTimeout(() => clickCount = 0, 1500);
@@ -847,6 +847,11 @@ $("#secretTrigger").addEventListener("click", () => {
     if(currentUser) openAdmin();
     else $("#loginOverlay").classList.add("show");
   }
+}
+$("#secretTrigger").addEventListener("click", handleAdminTrigger);
+$("#brandLogo")?.addEventListener("click", handleAdminTrigger);
+$(".brand")?.addEventListener("click", (e) => {
+  if(e.target?.id !== "brandLogo") handleAdminTrigger();
 });
 
 window.doLogin = async function(){
