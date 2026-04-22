@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0d3d1f">
+<meta name="description" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার (SCTC) - রিসোর্স হাব। চাকরি, ভর্তি, বৃত্তি ও নোটিশের সর্বশেষ আপডেট এক জায়গায়। বাগাতিপাড়া, নাটোর।">
+<meta name="author" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
+<meta property="og:title" content="রিসোর্স হাব — সবুজ কম্পিউটার ট্রেনিং সেন্টার">
+<meta property="og:description" content="চাকরি, ভর্তি, বৃত্তি ও নোটিশের সর্বশেষ আপডেট পান এক ক্লিকে — SCTC, বাগাতিপাড়া, নাটোর।">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://sabujcomputers.pro.bd/icon-512.png">
+<title>রিসোর্স হাব — সবুজ কম্পিউটার ট্রেনিং সেন্টার | চাকরি, ভর্তি ও নোটিশ</title>
+<link rel="icon" type="image/png" href="https://sabujcomputers.pro.bd/icon-192.png">
+<link rel="apple-touch-icon" href="https://sabujcomputers.pro.bd/icon-192.png">
+<link rel="canonical" href="https://sabujcomputers.pro.bd/resource-hub.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ====== DESIGN TOKENS (matched with main site) ====== */
+:root{
+  --g1:#0d3d1f;--g2:#1a6b35;--g3:#2e9e52;--g4:#5dd488;
+  --gold:#c8a847;--gold2:#f0d060;--gold3:#fff7d6;
+  --bg:#f2f8f4;--card:#ffffff;--text:#1e3028;--muted:#6b8c76;
+  --border:#e2ece6;--radius:16px;--shadow:0 8px 32px rgba(13,61,31,.13);
+  --shadow-sm:0 2px 8px rgba(13,61,31,.08);
+  --danger:#dc2626;--warn:#f59e0b;--info:#2563eb;
+}
+body.dark-mode{
+  --bg:#0a1f10;--card:#0f2918;--text:#e6f3eb;--muted:#8aa896;
+  --border:#1e3a22;--shadow:0 8px 32px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Hind Siliguri','Inter',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.6;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--g2);border-radius:4px}
+
+/* ====== TOP BREAKING NEWS TICKER ====== */
+.ticker-bar{background:linear-gradient(90deg,#7a1414,#b91c1c,#7a1414);color:#fff;
+  padding:9px 0;overflow:hidden;position:relative;z-index:50;
+  border-bottom:2px solid var(--gold);font-size:14px}
+.ticker-bar.hidden{display:none}
+.ticker-wrap{display:flex;align-items:center;gap:14px;padding:0 14px;max-width:1280px;margin:0 auto}
+.ticker-label{flex-shrink:0;background:var(--gold);color:#3b2300;padding:3px 11px;border-radius:6px;
+  font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;font-family:'Inter'}
+.ticker-content{flex:1;overflow:hidden;white-space:nowrap}
+.ticker-track{display:inline-block;padding-left:100%;animation:ticker 28s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-track span{margin-right:60px;font-weight:500}
+.ticker-track span::before{content:'📢 ';margin-right:4px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+
+/* ====== HEADER ====== */
+header{background:linear-gradient(135deg,#021a08 0%,#0d3d1f 50%,#1a6b35 100%);
+  padding:18px 0;box-shadow:0 4px 20px rgba(0,0,0,.15);position:sticky;top:0;z-index:40;
+  border-bottom:3px solid var(--gold)}
+.header-wrap{max-width:1280px;margin:0 auto;padding:0 22px;display:flex;align-items:center;
+  justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.brand-logo{width:46px;height:46px;border-radius:12px;background:#fff;padding:5px;
+  box-shadow:0 2px 10px rgba(0,0,0,.2);transition:transform .3s}
+.brand:hover .brand-logo{transform:rotate(-6deg) scale(1.05)}
+.brand-text h1{font-family:'Noto Serif Bengali';font-size:18px;color:#fff;line-height:1.2}
+.brand-text p{font-size:11px;color:var(--gold2);font-weight:500;letter-spacing:.4px}
+.header-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;
+  width:40px;height:40px;border-radius:10px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .2s;font-size:17px}
+.icon-btn:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
+.back-btn{background:var(--gold);color:#3b2300;padding:9px 16px;border-radius:10px;border:none;
+  font-family:'Hind Siliguri';font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.back-btn:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(200,168,71,.4)}
+
+/* ====== HERO ====== */
+.hero{background:linear-gradient(145deg,var(--g1) 0%,#145a28 55%,var(--g2) 100%);color:#fff;
+  padding:56px 22px 46px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 80% 40%,rgba(93,212,136,.14),transparent),
+    radial-gradient(ellipse 40% 70% at 10% 80%,rgba(200,168,71,.12),transparent);pointer-events:none}
+.hero-content{position:relative;max-width:780px;margin:0 auto;z-index:1}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+  color:var(--gold2);padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;
+  letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px;backdrop-filter:blur(10px);font-family:'Inter'}
+.hero h2{font-family:'Playfair Display','Noto Serif Bengali',serif;font-size:clamp(26px,6vw,44px);
+  font-weight:800;line-height:1.2;margin-bottom:12px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hero h2 span{color:var(--gold2)}
+.hero p{font-size:15px;opacity:.88;margin-bottom:22px;max-width:580px;margin-left:auto;margin-right:auto;line-height:1.7}
+.hero-stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:18px}
+.stat-pill{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);
+  padding:10px 18px;border-radius:30px;display:flex;align-items:center;gap:8px;font-size:13px}
+.stat-pill b{color:var(--gold2);font-size:18px;font-family:'Playfair Display';font-weight:800;line-height:1}
+
+/* ====== SEARCH & FILTER ====== */
+.controls{max-width:1280px;margin:-22px auto 0;padding:0 22px;position:relative;z-index:5}
+.search-box{background:var(--card);border-radius:14px;padding:6px;display:flex;align-items:center;
+  box-shadow:var(--shadow);border:1px solid var(--border)}
+.search-box input{flex:1;border:none;outline:none;padding:13px 16px;font-size:15px;
+  background:transparent;color:var(--text);font-family:'Hind Siliguri'}
+.search-box button{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border:none;
+  padding:11px 22px;border-radius:10px;cursor:pointer;font-weight:600;font-family:'Hind Siliguri';font-size:14px;
+  display:flex;align-items:center;gap:6px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding:0 2px}
+.chip{background:var(--card);border:1.5px solid var(--border);color:var(--text);padding:7px 14px;
+  border-radius:20px;cursor:pointer;font-family:'Hind Siliguri';font-size:13px;font-weight:500;
+  transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip:hover{border-color:var(--g2);color:var(--g2);transform:translateY(-1px)}
+.chip.active{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border-color:transparent;
+  box-shadow:0 4px 12px rgba(46,158,82,.3)}
+.chip-count{background:rgba(0,0,0,.12);padding:1px 7px;border-radius:10px;font-size:11px;font-weight:700}
+.chip.active .chip-count{background:rgba(255,255,255,.25)}
+
+/* ====== POSTS GRID ====== */
+.posts-section{max-width:1280px;margin:30px auto 60px;padding:0 22px}
+.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.post-card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);
+  border:1px solid var(--border);transition:all .35s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;animation:cardIn .5s ease backwards}
+.post-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--g3)}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.post-image{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#e8f3ec,#c5e3d0);
+  overflow:hidden}
+.post-image img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.post-card:hover .post-image img{transform:scale(1.07)}
+.post-image-placeholder{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:50px;opacity:.4}
+.post-badges{position:absolute;top:10px;left:10px;display:flex;gap:6px;flex-wrap:wrap}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;
+  text-transform:uppercase;letter-spacing:.4px;font-family:'Inter';
+  box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.badge-job{background:#2563eb}
+.badge-admission{background:#7c3aed}
+.badge-scholarship{background:#db2777}
+.badge-notice{background:#0891b2}
+.badge-exam{background:#ea580c}
+.badge-link{background:#475569}
+.badge-pinned{background:var(--gold);color:#3b2300}
+.badge-urgent{background:#dc2626;animation:pulse 1.6s ease infinite}
+@keyframes pulse{50%{opacity:.7;transform:scale(.96)}}
+.post-body{padding:16px 18px 18px;flex:1;display:flex;flex-direction:column;gap:9px}
+.post-title{font-family:'Hind Siliguri';font-size:16px;font-weight:700;color:var(--text);line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post-desc{font-size:13.5px;color:var(--muted);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;
+  color:var(--muted);padding-top:8px;border-top:1px dashed var(--border);margin-top:auto}
+.post-actions{display:flex;gap:6px;padding:0 12px 12px;flex-wrap:wrap}
+.btn-action{flex:1;min-width:0;padding:8px 10px;border-radius:8px;border:none;cursor:pointer;
+  font-family:'Hind Siliguri';font-weight:600;font-size:12.5px;display:inline-flex;
+  align-items:center;justify-content:center;gap:5px;transition:all .2s;text-decoration:none}
+.btn-view{background:rgba(46,158,82,.1);color:var(--g2)}
+.btn-view:hover{background:var(--g2);color:#fff}
+.btn-download{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff}
+.btn-download:hover{filter:brightness(1.1);box-shadow:0 4px 12px rgba(46,158,82,.35)}
+.btn-link{background:rgba(37,99,235,.1);color:#2563eb}
+.btn-link:hover{background:#2563eb;color:#fff}
+.btn-share{background:rgba(107,140,118,.12);color:var(--muted)}
+.btn-share:hover{background:var(--muted);color:#fff}
+
+/* Skeleton */
+.skeleton-card{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.skeleton-img{width:100%;aspect-ratio:16/9;background:linear-gradient(90deg,#e8efea 25%,#f4f8f5 50%,#e8efea 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite}
+.skeleton-line{height:14px;margin:10px 16px;border-radius:6px;
+  background:linear-gradient(90deg,#e8efea 25%,#f4f8f5 50%,#e8efea 75%);background-size:200% 100%;
+  animation:shimmer 1.4s infinite}
+.skeleton-line.short{width:60%}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:.5}
+.empty h3{font-family:'Noto Serif Bengali';color:var(--text);font-size:20px;margin-bottom:8px}
+
+/* Load more */
+.load-more-wrap{text-align:center;margin-top:30px}
+.btn-load-more{background:var(--card);border:2px solid var(--g2);color:var(--g2);padding:11px 28px;
+  border-radius:30px;cursor:pointer;font-family:'Hind Siliguri';font-weight:600;font-size:14px;transition:all .25s}
+.btn-load-more:hover{background:var(--g2);color:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(46,158,82,.3)}
+.btn-load-more:disabled{opacity:.5;cursor:not-allowed}
+
+/* ====== FOOTER ====== */
+footer{background:#021a08;color:#9bbfa6;padding:30px 22px;text-align:center;border-top:3px solid var(--gold)}
+footer p{font-size:13px;line-height:1.7}
+footer a{color:var(--gold2);text-decoration:none;font-weight:600}
+footer a:hover{text-decoration:underline}
+
+/* ====== SECRET TRIGGER (5-click admin) ====== */
+#secretTrigger{position:fixed;bottom:0;right:0;width:50px;height:50px;z-index:9990;
+  opacity:0;cursor:default}
+
+/* ====== OVERLAYS (login + admin + modal) ====== */
+.overlay{position:fixed;inset:0;background:rgba(3,14,7,.82);z-index:99980;backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:18px;animation:fadeBg .2s ease}
+.overlay.show{display:flex}
+@keyframes fadeBg{from{opacity:0}to{opacity:1}}
+
+.pwd-card{background:var(--card);border-radius:20px;padding:34px 30px;width:100%;max-width:380px;
+  text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.pwd-card h3{font-family:'Noto Serif Bengali';font-size:21px;color:var(--g1);margin-bottom:6px}
+.pwd-card .pwd-icon{font-size:42px;margin-bottom:10px}
+.pwd-card p{font-size:13px;color:var(--muted);margin-bottom:22px}
+.fg{margin-bottom:14px;text-align:left}
+.fg label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.fg input,.fg textarea,.fg select{width:100%;padding:12px 14px;border:2px solid var(--border);
+  border-radius:10px;font-size:15px;font-family:'Hind Siliguri';background:var(--bg);color:var(--text);
+  transition:border-color .2s}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--g2)}
+.fg textarea{min-height:100px;resize:vertical}
+.btn-primary{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:13px 26px;
+  border:none;border-radius:11px;font-family:'Hind Siliguri';font-weight:600;font-size:15px;
+  cursor:pointer;transition:all .2s;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 8px 22px rgba(46,158,82,.35)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.btn-secondary{background:var(--bg);color:var(--text);padding:11px 22px;border:1.5px solid var(--border);
+  border-radius:10px;cursor:pointer;font-family:'Hind Siliguri';font-weight:600;font-size:14px;transition:all .2s}
+.btn-secondary:hover{border-color:var(--g2);color:var(--g2)}
+.btn-danger{background:#fee2e2;color:#b91c1c;padding:8px 14px;border:none;border-radius:8px;
+  cursor:pointer;font-family:'Hind Siliguri';font-weight:600;font-size:13px}
+.btn-danger:hover{background:#dc2626;color:#fff}
+.err-msg{color:#dc2626;font-size:13px;margin-top:-6px;margin-bottom:10px;display:none;text-align:left}
+
+/* Admin panel */
+.admin-panel{background:var(--card);border-radius:18px;width:100%;max-width:1100px;max-height:92vh;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.admin-header{background:linear-gradient(135deg,#021a08,#0d3d1f,#1a6b35);padding:18px 24px;
+  display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--gold)}
+.admin-header h2{color:#fff;font-family:'Noto Serif Bengali';font-size:18px;display:flex;align-items:center;gap:10px}
+.admin-header h2::before{content:'';width:5px;height:22px;background:var(--gold);border-radius:3px;display:inline-block}
+.btn-close{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.2);
+  border-radius:9px;padding:6px 16px;cursor:pointer;font-family:'Hind Siliguri';font-size:13px}
+.btn-close:hover{background:rgba(255,255,255,.22)}
+.admin-tabs{display:flex;background:rgba(46,158,82,.06);border-bottom:2px solid var(--border);
+  overflow-x:auto;scrollbar-width:none}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{padding:12px 18px;border:none;background:none;cursor:pointer;font-family:'Hind Siliguri';
+  font-weight:600;font-size:13.5px;color:var(--muted);white-space:nowrap;
+  border-bottom:3px solid transparent;transition:all .2s}
+.admin-tab:hover{color:var(--g2);background:rgba(46,158,82,.08)}
+.admin-tab.active{color:var(--g1);border-bottom-color:var(--g2);background:var(--card)}
+.admin-body{padding:22px 26px;overflow-y:auto;flex:1}
+.admin-section{display:none}
+.admin-section.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:680px){.admin-grid{grid-template-columns:1fr}}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:22px;text-align:center;
+  cursor:pointer;transition:all .2s;background:var(--bg)}
+.upload-zone:hover{border-color:var(--g2);background:rgba(46,158,82,.05)}
+.upload-zone.has-file{border-color:var(--g2);background:rgba(46,158,82,.08)}
+.upload-zone .up-icon{font-size:32px;margin-bottom:8px}
+.upload-zone p{color:var(--muted);font-size:13px}
+.upload-zone strong{color:var(--g2);display:block;margin-top:4px}
+.file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.file-item{background:var(--bg);padding:8px 12px;border-radius:8px;display:flex;justify-content:space-between;
+  align-items:center;font-size:13px}
+.file-item button{background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px}
+.upload-progress{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;display:none}
+.upload-progress.show{display:block}
+.upload-progress-bar{height:100%;background:linear-gradient(90deg,var(--g2),var(--g4));width:0;transition:width .3s}
+
+.posts-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+.posts-table th{background:var(--g1);color:#fff;padding:10px 12px;text-align:left;
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;font-family:'Inter'}
+.posts-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.posts-table tr:hover td{background:var(--bg)}
+.posts-table .actions-cell{display:flex;gap:6px;flex-wrap:wrap}
+.posts-table .actions-cell button{padding:5px 10px;font-size:12px;border-radius:6px;border:none;cursor:pointer;font-family:'Hind Siliguri'}
+.btn-edit-sm{background:rgba(46,158,82,.15);color:var(--g2)}
+.btn-edit-sm:hover{background:var(--g2);color:#fff}
+
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.dash-card{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:16px;border-radius:12px;
+  box-shadow:var(--shadow-sm)}
+.dash-card .label{font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.dash-card .value{font-size:26px;font-weight:700;font-family:'Inter'}
+
+/* ====== MODAL (post preview) ====== */
+.modal-card{background:var(--card);border-radius:18px;width:100%;max-width:680px;max-height:92vh;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+.modal-img{width:100%;max-height:340px;object-fit:cover}
+.modal-body{padding:22px 26px;overflow-y:auto}
+.modal-body h3{font-family:'Noto Serif Bengali';color:var(--g1);font-size:22px;margin-bottom:10px}
+.modal-body .modal-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--muted)}
+.modal-body p{font-size:14.5px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.modal-files{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.modal-file{background:var(--bg);padding:11px 14px;border-radius:10px;display:flex;
+  align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border)}
+.modal-file .fname{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-file a{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:7px 14px;
+  border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:600;flex-shrink:0}
+.modal-actions{padding:14px 26px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+/* ====== TOAST ====== */
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;max-width:340px}
+.toast{background:var(--card);border-radius:12px;padding:13px 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);
+  display:flex;align-items:center;gap:10px;font-size:14px;border-left:4px solid var(--g2);
+  animation:slideIn .3s ease;color:var(--text)}
+.toast.error{border-left-color:#dc2626}
+.toast.warn{border-left-color:#f59e0b}
+@keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:none}}
+
+/* ====== Responsive ====== */
+@media (max-width:520px){
+  .header-wrap{padding:0 14px}
+  .brand-text h1{font-size:15px}
+  .brand-text p{font-size:10px}
+  .icon-btn{width:36px;height:36px;font-size:15px}
+  .back-btn{padding:7px 12px;font-size:12px}
+  .hero{padding:36px 16px 32px}
+  .controls{padding:0 14px}
+  .posts-section{padding:0 14px;margin-top:24px}
+  .search-box button span{display:none}
+  .admin-body{padding:16px}
+  .admin-tab{padding:11px 14px;font-size:12.5px}
+}
+</style>
+</head>
+<body>
+
+<!-- Breaking news ticker -->
+<div class="ticker-bar hidden" id="tickerBar">
+  <div class="ticker-wrap">
+    <span class="ticker-label">Breaking</span>
+    <div class="ticker-content"><div class="ticker-track" id="tickerTrack"></div></div>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-wrap">
+    <div class="brand">
+      <img src="https://sabujcomputers.pro.bd/icon-192.png" alt="Sabuj" class="brand-logo" id="brandLogo">
+      <div class="brand-text">
+        <h1>সবুজ কম্পিউটার্স • রিসোর্স হাব</h1>
+        <p>চাকরি • ভর্তি • বৃত্তি • নোটিশ</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="darkToggle" title="Dark Mode">🌙</button>
+      <a href="/" class="back-btn" title="Main website">← Main Site</a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-tag">📢 রিসোর্স হাব • SCTC</span>
+    <h2>চাকরি, ভর্তি ও নোটিশের <span>সর্বশেষ আপডেট</span></h2>
+    <p>বাগাতিপাড়া, নাটোরের ছাত্র-ছাত্রী ও চাকরিপ্রার্থীদের জন্য সবুজ কম্পিউটার ট্রেনিং সেন্টারের অফিসিয়াল রিসোর্স হাব — সব গুরুত্বপূর্ণ তথ্য এক জায়গায়।</p>
+    <div class="hero-stats">
+      <div class="stat-pill">📋 <b id="statTotal">0</b> মোট পোস্ট</div>
+      <div class="stat-pill">🆕 <b id="statWeek">0</b> এই সপ্তাহে</div>
+      <div class="stat-pill">🏷️ <b>৬</b> ক্যাটাগরি</div>
+    </div>
+  </div>
+</section>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="🔍 খুঁজুন... (title, description)">
+    <button onclick="applyFilters()">🔎 <span>Search</span></button>
+  </div>
+  <div class="filters" id="filterChips"></div>
+</div>
+
+<!-- Posts -->
+<section class="posts-section">
+  <div class="posts-grid" id="postsGrid"></div>
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+    <button class="btn-load-more" id="loadMoreBtn">আরও দেখুন ⬇</button>
+  </div>
+</section>
+
+<footer>
+  <p>© <span id="yr"></span> <a href="https://sabujcomputers.pro.bd">সবুজ কম্পিউটার ট্রেনিং সেন্টার</a> • রিসোর্স হাব</p>
+  <p style="margin-top:6px;font-size:12px;opacity:.7">বাগাতিপাড়া, নাটোর • BTEB অনুমোদিত প্রতিষ্ঠান 💚</p>
+</footer>
+
+<!-- Hidden 5-click trigger -->
+<div id="secretTrigger" title=""></div>
+
+<!-- Login overlay -->
+<div class="overlay" id="loginOverlay">
+  <div class="pwd-card">
+    <div class="pwd-icon">🔐</div>
+    <h3>Admin Login</h3>
+    <p>Authorized access only</p>
+    <div class="fg">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@example.com">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="err-msg" id="loginErr"></div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">🔓 Login</button>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" onclick="closeOverlay('loginOverlay')">Cancel</button>
+  </div>
+</div>
+
+<!-- Admin overlay -->
+<div class="overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <h2>⚙️ Admin Dashboard</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn-close" onclick="doLogout()">🚪 Logout</button>
+        <button class="btn-close" onclick="closeOverlay('adminOverlay')">✕ Close</button>
+      </div>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="admin-tab" data-tab="create">➕ New Post</button>
+      <button class="admin-tab" data-tab="manage">📋 Manage Posts</button>
+      <button class="admin-tab" data-tab="ticker">📢 Breaking News</button>
+      <button class="admin-tab" data-tab="settings">🎨 Settings</button>
+    </div>
+    <div class="admin-body">
+
+      <!-- Dashboard -->
+      <div class="admin-section active" data-section="dashboard">
+        <div class="dash-grid" id="dashGrid"></div>
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">Recent Activity</h3>
+        <div id="recentList" style="font-size:13.5px;color:var(--muted)">No activity yet.</div>
+      </div>
+
+      <!-- Create -->
+      <div class="admin-section" data-section="create">
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:14px" id="formTitle">New Post</h3>
+        <input type="hidden" id="editPostId">
+        <div class="admin-grid">
+          <div class="fg">
+            <label>Title *</label>
+            <input type="text" id="postTitle" placeholder="e.g. BCS 47th Job Circular 2026">
+          </div>
+          <div class="fg">
+            <label>Category *</label>
+            <select id="postCategory">
+              <option value="job">💼 Job Circular</option>
+              <option value="admission">🎓 Admission</option>
+              <option value="scholarship">🏆 Scholarship</option>
+              <option value="notice">📢 Notice</option>
+              <option value="exam">📝 Exam Routine</option>
+              <option value="link">🔗 Useful Link</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Description *</label>
+          <textarea id="postDesc" placeholder="Detailed description, deadlines, eligibility, etc..."></textarea>
+        </div>
+        <div class="admin-grid">
+          <div class="fg">
+            <label>External URL (optional)</label>
+            <input type="url" id="postUrl" placeholder="https://...">
+          </div>
+          <div class="fg">
+            <label>Options</label>
+            <div style="display:flex;gap:14px;padding:12px 0">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500">
+                <input type="checkbox" id="postPinned" style="width:18px;height:18px"> 📌 Pin to top
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500">
+                <input type="checkbox" id="postUrgent" style="width:18px;height:18px"> 🚨 Urgent
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Cover Image (optional)</label>
+          <div class="upload-zone" id="coverZone" onclick="document.getElementById('coverInput').click()">
+            <div class="up-icon">🖼️</div>
+            <p>Click to upload cover image<strong id="coverName">PNG, JPG, WEBP up to 10MB</strong></p>
+          </div>
+          <input type="file" id="coverInput" accept="image/*" style="display:none">
+          <div class="upload-progress" id="coverProgress"><div class="upload-progress-bar" id="coverProgressBar"></div></div>
+        </div>
+        <div class="fg">
+          <label>Attachments — PDF/Image (optional, multiple)</label>
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <div class="up-icon">📎</div>
+            <p>Click to upload files<strong>PDF, Images — multiple allowed</strong></p>
+          </div>
+          <input type="file" id="fileInput" accept="image/*,.pdf" multiple style="display:none">
+          <div class="upload-progress" id="fileProgress"><div class="upload-progress-bar" id="fileProgressBar"></div></div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn-primary" id="savePostBtn" onclick="savePost()" style="flex:1">💾 Save Post</button>
+          <button class="btn-secondary" onclick="resetPostForm()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Manage -->
+      <div class="admin-section" data-section="manage">
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">All Posts</h3>
+        <input type="text" id="manageSearch" placeholder="🔍 Search posts..."
+          style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:10px;font-family:'Hind Siliguri';background:var(--bg);color:var(--text)">
+        <div style="overflow-x:auto">
+          <table class="posts-table" id="managePosts">
+            <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ticker -->
+      <div class="admin-section" data-section="ticker">
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">📢 Breaking News Ticker</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Top এ scroll হওয়া messages। প্রতি লাইনে একটি message লিখুন।</p>
+        <div class="fg">
+          <label>Messages (one per line)</label>
+          <textarea id="tickerMessages" rows="6" placeholder="BCS 47 application deadline 30 April&#10;DU admission test schedule published&#10;..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-primary" onclick="saveTicker()" style="flex:1">💾 Save Ticker</button>
+          <button class="btn-secondary" onclick="clearTicker()">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="admin-section" data-section="settings">
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:14px">🎨 Site Settings</h3>
+        <div class="fg">
+          <label>Site Title</label>
+          <input type="text" id="setTitle" placeholder="সবুজ কম্পিউটার্স • রিসোর্স হাব">
+        </div>
+        <div class="fg">
+          <label>Site Tagline</label>
+          <input type="text" id="setTagline" placeholder="Job • Admission • Notice • Scholarship">
+        </div>
+        <div class="fg">
+          <label>Hero Heading (Bangla)</label>
+          <input type="text" id="setHeroH" placeholder="সব গুরুত্বপূর্ণ তথ্য — এক জায়গায়">
+        </div>
+        <div class="fg">
+          <label>Hero Subtext</label>
+          <input type="text" id="setHeroP" placeholder="চাকরি, ভর্তি, বৃত্তি ও নোটিশের সর্বশেষ আপডেট">
+        </div>
+        <div class="fg">
+          <label>Logo URL (optional)</label>
+          <input type="url" id="setLogo" placeholder="https://...">
+        </div>
+        <div class="fg">
+          <label>Footer Text</label>
+          <input type="text" id="setFooter" placeholder="© সবুজ কম্পিউটার ট্রেনিং সেন্টার • রিসোর্স হাব">
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+        <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+        <h4 style="color:var(--danger);margin-bottom:10px">⚠️ Danger Zone</h4>
+        <button class="btn-danger" onclick="clearActivityLog()">🗑️ Clear Activity History</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="overlay" id="previewOverlay">
+  <div class="modal-card" id="previewCard"></div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ============ FIREBASE + APP LOGIC ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+  query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+// ====== CONFIG ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBs0mPWNsO15jCkOqVHKaQTjwH7B7S2QAA",
+  authDomain: "sabuj-resource-hub.firebaseapp.com",
+  projectId: "sabuj-resource-hub",
+  storageBucket: "sabuj-resource-hub.firebasestorage.app",
+  messagingSenderId: "170931991815",
+  appId: "1:170931991815:web:6e937dbac38d4df9f181a2"
+};
+const CLOUDINARY = { cloudName: "dfwjoazwq", uploadPreset: "resource_hub_unsigned" };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const POSTS_PER_PAGE = 12;
+const CATEGORIES = [
+  { id: "all",         label: "🌐 All",          color: "" },
+  { id: "job",         label: "💼 Job",          color: "badge-job" },
+  { id: "admission",   label: "🎓 Admission",    color: "badge-admission" },
+  { id: "scholarship", label: "🏆 Scholarship",  color: "badge-scholarship" },
+  { id: "notice",      label: "📢 Notice",       color: "badge-notice" },
+  { id: "exam",        label: "📝 Exam Routine", color: "badge-exam" },
+  { id: "link",        label: "🔗 Link",         color: "badge-link" }
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+// ====== STATE ======
+let activeCategory = "all";
+let searchTerm = "";
+let lastDoc = null;
+let allLoaded = false;
+let postsCache = [];
+let pendingFiles = [];      // {name, url, type}
+let pendingCover = null;    // {url}
+let currentUser = null;
+let activityLog = JSON.parse(localStorage.getItem("rh_activity") || "[]");
+
+// ====== UTILS ======
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const escapeHtml = (s) => String(s||"").replace(/[&<>"']/g, ch =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[ch]));
+
+function toast(msg, type="success"){
+  const t = document.createElement("div");
+  t.className = "toast " + (type === "error" ? "error" : type === "warn" ? "warn" : "");
+  t.innerHTML = (type==="error"?"❌ ":type==="warn"?"⚠️ ":"✅ ") + escapeHtml(msg);
+  $("#toastWrap").appendChild(t);
+  setTimeout(() => { t.style.opacity="0"; t.style.transform="translateX(100%)"; }, 3000);
+  setTimeout(() => t.remove(), 3400);
+}
+function timeAgo(ts){
+  if(!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+  if(sec < 60) return "এইমাত্র";
+  if(sec < 3600) return Math.floor(sec/60) + " মিনিট আগে";
+  if(sec < 86400) return Math.floor(sec/3600) + " ঘন্টা আগে";
+  if(sec < 604800) return Math.floor(sec/86400) + " দিন আগে";
+  return d.toLocaleDateString("bn-BD");
+}
+function logActivity(action){
+  activityLog.unshift({ action, time: Date.now() });
+  activityLog = activityLog.slice(0, 50);
+  localStorage.setItem("rh_activity", JSON.stringify(activityLog));
+  renderRecentActivity();
+}
+
+// ====== CLOUDINARY UPLOAD ======
+async function uploadToCloudinary(file, onProgress){
+  return new Promise((resolve, reject) => {
+    const isImage = file.type.startsWith("image/");
+    const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/${isImage?"image":"raw"}/upload`;
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", CLOUDINARY.uploadPreset);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint);
+    xhr.upload.onprogress = e => { if(e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => {
+      if(xhr.status >= 200 && xhr.status < 300){
+        const r = JSON.parse(xhr.responseText);
+        resolve({ url: r.secure_url, name: file.name, type: file.type, size: file.size });
+      } else reject(new Error("Upload failed: " + xhr.status));
+    };
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.send(fd);
+  });
+}
+
+// ====== RENDER FILTERS ======
+function renderFilters(){
+  $("#filterChips").innerHTML = CATEGORIES.map(c =>
+    `<button class="chip ${c.id===activeCategory?'active':''}" data-cat="${c.id}">${c.label} <span class="chip-count" data-cnt="${c.id}">0</span></button>`
+  ).join("");
+  $$(".chip").forEach(b => b.addEventListener("click", () => {
+    activeCategory = b.dataset.cat;
+    renderFilters();
+    resetAndLoad();
+  }));
+  updateCounts();
+}
+function updateCounts(){
+  const counts = {};
+  postsCache.forEach(p => { counts[p.category] = (counts[p.category]||0) + 1; });
+  counts.all = postsCache.length;
+  $$("[data-cnt]").forEach(el => { el.textContent = counts[el.dataset.cnt] || 0; });
+}
+
+// ====== RENDER POSTS ======
+function postCardHtml(p, idx){
+  const cat = CAT_MAP[p.category] || CAT_MAP.notice;
+  const badges = [
+    p.urgent ? `<span class="badge badge-urgent">🚨 Urgent</span>` : "",
+    p.pinned ? `<span class="badge badge-pinned">📌 Pinned</span>` : "",
+    `<span class="badge ${cat.color}">${cat.label.replace(/^[^\s]+\s/,'')}</span>`
+  ].join("");
+  const img = p.cover
+    ? `<img src="${escapeHtml(p.cover)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=post-image-placeholder>📄</div>'">`
+    : `<div class="post-image-placeholder">${cat.label.match(/^[^\s]+/)?.[0] || "📄"}</div>`;
+  const downloadable = (p.files && p.files.length) ? p.files[0] : (p.cover ? { url: p.cover, name: "image.jpg" } : null);
+  return `
+    <article class="post-card" style="animation-delay:${idx*40}ms">
+      <div class="post-image">${img}<div class="post-badges">${badges}</div></div>
+      <div class="post-body">
+        <h3 class="post-title">${escapeHtml(p.title)}</h3>
+        <p class="post-desc">${escapeHtml(p.description||"")}</p>
+        <div class="post-meta">
+          <span>📅 ${timeAgo(p.createdAt)}</span>
+          <span>${(p.files?.length||0)} 📎</span>
+        </div>
+      </div>
+      <div class="post-actions">
+        <button class="btn-action btn-view" data-view="${p.id}">👁️ View</button>
+        ${downloadable ? `<a class="btn-action btn-download" href="${escapeHtml(downloadable.url)}" download="${escapeHtml(downloadable.name)}" target="_blank" rel="noopener">⬇️ Download</a>` : ""}
+        ${p.url ? `<a class="btn-action btn-link" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">🔗 Link</a>` : ""}
+        <button class="btn-action btn-share" data-share="${p.id}">📤</button>
+      </div>
+    </article>`;
+}
+function renderPosts(append=false){
+  const grid = $("#postsGrid");
+  const filtered = postsCache.filter(p => {
+    if(activeCategory !== "all" && p.category !== activeCategory) return false;
+    if(searchTerm){
+      const s = searchTerm.toLowerCase();
+      return (p.title||"").toLowerCase().includes(s) || (p.description||"").toLowerCase().includes(s);
+    }
+    return true;
+  }).sort((a,b) => {
+    if((a.pinned?1:0) !== (b.pinned?1:0)) return (b.pinned?1:0) - (a.pinned?1:0);
+    const ta = a.createdAt?.toMillis?.() || 0;
+    const tb = b.createdAt?.toMillis?.() || 0;
+    return tb - ta;
+  });
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="empty-icon">🔍</div>
+      <h3>কোনো পোস্ট পাওয়া যায়নি</h3>
+      <p>অন্য ক্যাটাগরি বা search term try করুন</p></div>`;
+  } else {
+    grid.innerHTML = filtered.map((p,i) => postCardHtml(p,i)).join("");
+    grid.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => openPreview(b.dataset.view)));
+    grid.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => sharePost(b.dataset.share)));
+  }
+  $("#statTotal").textContent = postsCache.length;
+  const wkAgo = Date.now() - 7*86400000;
+  $("#statWeek").textContent = postsCache.filter(p => (p.createdAt?.toMillis?.()||0) > wkAgo).length;
+  updateCounts();
+}
+function showSkeletons(){
+  $("#postsGrid").innerHTML = Array(6).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line" style="margin-top:14px"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line"></div>
+      <div style="height:14px"></div>
+    </div>`).join("");
+}
+
+// ====== LOAD POSTS ======
+async function loadPosts(append=false){
+  try {
+    if(!append){ showSkeletons(); lastDoc = null; allLoaded = false; postsCache = []; }
+    const constraints = [orderBy("createdAt", "desc"), limit(POSTS_PER_PAGE)];
+    if(append && lastDoc) constraints.push(startAfter(lastDoc));
+    const q = query(collection(db, "posts"), ...constraints);
+    const snap = await getDocs(q);
+    if(snap.empty && !append){
+      postsCache = [];
+      renderPosts();
+      return;
+    }
+    snap.docs.forEach(d => postsCache.push({ id: d.id, ...d.data() }));
+    lastDoc = snap.docs[snap.docs.length - 1];
+    allLoaded = snap.size < POSTS_PER_PAGE;
+    $("#loadMoreWrap").style.display = allLoaded ? "none" : "block";
+    renderPosts();
+    localStorage.setItem("rh_cache", JSON.stringify(postsCache.slice(0,30).map(p=>({...p,createdAt:p.createdAt?.toMillis?.()||Date.now()}))));
+  } catch(e){
+    console.error(e);
+    toast("Posts load করতে সমস্যা: " + e.message, "error");
+    $("#postsGrid").innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="empty-icon">⚠️</div><h3>Connection error</h3><p>${escapeHtml(e.message)}</p></div>`;
+  }
+}
+function resetAndLoad(){ loadPosts(false); }
+
+// ====== PREVIEW MODAL ======
+function openPreview(id){
+  const p = postsCache.find(x => x.id === id);
+  if(!p) return;
+  const cat = CAT_MAP[p.category] || CAT_MAP.notice;
+  const filesHtml = (p.files||[]).map(f => `
+    <div class="modal-file">
+      <span class="fname">📎 ${escapeHtml(f.name||"file")}</span>
+      <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener" download="${escapeHtml(f.name||'')}">View / Download</a>
+    </div>`).join("");
+  $("#previewCard").innerHTML = `
+    ${p.cover ? `<img src="${escapeHtml(p.cover)}" class="modal-img" alt="">` : ""}
+    <div class="modal-body">
+      <div class="modal-meta">
+        <span class="badge ${cat.color}">${cat.label}</span>
+        <span>📅 ${timeAgo(p.createdAt)}</span>
+        ${p.pinned ? '<span class="badge badge-pinned">📌 Pinned</span>' : ""}
+        ${p.urgent ? '<span class="badge badge-urgent">🚨 Urgent</span>' : ""}
+      </div>
+      <h3>${escapeHtml(p.title)}</h3>
+      <p>${escapeHtml(p.description||"")}</p>
+      ${filesHtml ? `<div class="modal-files">${filesHtml}</div>` : ""}
+      ${p.url ? `<div style="margin-top:16px"><a class="btn-primary" href="${escapeHtml(p.url)}" target="_blank" rel="noopener" style="width:auto;display:inline-flex">🔗 Visit External Link</a></div>` : ""}
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="window.__rh.sharePost('${p.id}')">📤 Share</button>
+      <button class="btn-primary" style="width:auto" onclick="window.__rh.closeOverlay('previewOverlay')">Close</button>
+    </div>`;
+  $("#previewOverlay").classList.add("show");
+}
+function sharePost(id){
+  const p = postsCache.find(x => x.id === id);
+  if(!p) return;
+  const url = `${location.origin}${location.pathname}?post=${id}`;
+  if(navigator.share){
+    navigator.share({ title: p.title, text: p.description, url }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url);
+    toast("Link copied to clipboard!");
+  }
+}
+
+// ====== ADMIN: AUTH ======
+let clickCount = 0, clickTimer = null;
+$("#secretTrigger").addEventListener("click", () => {
+  clickCount++;
+  clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => clickCount = 0, 1500);
+  if(clickCount >= 5){
+    clickCount = 0;
+    if(currentUser) openAdmin();
+    else $("#loginOverlay").classList.add("show");
+  }
+});
+
+window.doLogin = async function(){
+  const email = $("#loginEmail").value.trim();
+  const pwd = $("#loginPwd").value;
+  const err = $("#loginErr");
+  err.style.display = "none";
+  if(!email || !pwd){ err.textContent = "Email & password দিন"; err.style.display="block"; return; }
+  $("#loginBtn").disabled = true;
+  $("#loginBtn").innerHTML = "⏳ Logging in...";
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+    toast("Login successful!");
+    closeOverlay("loginOverlay");
+    openAdmin();
+    $("#loginPwd").value = "";
+  } catch(e){
+    err.textContent = "Invalid email or password";
+    err.style.display = "block";
+  } finally {
+    $("#loginBtn").disabled = false;
+    $("#loginBtn").innerHTML = "🔓 Login";
+  }
+};
+window.doLogout = async function(){
+  await signOut(auth);
+  closeOverlay("adminOverlay");
+  toast("Logged out");
+};
+window.closeOverlay = function(id){ $("#"+id).classList.remove("show"); };
+
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+});
+
+// ====== ADMIN PANEL ======
+function openAdmin(){
+  $("#adminOverlay").classList.add("show");
+  switchTab("dashboard");
+  renderDashboard();
+  renderManagePosts();
+  loadTickerToForm();
+  loadSettingsToForm();
+}
+function switchTab(name){
+  $$(".admin-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  $$(".admin-section").forEach(s => s.classList.toggle("active", s.dataset.section === name));
+}
+$$(".admin-tab").forEach(t => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+
+function renderDashboard(){
+  const counts = { total: postsCache.length };
+  CATEGORIES.filter(c=>c.id!=="all").forEach(c => {
+    counts[c.id] = postsCache.filter(p => p.category === c.id).length;
+  });
+  $("#dashGrid").innerHTML = `
+    <div class="dash-card"><div class="label">Total Posts</div><div class="value">${counts.total}</div></div>
+    <div class="dash-card" style="background:linear-gradient(135deg,#2563eb,#1e40af)"><div class="label">Jobs</div><div class="value">${counts.job||0}</div></div>
+    <div class="dash-card" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)"><div class="label">Admission</div><div class="value">${counts.admission||0}</div></div>
+    <div class="dash-card" style="background:linear-gradient(135deg,#db2777,#9d174d)"><div class="label">Scholarship</div><div class="value">${counts.scholarship||0}</div></div>
+    <div class="dash-card" style="background:linear-gradient(135deg,#0891b2,#155e75)"><div class="label">Notice</div><div class="value">${counts.notice||0}</div></div>
+    <div class="dash-card" style="background:linear-gradient(135deg,#ea580c,#9a3412)"><div class="label">Exam</div><div class="value">${counts.exam||0}</div></div>`;
+  renderRecentActivity();
+}
+function renderRecentActivity(){
+  const el = $("#recentList");
+  if(!el) return;
+  if(activityLog.length === 0){ el.innerHTML = "No activity yet."; return; }
+  el.innerHTML = activityLog.slice(0,10).map(a => `
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px">
+      <span>${escapeHtml(a.action)}</span>
+      <span style="font-size:12px;opacity:.7">${timeAgo(a.time)}</span>
+    </div>`).join("");
+}
+
+// ====== POST FORM ======
+$("#coverInput").addEventListener("change", async e => {
+  const file = e.target.files[0]; if(!file) return;
+  const prog = $("#coverProgress"), bar = $("#coverProgressBar");
+  prog.classList.add("show"); bar.style.width = "0%";
+  try {
+    const r = await uploadToCloudinary(file, p => bar.style.width = p + "%");
+    pendingCover = r;
+    $("#coverName").textContent = "✓ " + file.name;
+    $("#coverZone").classList.add("has-file");
+    toast("Cover uploaded!");
+  } catch(err){ toast("Upload failed: " + err.message, "error"); }
+  finally { setTimeout(() => prog.classList.remove("show"), 600); }
+});
+$("#fileInput").addEventListener("change", async e => {
+  const files = Array.from(e.target.files); if(!files.length) return;
+  const prog = $("#fileProgress"), bar = $("#fileProgressBar");
+  prog.classList.add("show");
+  for(let i = 0; i < files.length; i++){
+    bar.style.width = "0%";
+    try {
+      const r = await uploadToCloudinary(files[i], p => bar.style.width = p + "%");
+      pendingFiles.push(r);
+    } catch(err){ toast("Upload failed: " + files[i].name, "error"); }
+  }
+  renderPendingFiles();
+  setTimeout(() => prog.classList.remove("show"), 600);
+  e.target.value = "";
+});
+function renderPendingFiles(){
+  $("#fileList").innerHTML = pendingFiles.map((f,i) => `
+    <div class="file-item">
+      <span>📎 ${escapeHtml(f.name)} <small style="opacity:.6">(${(f.size/1024).toFixed(0)} KB)</small></span>
+      <button data-rm="${i}" title="Remove">✕</button>
+    </div>`).join("");
+  $$("[data-rm]").forEach(b => b.addEventListener("click", () => {
+    pendingFiles.splice(parseInt(b.dataset.rm), 1);
+    renderPendingFiles();
+  }));
+}
+
+window.savePost = async function(){
+  if(!currentUser){ toast("Please login first", "error"); return; }
+  const title = $("#postTitle").value.trim();
+  const desc = $("#postDesc").value.trim();
+  const category = $("#postCategory").value;
+  if(!title || !desc){ toast("Title & Description দিন", "error"); return; }
+  const editId = $("#editPostId").value;
+  const data = {
+    title, description: desc, category,
+    url: $("#postUrl").value.trim(),
+    pinned: $("#postPinned").checked,
+    urgent: $("#postUrgent").checked,
+    cover: pendingCover?.url || ($("#editPostId").dataset.cover || ""),
+    files: [...(JSON.parse($("#editPostId").dataset.files || "[]")), ...pendingFiles],
+    updatedAt: serverTimestamp()
+  };
+  $("#savePostBtn").disabled = true;
+  $("#savePostBtn").innerHTML = "⏳ Saving...";
+  try {
+    if(editId){
+      await setDoc(doc(db,"posts",editId), { ...data }, { merge: true });
+      toast("Post updated!");
+      logActivity(`✏️ Edited: ${title}`);
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,"posts"), data);
+      toast("Post published!");
+      logActivity(`➕ Created: ${title}`);
+    }
+    resetPostForm();
+    await loadPosts(false);
+    renderDashboard();
+    renderManagePosts();
+    switchTab("manage");
+  } catch(e){ toast("Save failed: " + e.message, "error"); }
+  finally {
+    $("#savePostBtn").disabled = false;
+    $("#savePostBtn").innerHTML = "💾 Save Post";
+  }
+};
+window.resetPostForm = function(){
+  ["postTitle","postDesc","postUrl"].forEach(id => $("#"+id).value = "");
+  $("#postCategory").value = "job";
+  $("#postPinned").checked = false;
+  $("#postUrgent").checked = false;
+  pendingCover = null; pendingFiles = [];
+  $("#coverName").textContent = "PNG, JPG, WEBP up to 10MB";
+  $("#coverZone").classList.remove("has-file");
+  $("#fileList").innerHTML = "";
+  $("#editPostId").value = ""; $("#editPostId").dataset.files = "[]"; $("#editPostId").dataset.cover = "";
+  $("#formTitle").textContent = "New Post";
+};
+
+// ====== MANAGE POSTS ======
+function renderManagePosts(){
+  const search = $("#manageSearch").value.toLowerCase();
+  const tbody = $("#managePosts tbody");
+  const filtered = postsCache.filter(p =>
+    !search || (p.title||"").toLowerCase().includes(search));
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--muted)">No posts</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><strong>${escapeHtml(p.title)}</strong>${p.pinned?' 📌':''}${p.urgent?' 🚨':''}</td>
+      <td>${(CAT_MAP[p.category]||CAT_MAP.notice).label}</td>
+      <td>${timeAgo(p.createdAt)}</td>
+      <td><div class="actions-cell">
+        <button class="btn-edit-sm" data-edit="${p.id}">✏️ Edit</button>
+        <button class="btn-danger" data-del="${p.id}">🗑️</button>
+      </div></td>
+    </tr>`).join("");
+  tbody.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => editPost(b.dataset.edit)));
+  tbody.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => deletePost(b.dataset.del)));
+}
+$("#manageSearch")?.addEventListener("input", renderManagePosts);
+function editPost(id){
+  const p = postsCache.find(x => x.id === id); if(!p) return;
+  switchTab("create");
+  $("#formTitle").textContent = "✏️ Edit Post";
+  $("#editPostId").value = id;
+  $("#editPostId").dataset.files = JSON.stringify(p.files||[]);
+  $("#editPostId").dataset.cover = p.cover||"";
+  $("#postTitle").value = p.title||"";
+  $("#postDesc").value = p.description||"";
+  $("#postCategory").value = p.category||"job";
+  $("#postUrl").value = p.url||"";
+  $("#postPinned").checked = !!p.pinned;
+  $("#postUrgent").checked = !!p.urgent;
+  pendingCover = null; pendingFiles = [];
+  $("#coverName").textContent = p.cover ? "✓ Existing cover (replace optional)" : "PNG, JPG, WEBP";
+  $("#coverZone").classList.toggle("has-file", !!p.cover);
+  $("#fileList").innerHTML = (p.files||[]).map(f => `
+    <div class="file-item"><span>📎 ${escapeHtml(f.name||"file")} <small style="opacity:.6">(existing)</small></span></div>`).join("");
+}
+async function deletePost(id){
+  const p = postsCache.find(x => x.id === id);
+  if(!confirm(`"${p?.title||'this post'}" delete করতে চান?`)) return;
+  try {
+    await deleteDoc(doc(db,"posts",id));
+    toast("Post deleted");
+    logActivity(`🗑️ Deleted: ${p?.title||id}`);
+    postsCache = postsCache.filter(x => x.id !== id);
+    renderPosts(); renderDashboard(); renderManagePosts();
+  } catch(e){ toast("Delete failed: " + e.message, "error"); }
+}
+
+// ====== TICKER ======
+async function loadTicker(){
+  try {
+    const snap = await getDoc(doc(db,"settings","ticker"));
+    const msgs = snap.exists() ? (snap.data().messages || []) : [];
+    if(msgs.length){
+      $("#tickerBar").classList.remove("hidden");
+      $("#tickerTrack").innerHTML = msgs.map(m => `<span>${escapeHtml(m)}</span>`).join("");
+    } else {
+      $("#tickerBar").classList.add("hidden");
+    }
+  } catch(e){ console.warn("Ticker load failed", e); }
+}
+async function loadTickerToForm(){
+  const snap = await getDoc(doc(db,"settings","ticker"));
+  if(snap.exists()) $("#tickerMessages").value = (snap.data().messages||[]).join("\n");
+}
+window.saveTicker = async function(){
+  const messages = $("#tickerMessages").value.split("\n").map(s => s.trim()).filter(Boolean);
+  try {
+    await setDoc(doc(db,"settings","ticker"), { messages, updatedAt: serverTimestamp() });
+    toast("Ticker updated!");
+    logActivity(`📢 Ticker updated (${messages.length} msgs)`);
+    loadTicker();
+  } catch(e){ toast("Save failed: " + e.message, "error"); }
+};
+window.clearTicker = async function(){
+  if(!confirm("Ticker clear করতে চান?")) return;
+  $("#tickerMessages").value = "";
+  await setDoc(doc(db,"settings","ticker"), { messages: [] });
+  loadTicker();
+  toast("Ticker cleared");
+};
+
+// ====== SETTINGS ======
+const DEFAULT_SETTINGS = {
+  title: "সবুজ কম্পিউটার্স • রিসোর্স হাব",
+  tagline: "চাকরি • ভর্তি • বৃত্তি • নোটিশ",
+  heroH: "চাকরি, ভর্তি ও নোটিশের সর্বশেষ আপডেট",
+  heroP: "বাগাতিপাড়া, নাটোরের ছাত্র-ছাত্রী ও চাকরিপ্রার্থীদের জন্য সবুজ কম্পিউটার ট্রেনিং সেন্টারের অফিসিয়াল রিসোর্স হাব — সব গুরুত্বপূর্ণ তথ্য এক জায়গায়।",
+  logo: "https://sabujcomputers.pro.bd/icon-192.png",
+  footer: "© সবুজ কম্পিউটার ট্রেনিং সেন্টার • রিসোর্স হাব • বাগাতিপাড়া, নাটোর"
+};
+async function loadSettings(){
+  try {
+    const snap = await getDoc(doc(db,"settings","site"));
+    const s = snap.exists() ? { ...DEFAULT_SETTINGS, ...snap.data() } : DEFAULT_SETTINGS;
+    document.title = s.title + " — চাকরি, ভর্তি ও নোটিশ";
+    $(".brand-text h1").textContent = s.title;
+    $(".brand-text p").textContent = s.tagline;
+    // Highlight last word of hero heading in gold
+    const words = (s.heroH || "").trim().split(/\s+/);
+    if(words.length > 1){
+      const last = words.pop();
+      $(".hero h2").innerHTML = `${escapeHtml(words.join(" "))} <span>${escapeHtml(last)}</span>`;
+    } else {
+      $(".hero h2").innerHTML = `<span>${escapeHtml(s.heroH || "")}</span>`;
+    }
+    $(".hero p").textContent = s.heroP;
+    if(s.logo) $("#brandLogo").src = s.logo;
+    $("footer p").innerHTML = s.footer;
+  } catch(e){ console.warn("Settings load failed",e); }
+}
+async function loadSettingsToForm(){
+  const snap = await getDoc(doc(db,"settings","site"));
+  const s = snap.exists() ? { ...DEFAULT_SETTINGS, ...snap.data() } : DEFAULT_SETTINGS;
+  $("#setTitle").value = s.title; $("#setTagline").value = s.tagline;
+  $("#setHeroH").value = s.heroH; $("#setHeroP").value = s.heroP;
+  $("#setLogo").value = s.logo; $("#setFooter").value = s.footer;
+}
+window.saveSettings = async function(){
+  const data = {
+    title: $("#setTitle").value.trim() || DEFAULT_SETTINGS.title,
+    tagline: $("#setTagline").value.trim() || DEFAULT_SETTINGS.tagline,
+    heroH: $("#setHeroH").value.trim() || DEFAULT_SETTINGS.heroH,
+    heroP: $("#setHeroP").value.trim() || DEFAULT_SETTINGS.heroP,
+    logo: $("#setLogo").value.trim() || DEFAULT_SETTINGS.logo,
+    footer: $("#setFooter").value.trim() || DEFAULT_SETTINGS.footer,
+    updatedAt: serverTimestamp()
+  };
+  try {
+    await setDoc(doc(db,"settings","site"), data);
+    toast("Settings saved!");
+    logActivity("🎨 Settings updated");
+    loadSettings();
+  } catch(e){ toast("Save failed: " + e.message, "error"); }
+};
+window.clearActivityLog = function(){
+  if(!confirm("সব activity history clear করতে চান?")) return;
+  activityLog = []; localStorage.removeItem("rh_activity"); renderRecentActivity();
+  toast("History cleared");
+};
+
+// ====== DARK MODE ======
+const dm = $("#darkToggle");
+if(localStorage.getItem("rh_dark") === "1"){ document.body.classList.add("dark-mode"); dm.textContent = "☀️"; }
+dm.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const on = document.body.classList.contains("dark-mode");
+  dm.textContent = on ? "☀️" : "🌙";
+  localStorage.setItem("rh_dark", on ? "1" : "0");
+});
+
+// ====== SEARCH ======
+let searchDebounce;
+$("#searchInput").addEventListener("input", e => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => { searchTerm = e.target.value.trim(); renderPosts(); }, 250);
+});
+window.applyFilters = function(){ searchTerm = $("#searchInput").value.trim(); renderPosts(); };
+
+// ====== LOAD MORE ======
+$("#loadMoreBtn").addEventListener("click", () => loadPosts(true));
+
+// ====== INIT ======
+$("#yr").textContent = new Date().getFullYear();
+window.__rh = { sharePost, closeOverlay: window.closeOverlay };
+window.sharePost = sharePost;
+
+renderFilters();
+loadSettings();
+loadTicker();
+loadPosts();
+
+// Deep link: ?post=ID
+const urlParams = new URLSearchParams(location.search);
+if(urlParams.get("post")){
+  setTimeout(() => openPreview(urlParams.get("post")), 1200);
+}
+
+// Click outside to close overlays
+$$(".overlay").forEach(o => o.addEventListener("click", e => {
+  if(e.target === o) o.classList.remove("show");
+}));
+</script>
+</body>
+</html>

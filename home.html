@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="bn" style="scroll-behavior:smooth">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0d3d1f">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<!-- Browser caching enabled for performance (SW handles freshness) -->
+<!-- Cache Control Meta Tags -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <script>
   // Service Worker Register (PWA - offline support & install)
@@ -21,6 +21,8 @@
     });
   }
 </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত | বাগাতিপাড়া, নাটোর</title>
 <meta name="description" content="সবুজ কম্পিউটার্স - বাগাতিপাড়া, নাটোরের BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। ফাউন্ডেশন কোর্স, ফটোকপি, প্রিন্টিং ও অনলাইন সেবা।">
 <meta name="keywords" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার, SCTC, বাগাতিপাড়া, নাটোর, কম্পিউটার প্রশিক্ষণ, BTEB কোর্স, ফাউন্ডেশন কোর্স, অনলাইন সেবা, ফটোকপি, প্রিন্টিং, computer training Bagatipara, Natore computer course, Sabuj Computer">
@@ -46,10 +48,10 @@
 <link rel="alternate" hreflang="x-default" href="https://sabujcomputers.pro.bd/">
 
 <!-- Open Graph -->
-<meta property="og:title" content="সবুজ কম্পিউটার্স ট্রেনিং সেন্টার - BTEB অনুমোদিত | বাগাতিপাড়া, নাটোর">
+<meta property="og:title" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত | বাগাতিপাড়া, নাটোর">
 <meta property="og:description" content="বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। স্বল্প খরচে সর্বোচ্চ মানের প্রশিক্ষণ, ফটোকপি, প্রিন্টিং ও অনলাইন সেবা।">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="সবুজ কম্পিউটার্স ট্রেনিং সেন্টার">
+<meta property="og:site_name" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
 <meta property="og:locale" content="bn_BD">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:url" content="https://sabujcomputers.pro.bd/">
@@ -58,14 +60,14 @@
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="সবুজ কম্পিউটার্স ট্রেনিং সেন্টার - প্রিমিয়াম ব্র্যান্ড ব্যানার">
+<meta property="og:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - প্রিমিয়াম ব্রান্ড ব্যানার">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="সবুজ কম্পিউটার্স ট্রেনিং সেন্টার - BTEB অনুমোদিত">
+<meta name="twitter:title" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার - BTEB অনুমোদিত">
 <meta name="twitter:description" content="বাগাতিপাড়া, নাটোরের সেরা BTEB অনুমোদিত কম্পিউটার প্রশিক্ষণ কেন্দ্র। ফাউন্ডেশন কোর্স, অনলাইন সেবা ও দ্রুত চাকরির সুযোগ।">
 <meta name="twitter:image" content="https://sabujcomputers.pro.bd/og-image.jpg">
-<meta name="twitter:image:alt" content="সবুজ কম্পিউটার্স ট্রেনিং সেন্টার">
+<meta name="twitter:image:alt" content="সবুজ কম্পিউটার ট্রেনিং সেন্টার">
 
 <link rel="canonical" href="https://sabujcomputers.pro.bd/">
 
@@ -1231,9 +1233,10 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
 <!-- ==================== HEADER ==================== -->
 <header>
   <!-- Mobile contact bar (hidden on desktop) -->
-   <div class="hdr-contact-mobile" style="display:none;font-size:12px;padding:5px 4%;background:rgba(0,0,0,.25);text-align:center">
+   <div class="hdr-contact-mobile" style="display:none;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;font-size:12px;padding:6px 4%;background:rgba(0,0,0,.25);text-align:center">
     📞 <a id="hdrPhoneMobile" href="tel:01724084350" style="color:var(--gold2);text-decoration:none;font-weight:600">০১৭২৪ ০৮৪৩৫০</a>
-    <a href="portal.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,var(--gold),#e0c060);color:#3d2800;border-radius:8px;padding:6px 14px;margin-left:10px;font-weight:700;font-size:12px;text-decoration:none;">🎓 পোর্টাল</a>
+    <a href="portal.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,var(--gold),#e0c060);color:#3d2800;border-radius:8px;padding:6px 14px;font-weight:700;font-size:12px;text-decoration:none;white-space:nowrap;">🎓 পোর্টাল</a>
+    <a href="resource-hub.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:8px;padding:6px 14px;font-weight:700;font-size:12px;text-decoration:none;white-space:nowrap;">📢 রিসোর্স হাব</a>
   </div>
   <div class="hdr-top">
     <div class="logo-wrap">
@@ -1246,6 +1249,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
     <div class="hdr-contact">
       📞 <a id="hdrPhone" href="tel:01724084350">০১৭২৪ ০৮৪৩৫০</a>
       <a href="portal.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,var(--gold),#e0c060);color:#3d2800;border-radius:10px;padding:10px 20px;margin-left:15px;font-weight:700;font-size:14px;text-decoration:none;display:inline-block;box-shadow:0 3px 10px rgba(200,168,71,0.4);transition:0.3s;">🎓 স্টুডেন্ট পোর্টাল</a>
+      <a href="resource-hub.html" target="_blank" rel="noopener" class="nav-resource-hub" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:10px;padding:10px 20px;margin-left:10px;font-weight:700;font-size:14px;text-decoration:none;display:inline-block;box-shadow:0 3px 10px rgba(22,163,74,0.4);transition:0.3s;" onmouseover="this.style.transform='translateY(-2px)';this.style.filter='brightness(1.08)'" onmouseout="this.style.transform='';this.style.filter=''">📢 রিসোর্স হাব</a>
     </div>
   </div>
   <button id="hamBtn" onclick="toggleNav()" aria-label="মেনু" style="display:none;background:none;border:none;cursor:pointer;padding:8px;position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:9999"><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span><span style="display:block;width:24px;height:2px;background:#fff;margin:5px 0"></span></button>
@@ -1260,6 +1264,7 @@ body.dark-mode #publicFeedbacks>div,body.dark-mode #noticeBoard>div{background:#
     <a href="#search">ফলাফল</a>
     <a href="#contact">যোগাযোগ</a>
     <a href="portal.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,var(--gold),#e0c060);color:#3d2800;border-radius:8px;padding:8px 16px;margin:8px 4px;font-weight:700;border-bottom:none;">🎓 স্টুডেন্ট পোর্টাল</a>
+    <a href="resource-hub.html" target="_blank" rel="noopener" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:8px;padding:8px 16px;margin:8px 4px;font-weight:700;border-bottom:none;">📢 রিসোর্স হাব</a>
   </nav>
 </header>
 
