@@ -534,7 +534,7 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 <!-- Controls -->
 <div class="controls">
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="🔍 খুঁজুন... (title, description)">
+    <input type="search" id="searchInput" name="q" autocomplete="new-password" placeholder="🔍 খুঁজুন... (title, description)">
     <button onclick="applyFilters()">🔎 <span>Search</span></button>
   </div>
   <div class="filters" id="filterChips"></div>
@@ -582,7 +582,8 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
     <div>
       <h4 style="color:var(--gold2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter'">যোগাযোগ</h4>
       <div style="font-size:12.5px;line-height:1.9;opacity:.75">
-        <p id="footerPhone"><a href="tel:01XXXXXXXXX" style="color:inherit;text-decoration:none">📞 01XXXXXXXXX</a></p>
+        <p id="footerPhone"><a href="tel:+8801724084350" style="color:inherit;text-decoration:none">📞 +880 1724 084350</a></p>
+        <p id="footerWa"><a href="https://wa.me/8801724084350" target="_blank" style="color:#4ade80;text-decoration:none;font-weight:600">💬 WhatsApp Message</a></p>
         <p id="footerEmail"><a href="mailto:info@sabujcomputers.pro.bd" style="color:inherit;text-decoration:none">📧 info@sabujcomputers.pro.bd</a></p>
         <p id="footerWebsite">🌐 <a href="https://sabujcomputers.pro.bd" target="_blank" style="color:inherit;text-decoration:none">sabujcomputers.pro.bd</a></p>
       </div>
@@ -605,24 +606,43 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 
 <!-- Contact modal -->
 <div class="overlay" id="contactOverlay">
-  <div class="modal-card" style="max-width: 400px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-      <h3 style="margin:0;font-family:'Noto Serif Bengali';color:var(--text-dark)">✉️ যোগাযোগ করুন</h3>
+  <div class="modal-card" style="max-width: 440px; box-sizing: border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <h3 style="margin:0;font-family:'Noto Serif Bengali';color:var(--g1);font-size:20px">✉️ যোগাযোগ করুন</h3>
       <button class="btn-close" onclick="closeOverlay('contactOverlay')">✕</button>
     </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <a href="tel:+8801724084350" class="btn-secondary" style="text-align:center;padding:12px;color:#1e40af;border-color:#bfdbfe;background:#eff6ff;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span style="font-size:20px">📞</span>
+        <span style="font-weight:700;font-size:13px">সরাসরি কল</span>
+        <span style="font-size:11px;opacity:0.8">+8801724084350</span>
+      </a>
+      <a href="https://wa.me/8801724084350?text=Hello" target="_blank" class="btn-secondary" style="text-align:center;padding:12px;color:#166534;border-color:#bbf7d0;background:#f0fdf4;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span style="font-size:20px">💬</span>
+        <span style="font-weight:700;font-size:13px">WhatsApp</span>
+        <span style="font-size:11px;opacity:0.8">মেসেজ পাঠান</span>
+      </a>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px;position:relative">
+      <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)"></div>
+      <span style="position:relative;background:var(--card);padding:0 12px;font-size:13px;color:var(--muted);font-weight:500">অথবা ফর্ম পূরণ করুন</span>
+    </div>
+
     <div class="fg">
       <label>আপনার নাম</label>
       <input type="text" id="contactName" placeholder="আপনার নাম লিখুন" maxlength="60">
     </div>
     <div class="fg">
       <label>ইমেইল বা ফোন নম্বর <span style="color:red">*</span></label>
-      <input type="text" id="contactEmail" placeholder="e.g. 01XXXXXXXXX" maxlength="80">
+      <input type="text" id="contactEmail" placeholder="আপনাকে রিপ্লাই করার মাধ্যম" maxlength="80">
     </div>
     <div class="fg">
       <label>মেসেজ <span style="color:red">*</span></label>
-      <textarea id="contactMsg" rows="4" placeholder="আপনার মেসেজ বিস্তারিত লিখুন..." maxlength="1000"></textarea>
+      <textarea id="contactMsg" rows="3" placeholder="আপনার মেসেজ বিস্তারিত লিখুন..." maxlength="1000" style="resize:none"></textarea>
     </div>
-    <button class="btn-primary" id="btnSubmitContact" onclick="submitContactForm()" style="width:100%;margin-top:10px">📤 মেসেজ পাঠান</button>
+    <button class="btn-primary" id="btnSubmitContact" onclick="submitContactForm()" style="width:100%;margin-top:6px">📤 মেসেজ পাঠান</button>
   </div>
 </div>
 
@@ -660,6 +680,7 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
       <button class="admin-tab active" data-tab="dashboard">📊 Dashboard</button>
       <button class="admin-tab" data-tab="create">➕ New Post</button>
       <button class="admin-tab" data-tab="manage">📋 Manage Posts</button>
+      <button class="admin-tab" data-tab="inbox">📥 Inbox</button>
       <button class="admin-tab" data-tab="ticker">📢 Breaking News</button>
       <button class="admin-tab" data-tab="settings">🎨 Settings</button>
     </div>
@@ -779,7 +800,7 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
             <button class="btn-danger" style="font-size:12.5px;padding:8px 12px" onclick="deleteSelectedPosts()" id="bulkDelBtn">🗑️ Delete Selected</button>
           </div>
         </div>
-        <input type="text" id="manageSearch" placeholder="🔍 Search posts..."
+        <input type="search" id="manageSearch" autocomplete="new-password" name="prevent_autofill_admin_q" placeholder="🔍 Search posts..."
           style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:10px;font-family:'Hind Siliguri';background:var(--bg);color:var(--text)">
         <div style="overflow-x:auto">
           <table class="posts-table" id="managePosts">
@@ -792,6 +813,14 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
             <tbody></tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Inbox -->
+      <div class="admin-section" data-section="inbox">
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:14px">📥 Contact Messages</h3>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px">সাধারণ মানুষের পাঠানো মেসেজগুলো এখানে দেখতে পারবেন।</p>
+        <button class="btn-secondary" style="font-size:12.5px;padding:8px 12px;margin-bottom:14px" onclick="loadMessages()">🔄 Refresh Inbox</button>
+        <div id="inboxList" style="display:flex;flex-direction:column;gap:12px;"></div>
       </div>
 
       <!-- Ticker -->
@@ -873,7 +902,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc,
-  query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp, increment
+  query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp, increment, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // ====== CONFIG ======
@@ -1085,7 +1114,7 @@ function postCardHtml(p, idx){
   const tagsHtml = p.tags && p.tags.length > 0 ? `<div style="margin-top:-6px;margin-bottom:6px;display:flex;gap:4px;flex-wrap:wrap;">${p.tags.slice(0,3).map(t=>`<span style="font-size:10px;background:rgba(200,168,71,.15);color:#7f641a;padding:2px 6px;border-radius:4px;">#${escapeHtml(t)}</span>`).join('')}</div>` : '';
   
   return `
-    <article class="post-card" style="animation-delay:${idx*40}ms">
+    <article class="post-card" data-id="${p.id}" style="animation-delay:${idx*40}ms">
       <div class="post-image">
         ${img}
         <div class="post-badges">${badges}</div>
@@ -1100,8 +1129,8 @@ function postCardHtml(p, idx){
         <div class="post-meta">
           <span>📅 ${timeAgo(p.createdAt)}</span>
           <span style="display:flex;gap:8px">
-            ${p.views > 0 ? `<span style="color:var(--g2);font-weight:600" title="Views">👁️ ${p.views}</span>` : `<span title="Views">👁️ 0</span>`}
-            ${p.likes > 0 ? `<span style="color:var(--g3);font-weight:600" title="Likes">👍 ${p.likes}</span>` : ''}
+            ${(p.views||0) > 0 ? `<span class="views-count" style="color:var(--g2);font-weight:600" title="Views">👁️ ${p.views}</span>` : `<span class="views-count" title="Views">👁️ 0</span>`}
+            ${(p.likes||0) > 0 ? `<span class="likes-count" style="color:var(--g3);font-weight:600" title="Likes">👍 ${p.likes}</span>` : `<span class="likes-count" style="display:none" title="Likes"></span>`}
             <span title="Attachments">📎 ${(p.files?.length||0)}</span>
           </span>
         </div>
@@ -1151,6 +1180,15 @@ window.toggleLike = async function(id) {
      likeBtn.innerHTML = `👍 Helpful (${p.likes})`;
      likeBtn.classList.add("liked");
   }
+  
+  // Optmistic UI Update on background card
+  document.querySelectorAll(`.post-card[data-id="${id}"] .likes-count`).forEach(el => {
+      el.innerHTML = `👍 ${p.likes}`;
+      el.style.display = 'inline';
+      el.style.color = 'var(--g3)';
+      el.style.fontWeight = '600';
+  });
+
   toast("আপনার মতামতের জন্য ধন্যবাদ!");
   
   // Trigger Confetti! 🎉
@@ -1160,7 +1198,10 @@ window.toggleLike = async function(id) {
 
   try {
      await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-  } catch(e) { console.warn("Like sync failed:", e); }
+  } catch(e) { 
+     console.warn("Like sync failed:", e); 
+     toast("কিছু সমস্যা হয়েছে, রিলোড দিলে আপডেট নাও থাকতে পারে (Firebase Rules check)", "warn");
+  }
 };
 
 function renderPosts(append=false){
@@ -1253,9 +1294,23 @@ async function loadPosts(append=false){
 function resetAndLoad(){ loadPosts(false); }
 
 // ====== PREVIEW MODAL ======
-function openPreview(id){
-  const p = postsCache.find(x => x.id === id);
-  if(!p) return;
+async function openPreview(id){
+  let p = postsCache.find(x => x.id === id);
+  if(!p) {
+    try {
+      const snap = await getDoc(doc(db, "posts", id));
+      if(snap.exists()){
+        p = { id: snap.id, ...snap.data() };
+        postsCache.push(p);
+      } else {
+        toast("সংযুক্ত পোস্টটি খুঁজে পাওয়া যায়নি!", "error");
+        return;
+      }
+    } catch(e) {
+      toast("Error loading post: " + e.message, "error");
+      return;
+    }
+  }
   const cat = CAT_MAP[p.category] || CAT_MAP.notice;
   const filesHtml = (p.files||[]).map(f => `
     <div class="modal-file">
@@ -1284,13 +1339,43 @@ function openPreview(id){
 
   const isLiked = likedPosts.includes(p.id);
 
-  // View Counter Tracking & Google Calendar Generator
+  // View Counter Tracking & Optimistic UI Update
   if(!sessionStorage.getItem('viewed_' + p.id)) {
       sessionStorage.setItem('viewed_' + p.id, '1');
       p.views = (p.views || 0) + 1;
       updateDoc(doc(db, "posts", p.id), { views: increment(1) }).catch(e => console.warn("View sync failed:", e));
+      // Update background card immediately
+      document.querySelectorAll(`.post-card[data-id="${p.id}"] .views-count`).forEach(el => {
+          el.innerHTML = `👁️ ${p.views}`;
+          el.style.color = 'var(--g2)';
+          el.style.fontWeight = '600';
+      });
   }
   
+  // Real-time listener for this specific post while modal is open
+  if (window._currentPostListener) window._currentPostListener();
+  window._currentPostListener = onSnapshot(doc(db, "posts", p.id), (docSnap) => {
+      if (docSnap.exists()) {
+          const freshData = docSnap.data();
+          p.views = freshData.views > p.views ? freshData.views : p.views;
+          p.likes = freshData.likes > p.likes ? freshData.likes : p.likes;
+          
+          // Update Modal UI live if someone else likes/views
+          const lb = document.getElementById("modalLikeBtn");
+          if (lb && !lb.classList.contains("liked")) { // don't override self likes
+              lb.innerHTML = `👍 Helpful (${p.likes || 0})`;
+          }
+          
+          // Update Card UI live
+          document.querySelectorAll(`.post-card[data-id="${p.id}"] .views-count`).forEach(el => {
+              el.innerHTML = `👁️ ${p.views}`; el.style.color='var(--g2)'; el.style.fontWeight='600';
+          });
+          document.querySelectorAll(`.post-card[data-id="${p.id}"] .likes-count`).forEach(el => {
+              if (p.likes > 0) { el.innerHTML = `👍 ${p.likes}`; el.style.color='var(--g3)'; el.style.fontWeight='600'; el.style.display='inline'; }
+          });
+      }
+  });
+
   let gCalUrl = null;
   if(p.deadline) {
       const dD = new Date(p.deadline);
@@ -1498,7 +1583,13 @@ window.doLogout = async function(){
   closeOverlay("adminOverlay");
   toast("Logged out");
 };
-window.closeOverlay = function(id){ $("#"+id).classList.remove("show"); };
+window.closeOverlay = function(id){ 
+  $("#"+id).classList.remove("show"); 
+  if (id === "previewOverlay" && window._currentPostListener) {
+      window._currentPostListener(); // unsubscribe
+      window._currentPostListener = null;
+  }
+};
 
 onAuthStateChanged(auth, user => {
   currentUser = user;
@@ -1512,6 +1603,7 @@ function openAdmin(){
   renderManagePosts();
   loadTickerToForm();
   loadSettingsToForm();
+  loadMessages();
   // Init Quill after panel is visible
   setTimeout(initQuill, 100);
 }
@@ -1833,6 +1925,52 @@ async function deletePost(id){
   } catch(e){ toast("Delete failed: " + e.message, "error"); }
 }
 
+// ====== INBOX LOGIC ======
+async function loadMessages() {
+  if(!currentUser) return;
+  const list = document.getElementById("inboxList");
+  list.innerHTML = "⏳ Loading messages...";
+  try {
+    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"), limit(50));
+    const snap = await getDocs(q);
+    if(snap.empty) {
+      list.innerHTML = "<div class='empty'>📭 কোনো নতুন মেসেজ নেই।</div>";
+      return;
+    }
+    list.innerHTML = snap.docs.map(doc => {
+      const d = doc.data();
+      return `
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:8px">
+            <h4 style="margin:0;font-size:15px;color:var(--text)">🗣️ ${escapeHtml(d.name)}</h4>
+            <span style="font-size:11px;color:var(--muted)">${timeAgo(d.createdAt)}</span>
+          </div>
+          <div style="font-size:13px;color:var(--g2);font-weight:600;margin-bottom:10px">📧 ${escapeHtml(d.email)}</div>
+          <div style="font-size:14px;color:var(--text);background:rgba(255,255,255,.5);padding:10px;border-radius:8px;white-space:pre-wrap;">${escapeHtml(d.message)}</div>
+          <div style="margin-top:10px;text-align:right">
+            <a href="mailto:${escapeHtml(d.email)}" class="btn-secondary" style="padding:4px 10px;font-size:11px;text-decoration:none;display:inline-block">Reply</a>
+            <button class="btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteMessage('${doc.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch(e) {
+    if(e.message.includes("permission denied")) {
+      list.innerHTML = "<div class='empty' style='color:#dc2626'>❌ Permission Denied. Check rules.</div>";
+    } else {
+      list.innerHTML = "<div class='empty'>⚠️ Error loading messages.</div>";
+    }
+  }
+}
+window.deleteMessage = async function(id) {
+  if(!confirm("মেসেজটি ডিলিট করতে চান?")) return;
+  try {
+    await deleteDoc(doc(db, "messages", id));
+    toast("মেসেজ ডিলিট হয়েছে!");
+    loadMessages();
+  } catch(e) { toast("Error: " + e.message, "error"); }
+};
+
 // Bulk Admin Actions
 window.toggleAllPosts = function(chk) {
   document.querySelectorAll(".post-chk").forEach(c => c.checked = chk.checked);
@@ -2141,7 +2279,7 @@ loadPosts();
 // Deep link: ?post=ID
 const urlParams = new URLSearchParams(location.search);
 if(urlParams.get("post")){
-  setTimeout(() => openPreview(urlParams.get("post")), 1200);
+  openPreview(urlParams.get("post"));
 }
 
 // Scroll logic
@@ -2161,7 +2299,13 @@ scrollBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "s
 
 // Click outside to close overlays
 $$(".overlay").forEach(o => o.addEventListener("click", e => {
-  if(e.target === o) o.classList.remove("show");
+  if(e.target === o) {
+    if(o.id === "previewOverlay" && window._currentPostListener) {
+      window._currentPostListener(); 
+      window._currentPostListener = null;
+    }
+    o.classList.remove("show");
+  }
 }));
 </script>
 </body>
