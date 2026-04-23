@@ -3,7 +3,7 @@
 
 User-agent: *
 Allow: /
-Allow: /home.html
+Allow: /index.html
 Allow: /admission-form.html
 Allow: /portal.html
 Allow: /verify.html
