@@ -1168,8 +1168,8 @@ function renderPosts(append=false){
     return true;
   }).sort((a,b) => {
     if((a.pinned?1:0) !== (b.pinned?1:0)) return (b.pinned?1:0) - (a.pinned?1:0);
-    const ta = a.createdAt?.toMillis?.() || 0;
-    const tb = b.createdAt?.toMillis?.() || 0;
+    const ta = a.createdAt?.toMillis?.() || (typeof a.createdAt === 'number' ? a.createdAt : 0);
+    const tb = b.createdAt?.toMillis?.() || (typeof b.createdAt === 'number' ? b.createdAt : 0);
     return tb - ta;
   });
   if(filtered.length === 0){
