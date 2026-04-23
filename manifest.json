@@ -21,7 +21,7 @@
       "purpose": "any"
     }
   ],
-  "start_url": "/home.html",
+  "start_url": "/index.html",
   "background_color": "#ffffff",
   "display": "standalone",
   "theme_color": "#0d3d1f",
