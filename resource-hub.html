@@ -34,6 +34,7 @@
 <meta property="og:title" content="রিসোর্স হাব — সবুজ কম্পিউটার ট্রেনিং সেন্টার">
 <meta property="og:description" content="চাকরি, ভর্তি, বৃত্তি ও নোটিশের সর্বশেষ আপডেট পান এক ক্লিকে — SCTC, বাগাতিপাড়া, নাটোর।">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://sabujcomputers.pro.bd/resource-hub.html">
 <meta property="og:image" content="https://sabujcomputers.pro.bd/icon-512.png">
 <title>রিসোর্স হাব — সবুজ কম্পিউটার ট্রেনিং সেন্টার | চাকরি, ভর্তি ও নোটিশ</title>
 <link rel="icon" type="image/png" href="https://sabujcomputers.pro.bd/icon-192.png">
@@ -42,6 +43,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <style>
 /* ====== DESIGN TOKENS (matched with main site) ====== */
 :root{
@@ -51,10 +53,12 @@
   --border:#e2ece6;--radius:16px;--shadow:0 8px 32px rgba(13,61,31,.13);
   --shadow-sm:0 2px 8px rgba(13,61,31,.08);
   --danger:#dc2626;--warn:#f59e0b;--info:#2563eb;
+  --sk-base:#e8efea;--sk-shine:#f4f8f5;
 }
 body.dark-mode{
   --bg:#0a1f10;--card:#0f2918;--text:#e6f3eb;--muted:#8aa896;
   --border:#1e3a22;--shadow:0 8px 32px rgba(0,0,0,.5);
+  --sk-base:#1a3020;--sk-shine:#1f3827;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -141,13 +145,13 @@ header{background:linear-gradient(135deg,#021a08 0%,#0d3d1f 50%,#1a6b35 100%);
 
 /* ====== POSTS GRID ====== */
 .posts-section{max-width:1280px;margin:30px auto 60px;padding:0 22px}
-.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:20px}
 .post-card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);
   border:1px solid var(--border);transition:all .35s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;animation:cardIn .5s ease backwards}
+  display:flex;flex-direction:column;animation:cardIn .5s ease backwards;will-change:transform}
 .post-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--g3)}
 @keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.post-image{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#e8f3ec,#c5e3d0);
+.post-image{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--sk-base),var(--sk-shine));
   overflow:hidden}
 .post-image img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .post-card:hover .post-image img{transform:scale(1.07)}
@@ -189,10 +193,10 @@ header{background:linear-gradient(135deg,#021a08 0%,#0d3d1f 50%,#1a6b35 100%);
 
 /* Skeleton */
 .skeleton-card{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
-.skeleton-img{width:100%;aspect-ratio:16/9;background:linear-gradient(90deg,#e8efea 25%,#f4f8f5 50%,#e8efea 75%);
+.skeleton-img{width:100%;aspect-ratio:16/9;background:linear-gradient(90deg,var(--sk-base) 25%,var(--sk-shine) 50%,var(--sk-base) 75%);
   background-size:200% 100%;animation:shimmer 1.4s infinite}
 .skeleton-line{height:14px;margin:10px 16px;border-radius:6px;
-  background:linear-gradient(90deg,#e8efea 25%,#f4f8f5 50%,#e8efea 75%);background-size:200% 100%;
+  background:linear-gradient(90deg,var(--sk-base) 25%,var(--sk-shine) 50%,var(--sk-base) 75%);background-size:200% 100%;
   animation:shimmer 1.4s infinite}
 .skeleton-line.short{width:60%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -215,7 +219,22 @@ footer p{font-size:13px;line-height:1.7}
 footer a{color:var(--gold2);text-decoration:none;font-weight:600}
 footer a:hover{text-decoration:underline}
 
-/* ====== SECRET TRIGGER (5-click admin) ====== */
+/* ====== PREMIUM CARD ACCENT LINE ====== */
+.post-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--g2),var(--g4));opacity:0;transition:opacity .35s}
+.post-card{position:relative}
+.post-card:hover::before{opacity:1}
+/* Better badge styling */
+.badge{font-family:'Inter';letter-spacing:.3px}
+/* Search button gradient animation */
+.search-box button{background:linear-gradient(135deg,var(--g1),var(--g2));
+  transition:filter .2s, box-shadow .2s}
+.search-box button:hover{filter:brightness(1.12);box-shadow:0 4px 16px rgba(46,158,82,.4)}
+/* Stat pills animation */
+.stat-pill{transition:transform .2s, background .2s}
+.stat-pill:hover{transform:translateY(-2px);background:rgba(255,255,255,.18)}
+/* Footer improvement */
+footer a:hover{color:var(--gold);text-decoration:none}
 #secretTrigger{position:fixed;bottom:0;right:0;width:50px;height:50px;z-index:9990;
   opacity:0;cursor:default}
 
@@ -315,7 +334,7 @@ footer a:hover{text-decoration:underline}
 .modal-body{padding:22px 26px;overflow-y:auto}
 .modal-body h3{font-family:'Noto Serif Bengali';color:var(--g1);font-size:22px;margin-bottom:10px}
 .modal-body .modal-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--muted)}
-.modal-body p{font-size:14.5px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.modal-body>p{font-size:14.5px;line-height:1.7;color:var(--text)}
 .modal-files{margin-top:18px;display:flex;flex-direction:column;gap:8px}
 .modal-file{background:var(--bg);padding:11px 14px;border-radius:10px;display:flex;
   align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border)}
@@ -325,10 +344,10 @@ footer a:hover{text-decoration:underline}
 .modal-actions{padding:14px 26px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 
 /* ====== TOAST ====== */
-.toast-wrap{position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;max-width:340px}
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;max-width:min(340px,calc(100vw - 40px))}
 .toast{background:var(--card);border-radius:12px;padding:13px 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);
   display:flex;align-items:center;gap:10px;font-size:14px;border-left:4px solid var(--g2);
-  animation:slideIn .3s ease;color:var(--text)}
+  animation:slideIn .3s ease;color:var(--text);transition:opacity .3s ease,transform .3s ease}
 .toast.error{border-left-color:#dc2626}
 .toast.warn{border-left-color:#f59e0b}
 @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:none}}
@@ -337,10 +356,16 @@ footer a:hover{text-decoration:underline}
 .ql-toolbar{border-radius:10px 10px 0 0!important;border-color:var(--border)!important;background:var(--bg)!important}
 .ql-container{border-radius:0 0 10px 10px!important;border-color:var(--border)!important;background:var(--bg)!important;min-height:140px;font-family:'Hind Siliguri'!important;font-size:15px!important;color:var(--text)!important}
 .ql-editor{color:var(--text)!important;min-height:140px}
+.ql-editor.ql-blank::before{color:var(--muted)!important;font-style:normal!important}
 .ql-toolbar .ql-stroke{stroke:var(--text)!important}
 .ql-toolbar .ql-fill{fill:var(--text)!important}
 .ql-toolbar button:hover .ql-stroke,.ql-toolbar button.ql-active .ql-stroke{stroke:var(--g2)!important}
 .ql-toolbar button:hover .ql-fill,.ql-toolbar button.ql-active .ql-fill{fill:var(--g2)!important}
+.ql-picker-label,.ql-picker-item{color:var(--text)!important}
+.ql-picker-options{background:var(--card)!important;border-color:var(--border)!important}
+/* Date input dark mode fix */
+.fg input[type="date"]{color-scheme:light}
+body.dark-mode .fg input[type="date"]{color-scheme:dark}
 /* Rich text in modal */
 .rich-content{font-size:14.5px;line-height:1.75;color:var(--text)}
 .rich-content p{margin-bottom:8px}
@@ -353,6 +378,31 @@ footer a:hover{text-decoration:underline}
 /* Infinite scroll sentinel */
 #scrollSentinel{height:1px;margin-top:20px}
 #infiniteLoader{text-align:center;padding:20px;color:var(--muted);font-size:14px;display:none}
+
+/* ====== QUICK BROWSE PANEL ====== */
+.quick-browse{max-width:1280px;margin:0 auto 50px;padding:0 22px}
+.qb-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.qb-header h3{font-family:'Noto Serif Bengali';font-size:19px;color:var(--g1)}
+.qb-divider{flex:1;height:2px;background:linear-gradient(90deg,var(--border),transparent)}
+.qb-tabs{display:flex;gap:0;background:var(--card);border-radius:14px;padding:5px;
+  box-shadow:var(--shadow-sm);border:1px solid var(--border);width:fit-content;margin-bottom:18px}
+.qb-tab{padding:9px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'Hind Siliguri';
+  font-weight:600;font-size:13.5px;color:var(--muted);transition:all .25s;background:transparent;
+  display:inline-flex;align-items:center;gap:7px}
+.qb-tab.active{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;
+  box-shadow:0 4px 14px rgba(46,158,82,.3)}
+.qb-tab:hover:not(.active){color:var(--g2);background:rgba(46,158,82,.07)}
+.qb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.qb-card{background:var(--card);border-radius:12px;padding:16px 18px;border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);cursor:pointer;transition:all .3s;display:flex;gap:14px;align-items:flex-start;will-change:transform}
+.qb-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--g3)}
+.qb-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--g1),var(--g2));
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.qb-info{flex:1;min-width:0}
+.qb-title{font-weight:700;font-size:14px;color:var(--text);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.qb-meta{font-size:12px;color:var(--muted)}
+.qb-empty{text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;font-size:14px}
 
 /* ====== Responsive ====== */
 @media (max-width:520px){
@@ -367,8 +417,10 @@ footer a:hover{text-decoration:underline}
   .search-box button span{display:none}
   .admin-body{padding:16px}
   .admin-tab{padding:11px 14px;font-size:12.5px}
+  .quick-browse{padding:0 14px}
+  .qb-tabs{width:100%}
+  .qb-tab{flex:1;justify-content:center}
 }
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 </style>
 </head>
 <body>
@@ -428,6 +480,23 @@ footer a:hover{text-decoration:underline}
   <div id="infiniteLoader">⏳ আরও পোস্ট লোড হচ্ছে...</div>
 </section>
 
+<!-- Quick Browse Panel -->
+<section style="background:linear-gradient(180deg,var(--bg) 0%,rgba(13,61,31,.04) 100%);padding:40px 0 10px">
+  <div class="quick-browse">
+    <div class="qb-header">
+      <h3>⚡ দ্রুত দেখুন</h3>
+      <div class="qb-divider"></div>
+    </div>
+    <div class="qb-tabs">
+      <button class="qb-tab active" id="qbTabJob" onclick="switchQbTab('job')">💼 চাকরির সার্কুলার</button>
+      <button class="qb-tab" id="qbTabAdmission" onclick="switchQbTab('admission')">🎓 ভর্তি তথ্য</button>
+    </div>
+    <div class="qb-grid" id="qbGrid">
+      <div class="qb-empty">⏳ লোড হচ্ছে...</div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left">
     <div>
@@ -438,8 +507,8 @@ footer a:hover{text-decoration:underline}
       <h4 style="color:var(--gold2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter'">Quick Links</h4>
       <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
         <a href="/" style="color:#9bbfa6;text-decoration:none;opacity:.8">🏠 Main Website</a>
-        <a href="/?tab=job" style="color:#9bbfa6;text-decoration:none;opacity:.8">💼 Job Circulars</a>
-        <a href="/?tab=admission" style="color:#9bbfa6;text-decoration:none;opacity:.8">🎓 Admission</a>
+        <button onclick="quickFilter('job')" style="background:none;border:none;color:#9bbfa6;text-align:left;cursor:pointer;padding:0;font-size:12.5px;font-family:'Hind Siliguri';opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">💼 Job Circulars</button>
+        <button onclick="quickFilter('admission')" style="background:none;border:none;color:#9bbfa6;text-align:left;cursor:pointer;padding:0;font-size:12.5px;font-family:'Hind Siliguri';opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">🎓 Admission</button>
       </div>
     </div>
     <div>
@@ -666,6 +735,7 @@ footer a:hover{text-decoration:underline}
 <div class="toast-wrap" id="toastWrap"></div>
 
 <!-- ============ FIREBASE + APP LOGIC ============ -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
@@ -696,7 +766,7 @@ const CLOUDINARY = {
 // ====== CLOUDINARY SECURITY CONFIG ======
 const UPLOAD_LIMITS = {
   image: { maxSizeMB: 8,  allowedTypes: ["image/jpeg","image/png","image/webp","image/gif","image/jpg"] },
-  file:  { maxSizeMB: 15, allowedTypes: ["image/jpeg","image/png","image/webp","image/pdf","application/pdf"] }
+  file:  { maxSizeMB: 15, allowedTypes: ["image/jpeg","image/png","image/webp","application/pdf"] }
 };
 const UPLOAD_RATE = { maxUploadsPerSession: 30, uploadCount: 0 };
 
@@ -725,7 +795,7 @@ let postsCache = [];
 let pendingFiles = [];      // {name, url, type}
 let pendingCover = null;    // {url}
 let currentUser = null;
-let activityLog = JSON.parse(localStorage.getItem("rh_activity") || "[]");
+let activityLog = (() => { try { return JSON.parse(localStorage.getItem("rh_activity") || "[]"); } catch(e){ return []; } })();
 
 // ====== UTILS ======
 const $ = (sel) => document.querySelector(sel);
@@ -735,7 +805,7 @@ const escapeHtml = (s) => String(s||"").replace(/[&<>"']/g, ch =>
 
 function toast(msg, type="success"){
   const t = document.createElement("div");
-  t.className = "toast " + (type === "error" ? "error" : type === "warn" ? "warn" : "");
+  t.className = ("toast " + (type === "error" ? "error" : type === "warn" ? "warn" : "")).trim();
   t.innerHTML = (type==="error"?"❌ ":type==="warn"?"⚠️ ":"✅ ") + escapeHtml(msg);
   $("#toastWrap").appendChild(t);
   setTimeout(() => { t.style.opacity="0"; t.style.transform="translateX(100%)"; }, 3000);
@@ -859,7 +929,7 @@ function postCardHtml(p, idx){
     `<span class="badge ${cat.color}">${cat.label.replace(/^[^\s]+\s/,'')}</span>`
   ].join("");
   const img = p.cover
-    ? `<img src="${escapeHtml(p.cover)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=post-image-placeholder>📄</div>'">`
+    ? `<img src="${escapeHtml(p.cover)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"post-image-placeholder\">📄</div>'">`
     : `<div class="post-image-placeholder">${cat.label.match(/^[^\s]+/)?.[0] || "📄"}</div>`;
   const downloadable = (p.files && p.files.length) ? p.files[0] : (p.cover ? { url: p.cover, name: "image.jpg" } : null);
   return `
@@ -867,7 +937,7 @@ function postCardHtml(p, idx){
       <div class="post-image">${img}<div class="post-badges">${badges}</div></div>
       <div class="post-body">
         <h3 class="post-title">${escapeHtml(p.title)}</h3>
-        <p class="post-desc">${escapeHtml(p.descriptionText || (p.description||"").replace(/<[^>]+>/g,""))}</p>
+        <p class="post-desc">${p.descriptionText ? escapeHtml(p.descriptionText) : (p.description||"").replace(/<[^>]+>/g,"").replace(/&[a-z]+;/gi,"").trim().slice(0,200)}</p>
         <div class="post-meta">
           <span>📅 ${timeAgo(p.createdAt)}</span>
           <span>${(p.files?.length||0)} 📎</span>
@@ -911,6 +981,7 @@ function renderPosts(append=false){
   const wkAgo = Date.now() - 7*86400000;
   $("#statWeek").textContent = postsCache.filter(p => (p.createdAt?.toMillis?.()||0) > wkAgo).length;
   updateCounts();
+  renderQbPanel();
 }
 function showSkeletons(){
   $("#postsGrid").innerHTML = Array(6).fill(0).map(() => `
@@ -927,8 +998,9 @@ function showSkeletons(){
 async function loadPosts(append=false){
   try {
     if(!append){ showSkeletons(); lastDoc = null; allLoaded = false; postsCache = []; }
-    const constraints = [orderBy("createdAt", "desc"), limit(POSTS_PER_PAGE)];
+    const constraints = [orderBy("createdAt", "desc")];
     if(append && lastDoc) constraints.push(startAfter(lastDoc));
+    constraints.push(limit(POSTS_PER_PAGE));
     const q = query(collection(db, "posts"), ...constraints);
     const snap = await getDocs(q);
     if(snap.empty && !append){
@@ -936,7 +1008,11 @@ async function loadPosts(append=false){
       renderPosts();
       return;
     }
-    snap.docs.forEach(d => postsCache.push({ id: d.id, ...d.data() }));
+    snap.docs.forEach(d => {
+      if(!postsCache.find(x => x.id === d.id)){
+        postsCache.push({ id: d.id, ...d.data() });
+      }
+    });
     lastDoc = snap.docs[snap.docs.length - 1];
     allLoaded = snap.size < POSTS_PER_PAGE;
     renderPosts();
@@ -984,10 +1060,12 @@ function openPreview(id){
 function sharePost(id){
   const p = postsCache.find(x => x.id === id);
   if(!p) return;
-  const url = `${location.origin}${location.pathname}?post=${id}`;
-  const text = `${p.title}\n\n${(p.description||"").slice(0,120)}${p.description?.length>120?"...":""}\n\n`;
 
-  // Show share sheet overlay
+  const shareUrl  = `${location.origin}${location.pathname}?post=${id}`;
+  // Use plain text for sharing — NOT raw Quill HTML
+  const plainText = (p.descriptionText || (p.description||"").replace(/<[^>]+>/g,"").replace(/&[a-z]+;/gi," ")).trim();
+  const shareText = `${p.title}\n\n${plainText.slice(0,200)}${plainText.length>200?"...":""}\n\n${shareUrl}`;
+
   const existing = document.getElementById("shareSheet");
   if(existing) existing.remove();
 
@@ -996,41 +1074,78 @@ function sharePost(id){
   sheet.style.cssText = `position:fixed;inset:0;background:rgba(3,14,7,.82);z-index:99990;
     backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;
     padding:18px;animation:fadeBg .2s ease`;
+
+  // Build HTML WITHOUT any inline onclick — event listeners added after
   sheet.innerHTML = `
     <div style="background:var(--card);border-radius:20px 20px 16px 16px;width:100%;max-width:460px;
       padding:24px;box-shadow:0 -8px 40px rgba(0,0,0,.3);animation:popIn .3s cubic-bezier(.34,1.56,.64,1)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
         <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);font-size:17px">📤 শেয়ার করুন</h3>
-        <button onclick="document.getElementById('shareSheet').remove()"
-          style="background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted)">✕</button>
+        <button id="shareClose" style="background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;
+          cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--muted)">✕</button>
       </div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;
         border-left:3px solid var(--g3);padding-left:10px">${escapeHtml(p.title.slice(0,80))}</p>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
-        <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('${text.replace(/'/g,"\\'")}'+encodeURIComponent('${url}')),'_blank')"
-          style="background:#25D366;color:#fff;border:none;padding:12px 6px;border-radius:12px;
+        <button id="shareWa" style="background:#25D366;color:#fff;border:none;padding:12px 6px;border-radius:12px;
           cursor:pointer;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Hind Siliguri'">
           <span style="font-size:22px">💬</span>WhatsApp</button>
-        <button onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent('${url}'),'_blank')"
-          style="background:#1877F2;color:#fff;border:none;padding:12px 6px;border-radius:12px;
+        <button id="shareFb" style="background:#1877F2;color:#fff;border:none;padding:12px 6px;border-radius:12px;
           cursor:pointer;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Hind Siliguri'">
           <span style="font-size:22px">📘</span>Facebook</button>
-        <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent('${url}')+'&text='+encodeURIComponent('${p.title.replace(/'/g,"\\'")}'),'_blank')"
-          style="background:#229ED9;color:#fff;border:none;padding:12px 6px;border-radius:12px;
+        <button id="shareTg" style="background:#229ED9;color:#fff;border:none;padding:12px 6px;border-radius:12px;
           cursor:pointer;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Hind Siliguri'">
           <span style="font-size:22px">✈️</span>Telegram</button>
-        <button id="copyLinkBtn" onclick="navigator.clipboard.writeText('${url}').then(()=>{this.innerHTML='<span style=\\'font-size:22px\\'>✅</span>Copied!';setTimeout(()=>document.getElementById(\\'shareSheet\\').remove(),800)})"
-          style="background:var(--g1);color:#fff;border:none;padding:12px 6px;border-radius:12px;
+        <button id="shareCopy" style="background:var(--g1);color:#fff;border:none;padding:12px 6px;border-radius:12px;
           cursor:pointer;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Hind Siliguri'">
           <span style="font-size:22px">🔗</span>Copy Link</button>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;border:1px solid var(--border)">
-        <input value="${url}" readonly style="flex:1;border:none;background:transparent;font-size:12px;color:var(--muted);font-family:'Inter';outline:none">
+        <input id="shareUrlInput" value="" readonly style="flex:1;border:none;background:transparent;font-size:12px;color:var(--muted);font-family:'Inter';outline:none">
       </div>
     </div>`;
 
   document.body.appendChild(sheet);
+
+  // Set the URL input value safely via JS (not HTML attribute)
+  document.getElementById("shareUrlInput").value = shareUrl;
+
+  // Attach ALL event listeners properly — no string interpolation, no escaping issues
+  document.getElementById("shareClose").addEventListener("click", () => sheet.remove());
   sheet.addEventListener("click", e => { if(e.target === sheet) sheet.remove(); });
+
+  document.getElementById("shareWa").addEventListener("click", () => {
+    window.open("https://wa.me/?text=" + encodeURIComponent(shareText), "_blank");
+  });
+  document.getElementById("shareFb").addEventListener("click", () => {
+    window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl), "_blank");
+  });
+  document.getElementById("shareTg").addEventListener("click", () => {
+    window.open("https://t.me/share/url?url=" + encodeURIComponent(shareUrl) + "&text=" + encodeURIComponent(p.title), "_blank");
+  });
+  document.getElementById("shareCopy").addEventListener("click", function() {
+    // Use modern clipboard API with fallback
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        this.innerHTML = '<span style="font-size:22px">✅</span>Copied!';
+        setTimeout(() => sheet.remove(), 900);
+      }).catch(() => fallbackCopy(shareUrl, this));
+    } else {
+      fallbackCopy(shareUrl, this);
+    }
+  });
+}
+// Clipboard fallback for older browsers / non-HTTPS
+function fallbackCopy(text, btn){
+  const inp = document.getElementById("shareUrlInput");
+  if(inp){ inp.select(); inp.setSelectionRange(0, 99999); }
+  try {
+    document.execCommand("copy");
+    btn.innerHTML = '<span style="font-size:22px">✅</span>Copied!';
+    setTimeout(() => { const s = document.getElementById("shareSheet"); if(s) s.remove(); }, 900);
+  } catch(e){
+    btn.innerHTML = '<span style="font-size:22px">❌</span>Failed';
+  }
 }
 
 // ====== ADMIN: AUTH (hidden footer dot trigger) ======
@@ -1390,7 +1505,7 @@ async function loadSettings(){
     if(emailEl) emailEl.textContent = "📧 " + s.email;
     if(addrEl)  addrEl.textContent  = s.address;
     const footerCopy = document.getElementById("footerCopy");
-    if(footerCopy) footerCopy.innerHTML = s.footer;
+    if(footerCopy) footerCopy.textContent = s.footer;
   } catch(e){ console.warn("Settings load failed",e); }
 }
 async function loadSettingsToForm(){
@@ -1479,6 +1594,48 @@ const scrollObserver = new IntersectionObserver(async (entries) => {
 }, { rootMargin: "200px" });
 scrollObserver.observe(sentinel);
 
+// ====== QUICK BROWSE PANEL ======
+let qbActiveTab = "job";
+function renderQbPanel(){
+  const grid = document.getElementById("qbGrid");
+  if(!grid) return;
+  const filtered = postsCache
+    .filter(p => p.category === qbActiveTab)
+    .sort((a,b)=>{
+      const ta = a.createdAt?.toMillis?.() || 0;
+      const tb = b.createdAt?.toMillis?.() || 0;
+      return tb - ta;
+    })
+    .slice(0, 6);
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="qb-empty">📭 এই মুহূর্তে কোনো পোস্ট নেই</div>`;
+    return;
+  }
+  const icon = qbActiveTab === "job" ? "💼" : "🎓";
+  grid.innerHTML = filtered.map(p => `
+    <div class="qb-card" data-qbview="${p.id}">
+      <div class="qb-icon">${icon}</div>
+      <div class="qb-info">
+        <div class="qb-title" title="${escapeHtml(p.title)}">${escapeHtml(p.title)}</div>
+        <div class="qb-meta">📅 ${timeAgo(p.createdAt)}${p.deadline ? ` • ${getDeadlineHtml(p.deadline)}` : ""}</div>
+      </div>
+    </div>`).join("");
+  grid.querySelectorAll("[data-qbview]").forEach(c =>
+    c.addEventListener("click", () => openPreview(c.dataset.qbview)));
+}
+window.switchQbTab = function(tab){
+  qbActiveTab = tab;
+  document.getElementById("qbTabJob")?.classList.toggle("active", tab === "job");
+  document.getElementById("qbTabAdmission")?.classList.toggle("active", tab === "admission");
+  renderQbPanel();
+};
+// Filter main posts grid + scroll to top of posts
+window.quickFilter = function(category){
+  activeCategory = category;
+  renderFilters();
+  document.querySelector(".posts-section")?.scrollIntoView({ behavior:"smooth", block:"start" });
+};
+
 // ====== INIT ======
 $("#yr").textContent = new Date().getFullYear();
 window.__rh = { sharePost, closeOverlay: window.closeOverlay };
@@ -1500,6 +1657,5 @@ $$(".overlay").forEach(o => o.addEventListener("click", e => {
   if(e.target === o) o.classList.remove("show");
 }));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 </body>
 </html>
