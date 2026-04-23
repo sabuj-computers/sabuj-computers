@@ -44,10 +44,16 @@
 <link rel="canonical" href="https://sabujcomputers.pro.bd/resource-hub.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <!-- Security Fix: DOMPurify Add kora holo -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<!-- Export to PDF dependency -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Confetti Effect -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<!-- Chart.js for Analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 /* ====== DESIGN TOKENS (matched with main site) ====== */
 :root{
@@ -75,22 +81,24 @@ body{font-family:'Hind Siliguri','Inter',sans-serif;background:var(--bg);color:v
 /* ====== TOP BREAKING NEWS TICKER ====== */
 .ticker-bar{background:linear-gradient(90deg,#7a1414,#b91c1c,#7a1414);color:#fff;
   padding:9px 0;overflow:hidden;position:relative;z-index:50;
-  border-bottom:2px solid var(--gold);font-size:14px}
+  border-bottom:2px solid var(--gold);font-size:14px;box-shadow: 0 2px 10px rgba(0,0,0,0.1)}
 .ticker-bar.hidden{display:none}
 .ticker-wrap{display:flex;align-items:center;gap:14px;padding:0 14px;max-width:1280px;margin:0 auto}
-.ticker-label{flex-shrink:0;background:var(--gold);color:#3b2300;padding:3px 11px;border-radius:6px;
-  font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;font-family:'Inter'}
+.ticker-label{flex-shrink:0;background:var(--gold);color:#3b2300;padding:3px 14px;border-radius:20px;
+  font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-family:'Inter';
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2)}
 .ticker-content{flex:1;overflow:hidden;white-space:nowrap}
-.ticker-track{display:inline-block;padding-left:100%;animation:ticker 28s linear infinite}
+.ticker-track{display:inline-block;padding-left:100%;animation:ticker 35s linear infinite}
 .ticker-track:hover{animation-play-state:paused}
-.ticker-track span{margin-right:60px;font-weight:500}
-.ticker-track span::before{content:'📢 ';margin-right:4px}
+.ticker-track span{margin-right:80px;font-weight:500;font-family: 'Hind Siliguri'}
+.ticker-track span::before{content:'🔥 ';margin-right:4px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
 
-/* ====== HEADER ====== */
-header{background:linear-gradient(135deg,#021a08 0%,#0d3d1f 50%,#1a6b35 100%);
-  padding:18px 0;box-shadow:0 4px 20px rgba(0,0,0,.15);position:sticky;top:0;z-index:40;
-  border-bottom:3px solid var(--gold)}
+/* ====== HEADER (Glassmorphism) ====== */
+header{background:rgba(13, 61, 31, 0.95);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding:15px 0;box-shadow:0 10px 30px rgba(0,0,0,0.2);position:sticky;top:0;z-index:100;
+  border-bottom:1px solid rgba(200,168,71,0.3)}
 .header-wrap{max-width:1280px;margin:0 auto;padding:0 22px;display:flex;align-items:center;
   justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
@@ -241,6 +249,21 @@ footer a:hover{text-decoration:underline}
 footer a:hover{color:var(--gold);text-decoration:none}
 #secretTrigger{position:fixed;bottom:0;right:0;width:50px;height:50px;z-index:9990;
   opacity:0;cursor:default}
+
+/* Premium Features Styling */
+.btn-icon-float { position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.9); border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-sm); z-index:10; border:none; transition:all 0.2s; font-size: 16px;}
+.btn-icon-float:hover { transform:scale(1.12); background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+.btn-icon-float.active { color:#dc2626; }
+.related-section { margin-top: 24px; border-top: 1px dashed var(--border); padding-top: 16px; }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+.related-card { border:1px solid var(--border); border-radius:10px; padding:12px; cursor:pointer; background:var(--bg); transition:all 0.2s; }
+.related-card:hover { border-color:var(--g3); transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+.tag-badge { display: inline-block; background: rgba(200, 168, 71, 0.15); color: #7f641a; border-radius: 6px; padding: 3px 8px; font-size: 11px; margin-right: 6px; margin-top: 6px; border: 1px solid rgba(200, 168, 71, 0.3); font-weight: 600; font-family: 'Inter'; }
+body.dark-mode .tag-badge { color: var(--gold2); }
+.action-like { background: rgba(107, 140, 118, 0.12); color: var(--muted); }
+.action-like.liked { background: rgba(46,158,82,0.15) !important; color: var(--g2) !important; border-color: var(--g2) !important; }
+.action-like:hover { background: var(--muted); color: #fff; }
+.action-like.liked:hover { background: var(--g2) !important; color: #fff !important; }
 
 /* ====== OVERLAYS (login + admin + modal) ====== */
 .overlay{position:fixed;inset:0;background:rgba(3,14,7,.82);z-index:99980;backdrop-filter:blur(6px);
@@ -408,6 +431,14 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 .qb-meta{font-size:12px;color:var(--muted)}
 .qb-empty{text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;font-size:14px}
 
+/* ====== SCROLL TO TOP ====== */
+#scrollToTop{position:fixed;bottom:25px;left:25px;width:50px;height:50px;background:var(--g1);
+  color:var(--gold2);border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;opacity:0;visibility:hidden;transition:all .3s;z-index:90;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);font-size:20px}
+#scrollToTop.show{opacity:1;visibility:visible}
+#scrollToTop:hover{background:var(--gold);color:var(--g1);transform:translateY(-5px)}
+
 /* ====== Responsive ====== */
 @media (max-width:520px){
   .header-wrap{padding:0 14px}
@@ -425,9 +456,38 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
   .qb-tabs{width:100%}
   .qb-tab{flex:1;justify-content:center}
 }
+
+/* Scroll Progress Bar */
+#scrollProgress { position: fixed; top: 0; left: 0; height: 3.5px; background: linear-gradient(90deg, var(--g4), var(--gold2)); z-index: 99999; width: 0%; transition: width 0.1s ease-out; }
+
+/* Admin panel tab fix for mobile/scroll */
+.admin-header, .admin-tabs { flex-shrink: 0; }
+.admin-body { flex: 1; overflow-y: auto; }
+
+/* Enhanced Quill Content Rendering inside modals */
+.rich-content blockquote { border-left: 4px solid var(--gold); padding: 6px 14px; color: var(--muted); background: rgba(200, 168, 71, 0.05); border-radius: 4px; margin: 10px 0; font-style: italic; }
+.rich-content pre { background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13.5px; color: var(--text); white-space: pre-wrap; }
+.rich-content img { max-width: 100%; border-radius: 12px; margin: 10px 0; box-shadow: var(--shadow-sm); }
+.rich-content iframe { border-radius: 12px; width: 100%; aspect-ratio: 16/9; margin: 10px 0; }
+
+/* Print Optimization */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  header, footer, .hero, .controls, .quick-browse, #tickerBar, #scrollToTop, #scrollProgress, .qb-tabs, .post-actions, .modal-actions, .related-section, .btn-icon-float, .admin-panel { display: none !important; }
+  .posts-section { display: none !important; }
+  .overlay.show { position: absolute; inset: 0; background: #fff !important; padding: 0 !important; display: block !important; }
+  .modal-card { max-width: 100% !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; animation: none !important; max-height: none !important; overflow: visible !important; margin: 0 !important; }
+  .modal-body { padding: 0 !important; overflow: visible !important; }
+  .modal-img { max-height: 250px !important; object-fit: contain !important; margin-bottom: 20px !important; }
+  .badge { border: 1px solid #000 !important; color: #000 !important; padding: 2px 6px !important; }
+  .rich-content * { color: #000 !important; }
+  a { text-decoration: none !important; color: #000 !important; }
+  a::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #555; }
+}
 </style>
 </head>
 <body>
+<div id="scrollProgress"></div>
 
 <!-- Breaking news ticker -->
 <div class="ticker-bar hidden" id="tickerBar">
@@ -440,16 +500,19 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 <!-- Header -->
 <header>
   <div class="header-wrap">
-    <div class="brand">
+    <div class="brand" onclick="location.reload()">
       <img src="https://sabujcomputers.pro.bd/icon-192.png" alt="Sabuj" class="brand-logo" id="brandLogo">
       <div class="brand-text">
-        <h1>সবুজ কম্পিউটার্স • রিসোর্স হাব</h1>
-        <p>চাকরি • ভর্তি • বৃত্তি • নোটিশ</p>
+        <h1>SCTC Resource Hub</h1>
+        <p>Job • Admission • Notice • Scholarship</p>
       </div>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="darkToggle" title="Dark Mode">🌙</button>
-      <a href="/" class="back-btn" title="Main website">← Main Site</a>
+      <a href="/" class="back-btn" title="Main website">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-top:-2px"><path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
+        <span>Back to Home</span>
+      </a>
     </div>
   </div>
 </header>
@@ -533,6 +596,9 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
   </div>
 </footer>
 
+<!-- Scroll top -->
+<button id="scrollToTop" title="Scroll to Top">↑</button>
+
 <!-- Hidden 5-click trigger -->
 <div id="secretTrigger" title=""></div>
 
@@ -578,7 +644,15 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
       <!-- Dashboard -->
       <div class="admin-section active" data-section="dashboard">
         <div class="dash-grid" id="dashGrid"></div>
-        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">Recent Activity</h3>
+        <div style="margin-top:20px; background:var(--bg); border-radius:10px; padding:15px; border:1px solid var(--border)">
+            <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">📊 Analytics (Category Views)</h3>
+            <canvas id="categoryChart" style="max-height: 250px;"></canvas>
+        </div>
+        <div style="margin-top:20px; background:var(--bg); border-radius:10px; padding:15px; border:1px solid var(--border)">
+            <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">🔥 Top 5 Most Viewed Posts</h3>
+            <div id="topPostsList" style="font-size:13.5px;color:var(--muted)">No data yet.</div>
+        </div>
+        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px;margin-top:20px">📝 Recent Activity</h3>
         <div id="recentList" style="font-size:13.5px;color:var(--muted)">No activity yet.</div>
       </div>
 
@@ -587,9 +661,13 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
         <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:14px" id="formTitle">New Post</h3>
         <input type="hidden" id="editPostId">
         <div class="admin-grid">
-          <div class="fg">
+          <div class="fg" style="grid-column: 1 / -1;">
             <label>Title *</label>
             <input type="text" id="postTitle" placeholder="e.g. BCS 47th Job Circular 2026">
+          </div>
+          <div class="fg">
+            <label>Custom Tags (Comma separated)</label>
+            <input type="text" id="postTags" placeholder="e.g. Govt, Bank, HSC Pass">
           </div>
           <div class="fg">
             <label>Category *</label>
@@ -648,6 +726,20 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
           <div class="upload-progress" id="fileProgress"><div class="upload-progress-bar" id="fileProgressBar"></div></div>
           <div class="file-list" id="fileList"></div>
         </div>
+        <div class="fg">
+          <label>Status / Publish Control</label>
+          <div style="display:flex;gap:14px;padding:12px 0; background:var(--bg); border-radius:8px; border:1px solid var(--border); padding:10px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500flex:1">
+              <input type="radio" name="postStatus" value="published" checked style="width:16px;height:16px"> 🟢 Publish Now
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;flex:1">
+              <input type="radio" name="postStatus" value="draft" style="width:16px;height:16px"> 📝 Save Draft
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;flex:1">
+              <input type="radio" name="postStatus" value="scheduled" style="width:16px;height:16px"> ⏳ Schedule: <input type="datetime-local" id="postScheduleDate" style="padding:4px; font-size:12px; border-radius:4px; border:1px solid var(--border)">
+            </label>
+          </div>
+        </div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn-primary" id="savePostBtn" onclick="savePost()" style="flex:1">💾 Save Post</button>
           <button class="btn-secondary" onclick="resetPostForm()">Reset</button>
@@ -656,12 +748,23 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 
       <!-- Manage -->
       <div class="admin-section" data-section="manage">
-        <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin-bottom:10px">All Posts</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <h3 style="font-family:'Noto Serif Bengali';color:var(--g1);margin:0">All Posts</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn-secondary" style="font-size:12.5px;padding:8px 12px" onclick="selectExpiredPosts()">✅ Select Expired</button>
+            <button class="btn-danger" style="font-size:12.5px;padding:8px 12px" onclick="deleteSelectedPosts()" id="bulkDelBtn">🗑️ Delete Selected</button>
+          </div>
+        </div>
         <input type="text" id="manageSearch" placeholder="🔍 Search posts..."
           style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;margin-bottom:10px;font-family:'Hind Siliguri';background:var(--bg);color:var(--text)">
         <div style="overflow-x:auto">
           <table class="posts-table" id="managePosts">
-            <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead>
+            <thead>
+              <tr>
+                <th style="width:30px;padding-right:0"><input type="checkbox" id="selectAllPosts" onchange="toggleAllPosts(this)" style="cursor:pointer"></th>
+                <th>Title</th><th>Category</th><th>Meta</th><th>Actions</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
         </div>
@@ -746,7 +849,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
-  query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp
+  query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // ====== CONFIG (obfuscated — do NOT expose raw keys in public repos) ======
@@ -797,9 +900,24 @@ let lastDoc = null;
 let allLoaded = false;
 let postsCache = [];
 let pendingFiles = [];      // {name, url, type}
-let pendingCover = null;    // {url}
+let pendingCover = null;    // {name, url, type}
 let currentUser = null;
-let activityLog = (() => { try { return JSON.parse(localStorage.getItem("rh_activity") || "[]"); } catch(e){ return []; } })();
+let activityLog = JSON.parse(localStorage.getItem("rh_activity")||"[]");
+
+let savedPosts = JSON.parse(localStorage.getItem('rh_saved') || '[]');
+let likedPosts = JSON.parse(localStorage.getItem('rh_liked') || '[]');
+
+// Bootstrap categories to include Saved
+CATEGORIES.push({ id: "ending_soon", label: "⏳ Ending Soon", color: "badge-urgent" });
+CATEGORIES.push({ id: "saved", label: "🔖 Saved", color: "badge-pinned" });
+
+function isPostExpired(p) {
+  if(!p.deadline) return false;
+  const dDate = new Date(p.deadline);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return Math.ceil((dDate - today) / (1000 * 60 * 60 * 24)) < 0;
+}
 
 // ====== UTILS ======
 const $ = (sel) => document.querySelector(sel);
@@ -915,14 +1033,20 @@ function updateCounts(){
 // ====== RENDER POSTS ======
 function getDeadlineHtml(deadline){
   if(!deadline) return "";
-  const diff = new Date(deadline) - Date.now();
-  if(diff < 0) return `<span style="color:var(--danger);font-size:11.5px;font-weight:600">⏰ মেয়াদ শেষ</span>`;
-  const days = Math.floor(diff / 86400000);
-  const hrs  = Math.floor((diff % 86400000) / 3600000);
-  if(days > 30) return `<span style="color:var(--muted);font-size:11.5px">📅 ${new Date(deadline).toLocaleDateString("bn-BD")}</span>`;
-  const color = days <= 3 ? "var(--danger)" : days <= 7 ? "var(--warn)" : "var(--g2)";
-  const label = days > 0 ? `${days} দিন ${hrs} ঘণ্টা বাকি` : `${hrs} ঘণ্টা বাকি`;
-  return `<span style="color:${color};font-size:11.5px;font-weight:700;animation:${days<=3?'pulse 1.5s infinite':'none'}">⏳ ${label}</span>`;
+  const dDate = new Date(deadline);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diffTime = dDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  let humanized = "";
+  if (diffDays < 0) humanized = `<span style="color:#dc2626;font-weight:600">❌ সময় শেষ</span>`;
+  else if (diffDays === 0) humanized = `<span style="color:#ea580c;font-weight:600;animation:pulse 1.5s infinite">🚨 আজই শেষ দিন</span>`;
+  else if (diffDays <= 3) humanized = `<span style="color:#ea580c;font-weight:600">⏳ আর মাত্র ${diffDays} দিন বাকি</span>`;
+  else humanized = `<span style="color:var(--g3);font-weight:600">📅 ${diffDays} দিন বাকি</span>`;
+
+  const dtFmt = dDate.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `<span style="font-size:12.5px">শেষ তারিখ: <b>${dtFmt}</b> (${humanized})</span>`;
 }
 
 function postCardHtml(p, idx){
@@ -936,15 +1060,29 @@ function postCardHtml(p, idx){
     ? `<img src="${escapeHtml(p.cover)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"post-image-placeholder\">📄</div>'">`
     : `<div class="post-image-placeholder">${cat.label.match(/^[^\s]+/)?.[0] || "📄"}</div>`;
   const downloadable = (p.files && p.files.length) ? p.files[0] : (p.cover ? { url: p.cover, name: "image.jpg" } : null);
+  const isSaved = savedPosts.includes(p.id);
+  const tagsHtml = p.tags && p.tags.length > 0 ? `<div style="margin-top:-6px;margin-bottom:6px;display:flex;gap:4px;flex-wrap:wrap;">${p.tags.slice(0,3).map(t=>`<span style="font-size:10px;background:rgba(200,168,71,.15);color:#7f641a;padding:2px 6px;border-radius:4px;">#${escapeHtml(t)}</span>`).join('')}</div>` : '';
+  
   return `
     <article class="post-card" style="animation-delay:${idx*40}ms">
-      <div class="post-image">${img}<div class="post-badges">${badges}</div></div>
+      <div class="post-image">
+        ${img}
+        <div class="post-badges">${badges}</div>
+        <button class="btn-icon-float bookmark-icon ${isSaved ? 'active' : ''}" data-id="${p.id}" onclick="window.toggleSave('${p.id}', event)" title="Save for later">
+          ${isSaved ? '🔖' : '📑'}
+        </button>
+      </div>
       <div class="post-body">
         <h3 class="post-title">${escapeHtml(p.title)}</h3>
+        ${tagsHtml}
         <p class="post-desc">${p.descriptionText ? escapeHtml(p.descriptionText) : (p.description||"").replace(/<[^>]+>/g,"").replace(/&[a-z]+;/gi,"").trim().slice(0,200)}</p>
         <div class="post-meta">
           <span>📅 ${timeAgo(p.createdAt)}</span>
-          <span>${(p.files?.length||0)} 📎</span>
+          <span style="display:flex;gap:8px">
+            ${p.views > 0 ? `<span style="color:var(--g2);font-weight:600" title="Views">👁️ ${p.views}</span>` : `<span title="Views">👁️ 0</span>`}
+            ${p.likes > 0 ? `<span style="color:var(--g3);font-weight:600" title="Likes">👍 ${p.likes}</span>` : ''}
+            <span title="Attachments">📎 ${(p.files?.length||0)}</span>
+          </span>
         </div>
         ${p.deadline ? `<div style="padding:6px 0 2px">${getDeadlineHtml(p.deadline)}</div>` : ""}
       </div>
@@ -956,13 +1094,76 @@ function postCardHtml(p, idx){
       </div>
     </article>`;
 }
+
+window.toggleSave = function(id, e) {
+  if (e) e.stopPropagation();
+  const idx = savedPosts.indexOf(id);
+  if (idx > -1) {
+    savedPosts.splice(idx, 1);
+    toast("বুকমার্ক সরানো হয়েছে");
+  } else {
+    savedPosts.push(id);
+    toast("বুকমার্ক সেভ হয়েছে!");
+  }
+  localStorage.setItem('rh_saved', JSON.stringify(savedPosts));
+  document.querySelectorAll(`.bookmark-icon[data-id="${id}"]`).forEach(el => {
+    el.innerHTML = savedPosts.includes(id) ? "🔖" : "📑";
+    el.classList.toggle('active', savedPosts.includes(id));
+  });
+  if(activeCategory === "saved") renderPosts();
+};
+
+window.toggleLike = async function(id) {
+  if (likedPosts.includes(id)) {
+    toast("আপনি ইতিমধ্যে লাইক দিয়েছেন!", "warn");
+    return;
+  }
+  const p = postsCache.find(x => x.id === id);
+  if(!p) return;
+
+  likedPosts.push(id);
+  localStorage.setItem('rh_liked', JSON.stringify(likedPosts));
+  p.likes = (p.likes || 0) + 1;
+
+  const likeBtn = document.getElementById("modalLikeBtn");
+  if(likeBtn) {
+     likeBtn.innerHTML = `👍 Helpful (${p.likes})`;
+     likeBtn.classList.add("liked");
+  }
+  toast("আপনার মতামতের জন্য ধন্যবাদ!");
+  
+  // Trigger Confetti! 🎉
+  if(typeof confetti === "function") {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#c8a847', '#2e9e52', '#ffffff'] });
+  }
+
+  try {
+     await setDoc(doc(db, "posts", id), { likes: increment(1) }, { merge: true });
+  } catch(e) { console.warn("Like sync failed (auth maybe missing):", e); }
+};
+
 function renderPosts(append=false){
   const grid = $("#postsGrid");
+  const now = Date.now();
   const filtered = postsCache.filter(p => {
+    // Only show published posts, or scheduled posts where time has passed
+    if (p.status === 'draft') return false;
+    if (p.status === 'scheduled' && p.publishedAt && p.publishedAt > now) return false;
+
+    // Hidden expired posts from public view naturally unless saved or specifically searching
+    if(isPostExpired(p) && activeCategory !== "saved" && !searchTerm && activeCategory !== "ending_soon") return false;
+
+    if(activeCategory === "saved") return savedPosts.includes(p.id);
+    if(activeCategory === "ending_soon") {
+        if(!p.deadline) return false;
+        const diff = Math.ceil((new Date(p.deadline) - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+        return diff >= 0 && diff <= 4; // within 4 days
+    }
     if(activeCategory !== "all" && p.category !== activeCategory) return false;
     if(searchTerm){
       const s = searchTerm.toLowerCase();
-      return (p.title||"").toLowerCase().includes(s) || (p.description||"").toLowerCase().includes(s);
+      const t = p.tags ? p.tags.join(' ').toLowerCase() : "";
+      return (p.title||"").toLowerCase().includes(s) || (p.description||"").toLowerCase().includes(s) || t.includes(s);
     }
     return true;
   }).sort((a,b) => {
@@ -1031,6 +1232,25 @@ async function loadPosts(append=false){
 function resetAndLoad(){ loadPosts(false); }
 
 // ====== PREVIEW MODAL ======
+window.downloadPDF = function(title) {
+  const ele = document.getElementById("pdfTarget");
+  const related = document.getElementById("relatedSection");
+  if(related) related.style.display = "none"; // Hide related posts from PDF
+  
+  const opt = {
+    margin:       0.5,
+    filename:     title.replace(/[^a-zA-Z0-9]/g, '_') + '_Notice.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+  toast("PDF তৈরি হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
+  html2pdf().set(opt).from(ele).save().then(() => {
+    if(related) related.style.display = "block";
+    toast("✅ PDF ডাউনলোড সম্পন্ন হয়েছে!");
+  });
+};
+
 function openPreview(id){
   const p = postsCache.find(x => x.id === id);
   if(!p) return;
@@ -1040,9 +1260,48 @@ function openPreview(id){
       <span class="fname">📎 ${escapeHtml(f.name||"file")}</span>
       <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener" download="${escapeHtml(f.name||'')}">View / Download</a>
     </div>`).join("");
+    
+  const tagsHtml = p.tags && p.tags.length > 0 ? `<div style="margin-top:10px">${p.tags.map(t=>`<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}</div>` : '';
+  
+  // Related Posts Logic
+  const related = postsCache.filter(x => x.category === p.category && x.id !== p.id).slice(0,3);
+  let relatedHtml = "";
+  if (related.length > 0) {
+     relatedHtml = `<div id="relatedSection" class="related-section">
+       <h4 style="font-family:'Noto Serif Bengali'; color:var(--g1); font-size:16px;">🔍 একই ক্যাটাগরির আরও নোটিশ</h4>
+       <div class="related-grid">
+         ${related.map(r => `
+           <div class="related-card" onclick="openPreview('${r.id}')">
+             <div style="font-size:12px;color:var(--muted)">📅 ${timeAgo(r.createdAt)}</div>
+             <div style="font-size:13.5px;font-weight:600;color:var(--text);line-height:1.4;margin-top:4px">${escapeHtml(r.title).slice(0,50)}...</div>
+           </div>
+         `).join("")}
+       </div>
+     </div>`;
+  }
+
+  const isLiked = likedPosts.includes(p.id);
+
+  // View Counter Tracking & Google Calendar Generator
+  if(!sessionStorage.getItem('viewed_' + p.id)) {
+      sessionStorage.setItem('viewed_' + p.id, '1');
+      p.views = (p.views || 0) + 1;
+      // Fail silently if guest lacks db write rule. UI still reacts immediately.
+      setDoc(doc(db, "posts", p.id), { views: increment(1) }, { merge: true }).catch(()=>{});
+  }
+  
+  let gCalUrl = null;
+  if(p.deadline) {
+      const dD = new Date(p.deadline);
+      const dateStr = dD.toISOString().split('T')[0].replace(/-/g, '');
+      dD.setDate(dD.getDate() + 1);
+      const nextDateStr = dD.toISOString().split('T')[0].replace(/-/g, '');
+      gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(p.title)}&dates=${dateStr}/${nextDateStr}&details=${encodeURIComponent('Deadline for: ' + p.title + '\\nLink: ' + location.href)}`;
+  }
+
   $("#previewCard").innerHTML = `
     ${p.cover ? `<img src="${escapeHtml(p.cover)}" class="modal-img" alt="">` : ""}
-    <div class="modal-body">
+    <div class="modal-body" id="pdfTarget">
       <div class="modal-meta">
         <span class="badge ${cat.color}">${cat.label}</span>
         <span>📅 ${timeAgo(p.createdAt)}</span>
@@ -1050,12 +1309,21 @@ function openPreview(id){
         ${p.urgent ? '<span class="badge badge-urgent">🚨 Urgent</span>' : ""}
       </div>
       <h3>${escapeHtml(p.title)}</h3>
-      ${p.deadline ? `<div style="margin-bottom:10px">${getDeadlineHtml(p.deadline)}</div>` : ""}
-      <div class="rich-content">${DOMPurify.sanitize(p.description||"")}</div>
+      ${p.deadline ? `<div style="margin-bottom:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+          ${getDeadlineHtml(p.deadline)}
+          ${isPostExpired(p) ? `<span class="badge badge-urgent" style="font-size:10px">Expired</span>` : `<a href="${gCalUrl}" target="_blank" style="font-size:12px;text-decoration:none;background:rgba(37,99,235,.1);color:#2563eb;padding:3px 8px;border-radius:6px;font-weight:600;font-family:'Inter'">📅 Add to Calendar</a>`}
+      </div>` : ""}
+      ${tagsHtml}
+      <div class="rich-content" style="margin-top:16px">${DOMPurify.sanitize(p.description||"")}</div>
       ${filesHtml ? `<div class="modal-files">${filesHtml}</div>` : ""}
       ${p.url ? `<div style="margin-top:16px"><a class="btn-primary" href="${escapeHtml(p.url)}" target="_blank" rel="noopener" style="width:auto;display:inline-flex">🔗 Visit External Link</a></div>` : ""}
+      ${relatedHtml}
     </div>
     <div class="modal-actions">
+      <button class="btn-secondary action-like ${isLiked ? 'liked' : ''}" id="modalLikeBtn" onclick="toggleLike('${p.id}')">
+        👍 Helpful (${p.likes || 0})
+      </button>
+      <button class="btn-secondary" onclick="downloadPDF('${escapeHtml(p.title)}')">📄 PDF</button>
       <button class="btn-secondary" onclick="window.__rh.sharePost('${p.id}')">📤 Share</button>
       <button class="btn-primary" style="width:auto" onclick="window.__rh.closeOverlay('previewOverlay')">Close</button>
     </div>`;
@@ -1132,6 +1400,7 @@ function sharePost(id){
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(shareUrl).then(() => {
         this.innerHTML = '<span style="font-size:22px">✅</span>Copied!';
+        toast("✅ লিংক কপি হয়েছে!");
         setTimeout(() => sheet.remove(), 900);
       }).catch(() => fallbackCopy(shareUrl, this));
     } else {
@@ -1146,6 +1415,7 @@ function fallbackCopy(text, btn){
   try {
     document.execCommand("copy");
     btn.innerHTML = '<span style="font-size:22px">✅</span>Copied!';
+    toast("✅ লিংক কপি হয়েছে!");
     setTimeout(() => { const s = document.getElementById("shareSheet"); if(s) s.remove(); }, 900);
   } catch(e){
     btn.innerHTML = '<span style="font-size:22px">❌</span>Failed';
@@ -1200,19 +1470,19 @@ window.doLogin = async function(){
     await signInWithEmailAndPassword(auth, email, pwd);
     // Reset on success
     LOGIN_STATE.attempts = 0;
-    sessionStorage.removeItem("rh_login_attempts");
-    sessionStorage.removeItem("rh_login_locked");
+    localStorage.removeItem("rh_login_attempts");
+    localStorage.removeItem("rh_login_locked");
     toast("Login successful!");
     closeOverlay("loginOverlay");
     openAdmin();
     $("#loginPwd").value = "";
   } catch(e){
     LOGIN_STATE.attempts++;
-    sessionStorage.setItem("rh_login_attempts", LOGIN_STATE.attempts);
+    localStorage.setItem("rh_login_attempts", LOGIN_STATE.attempts);
     if(LOGIN_STATE.attempts >= 5){
       // Lock for 5 minutes after 5 failed attempts
       LOGIN_STATE.lockedUntil = Date.now() + 5 * 60 * 1000;
-      sessionStorage.setItem("rh_login_locked", LOGIN_STATE.lockedUntil);
+      localStorage.setItem("rh_login_locked", LOGIN_STATE.lockedUntil);
       err.textContent = "🔒 ৫টি ভুল চেষ্টার কারণে ৫ মিনিটের জন্য লক হয়েছে।";
     } else {
       err.textContent = `❌ ভুল email বা password। (${LOGIN_STATE.attempts}/5 চেষ্টা)`;
@@ -1263,8 +1533,87 @@ function renderDashboard(){
     <div class="dash-card" style="background:linear-gradient(135deg,#db2777,#9d174d)"><div class="label">Scholarship</div><div class="value">${counts.scholarship||0}</div></div>
     <div class="dash-card" style="background:linear-gradient(135deg,#0891b2,#155e75)"><div class="label">Notice</div><div class="value">${counts.notice||0}</div></div>
     <div class="dash-card" style="background:linear-gradient(135deg,#ea580c,#9a3412)"><div class="label">Exam</div><div class="value">${counts.exam||0}</div></div>`;
+  
+  renderTopPosts();
+  renderCategoryChart(counts);
   renderRecentActivity();
 }
+
+let catChartInstance = null;
+function renderCategoryChart(counts) {
+    const ctx = document.getElementById('categoryChart');
+    if (!ctx) return;
+    
+    const labels = [];
+    const data = [];
+    const bgColors = [];
+    
+    // Map our colors to chart background
+    const colorMap = {
+        'job': '#2563eb',
+        'admission': '#7c3aed',
+        'scholarship': '#db2777',
+        'notice': '#0891b2',
+        'exam': '#ea580c',
+        'link': '#64748b' || '#cbd5e1'
+    };
+
+    CATEGORIES.filter(c => c.id !== "all" && c.id !== "saved" && c.id !== "ending_soon").forEach(c => {
+        labels.push(c.label.replace(/[^A-Za-z ]/g, '').trim()); // Strip emojis
+        data.push(counts[c.id] || 0);
+        bgColors.push(colorMap[c.id] || '#cbd5e1');
+    });
+
+    if (catChartInstance) catChartInstance.destroy();
+    
+    catChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Posts',
+                data: data,
+                backgroundColor: bgColors,
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+}
+
+function renderTopPosts() {
+    const el = $("#topPostsList");
+    if(!el) return;
+    
+    // Sort posts by views
+    const topPosts = [...postsCache]
+        .sort((a,b) => (b.views || 0) - (a.views || 0))
+        .slice(0, 5);
+        
+    if(topPosts.length === 0) {
+        el.innerHTML = "No posts available yet."; return;
+    }
+    
+    el.innerHTML = topPosts.map((p, i) => `
+        <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+            <span style="font-weight:bold; color:var(--g3); font-size:16px;">#${i+1}</span>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.title)}</span>
+          </div>
+          <span class="badge badge-link" style="white-space:nowrap;">👁️ ${p.views || 0}</span>
+        </div>`).join("");
+}
+
 function renderRecentActivity(){
   const el = $("#recentList");
   if(!el) return;
@@ -1309,7 +1658,7 @@ function renderPendingFiles(){
   $("#fileList").innerHTML = pendingFiles.map((f,i) => `
     <div class="file-item">
       <span>📎 ${escapeHtml(f.name)} <small style="opacity:.6">(${(f.size/1024).toFixed(0)} KB)</small></span>
-      <button data-rm="${i}" title="Remove">✕</button>
+      <button data-seerm="${i}" title="Remove">✕</button>
     </div>`).join("");
   $$("[data-rm]").forEach(b => b.addEventListener("click", () => {
     pendingFiles.splice(parseInt(b.dataset.rm), 1);
@@ -1324,17 +1673,33 @@ window.savePost = async function(){
   const descHtml = quill ? quill.root.innerHTML.trim() : $("#postDesc").value.trim();
   const descText = quill ? quill.getText().trim() : descHtml;
   const category = $("#postCategory").value;
+  const tagsStr = $("#postTags").value.trim();
+  const tagsList = tagsStr ? tagsStr.split(',').map(t=>t.trim()).filter(Boolean) : [];
+  
   if(!title || !descText || descText === "\n"){ toast("Title ও Description দিন", "error"); return; }
+  
+  const statusEl = document.querySelector('input[name="postStatus"]:checked');
+  const postStatus = statusEl ? statusEl.value : "published";
+  const scheduleDateEl = $("#postScheduleDate");
+  let publishedAtDate = serverTimestamp();
+  
+  if (postStatus === "scheduled" && scheduleDateEl.value) {
+    publishedAtDate = new Date(scheduleDateEl.value).getTime(); // Store as number for simpler comparison
+  }
+
   const editId = $("#editPostId").value;
   const data = {
     title,
     description: descHtml,   // store HTML for rich display
     descriptionText: descText.slice(0,300), // plain text for search/card preview
     category,
+    tags: tagsList,
     url: $("#postUrl").value.trim(),
     deadline: $("#postDeadline").value || null,
     pinned: $("#postPinned").checked,
     urgent: $("#postUrgent").checked,
+    status: postStatus, // published, draft, or scheduled
+    publishedAt: publishedAtDate,
     cover: pendingCover?.url || ($("#editPostId").dataset.cover || ""),
     files: [...(JSON.parse($("#editPostId").dataset.files || "[]")), ...pendingFiles],
     updatedAt: serverTimestamp()
@@ -1348,9 +1713,11 @@ window.savePost = async function(){
       logActivity(`✏️ Edited: ${title}`);
     } else {
       data.createdAt = serverTimestamp();
+      data.likes = 0;
+      data.views = 0;
       await addDoc(collection(db,"posts"), data);
-      toast("Post published!");
-      logActivity(`➕ Created: ${title}`);
+      toast(postStatus === 'draft' ? "Draft saved!" : (postStatus === 'scheduled' ? "Post scheduled!" : "Post published!"));
+      logActivity(`➕ Created (${postStatus}): ${title}`);
     }
     resetPostForm();
     await loadPosts(false);
@@ -1364,11 +1731,13 @@ window.savePost = async function(){
   }
 };
 window.resetPostForm = function(){
-  ["postTitle","postUrl","postDeadline"].forEach(id => { const el = $("#"+id); if(el) el.value = ""; });
+  ["postTitle","postTags","postUrl","postDeadline","postScheduleDate"].forEach(id => { const el = $("#"+id); if(el) el.value = ""; });
   if(quill) quill.setContents([]);
   $("#postCategory").value = "job";
   $("#postPinned").checked = false;
   $("#postUrgent").checked = false;
+  const pubRadio = document.querySelector('input[name="postStatus"][value="published"]');
+  if (pubRadio) pubRadio.checked = true;
   pendingCover = null; pendingFiles = [];
   $("#coverName").textContent = "PNG, JPG, WEBP";
   $("#coverZone").classList.remove("has-file");
@@ -1388,12 +1757,18 @@ function renderManagePosts(){
     return;
   }
   tbody.innerHTML = filtered.map(p => `
-    <tr>
-      <td><strong>${escapeHtml(p.title)}</strong>${p.pinned?' 📌':''}${p.urgent?' 🚨':''}</td>
+    <tr class="${isPostExpired(p) ? 'expired-row' : ''}">
+      <td style="padding-right:0"><input type="checkbox" class="post-chk" value="${p.id}" ${isPostExpired(p) ? 'data-expired="1"' : ''} style="cursor:pointer"></td>
+      <td>
+        <strong>${escapeHtml(p.title)}</strong>${p.pinned?' 📌':''}${p.urgent?' 🚨':''}
+        ${isPostExpired(p) ? '<br><span class="badge badge-urgent" style="font-size:9px;background:#b91c1c;margin-top:4px">Expired</span>' : ''}
+        ${p.status === 'draft' ? '<br><span class="badge" style="font-size:9px;background:#64748b;color:#fff;margin-top:4px">Draft</span>' : ''}
+        ${p.status === 'scheduled' ? `<br><span class="badge" style="font-size:9px;background:#2563eb;color:#fff;margin-top:4px">Scheduled: ${new Date(p.publishedAt).toLocaleString()}</span>` : ''}
+      </td>
       <td>${(CAT_MAP[p.category]||CAT_MAP.notice).label}</td>
-      <td>${timeAgo(p.createdAt)}</td>
+      <td style="font-size:11.5px;color:var(--muted)">📅 ${timeAgo(p.createdAt)}<br>👁️ ${p.views||0} | 👍 ${p.likes||0}</td>
       <td><div class="actions-cell">
-        <button class="btn-edit-sm" data-edit="${p.id}">✏️ Edit</button>
+        <button class="btn-edit-sm" data-edit="${p.id}">✏️</button>
         <button class="btn-danger" data-del="${p.id}">🗑️</button>
       </div></td>
     </tr>`).join("");
@@ -1410,6 +1785,7 @@ function editPost(id){
   $("#editPostId").dataset.files = JSON.stringify(p.files||[]);
   $("#editPostId").dataset.cover = p.cover||"";
   $("#postTitle").value = p.title||"";
+  $("#postTags").value = (p.tags||[]).join(", ");
   // Load rich HTML into Quill (with slight delay for init)
   setTimeout(() => {
     if(quill){
@@ -1421,6 +1797,24 @@ function editPost(id){
   $("#postDeadline").value = p.deadline||"";
   $("#postPinned").checked = !!p.pinned;
   $("#postUrgent").checked = !!p.urgent;
+  
+  const pStatus = p.status || "published";
+  const statusRadio = document.querySelector(`input[name="postStatus"][value="${pStatus}"]`);
+  if (statusRadio) statusRadio.checked = true;
+  
+  if (pStatus === "scheduled" && p.publishedAt) {
+      const d = new Date(p.publishedAt);
+      // Format to YYYY-MM-DDThh:mm
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      $("#postScheduleDate").value = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  } else {
+      $("#postScheduleDate").value = "";
+  }
+
   pendingCover = null; pendingFiles = [];
   $("#coverName").textContent = p.cover ? "✓ Existing cover (replace optional)" : "PNG, JPG, WEBP";
   $("#coverZone").classList.toggle("has-file", !!p.cover);
@@ -1438,6 +1832,46 @@ async function deletePost(id){
     renderPosts(); renderDashboard(); renderManagePosts();
   } catch(e){ toast("Delete failed: " + e.message, "error"); }
 }
+
+// Bulk Admin Actions
+window.toggleAllPosts = function(chk) {
+  document.querySelectorAll(".post-chk").forEach(c => c.checked = chk.checked);
+};
+window.selectExpiredPosts = function() {
+  let count = 0;
+  document.querySelectorAll(".post-chk").forEach(c => {
+    c.checked = !!c.dataset.expired;
+    if(c.checked) count++;
+  });
+  toast(count > 0 ? `${count} Expired posts selected` : "No expired posts found", count > 0 ? "success" : "warn");
+};
+window.deleteSelectedPosts = async function() {
+  const selected = Array.from(document.querySelectorAll(".post-chk:checked")).map(c => c.value);
+  if(selected.length === 0) {
+      toast("No posts selected", "warn"); return;
+  }
+  if(!confirm(`${selected.length} টি পোস্ট ডিলিট করতে চান? এই কাজ ফেরানো যাবে না!`)) return;
+  
+  const btn = document.getElementById("bulkDelBtn");
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = "⏳ Deleting..."; btn.disabled = true;
+  let successCount = 0;
+  try {
+      for(let id of selected) {
+          await deleteDoc(doc(db, "posts", id));
+          postsCache = postsCache.filter(x => x.id !== id);
+          successCount++;
+      }
+      toast(`${successCount} Posts deleted completely!`);
+      logActivity(`🗑️ Bulk Deleted ${successCount} Posts`);
+      document.getElementById("selectAllPosts").checked = false;
+      renderPosts(); renderDashboard(); renderManagePosts();
+  } catch(e) {
+      toast("Error deleting some posts: " + e.message, "error");
+  } finally {
+      btn.innerHTML = originalHtml; btn.disabled = false;
+  }
+};
 
 // ====== TICKER ======
 async function loadTicker(){
@@ -1573,10 +2007,14 @@ function initQuill(){
     placeholder: 'বিস্তারিত লিখুন... (deadline, eligibility, instructions)',
     modules: {
       toolbar: [
-        ['bold','italic','underline','strike'],
-        [{'list':'ordered'},{'list':'bullet'}],
-        ['link','clean'],
-        [{'header':[2,3,false]}]
+        [{ 'header': [1, 2, 3, false] }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video'],
+        ['clean']
       ]
     }
   });
@@ -1644,6 +2082,10 @@ window.quickFilter = function(category){
 $("#yr").textContent = new Date().getFullYear();
 window.__rh = { sharePost, closeOverlay: window.closeOverlay };
 window.sharePost = sharePost;
+window.openPreview = openPreview;
+window.downloadPDF = downloadPDF;
+window.toggleLike = toggleLike;
+window.toggleSave = toggleSave;
 
 renderFilters();
 loadSettings();
@@ -1655,6 +2097,21 @@ const urlParams = new URLSearchParams(location.search);
 if(urlParams.get("post")){
   setTimeout(() => openPreview(urlParams.get("post")), 1200);
 }
+
+// Scroll logic
+const scrollBtn = document.getElementById("scrollToTop");
+const scrollProgress = document.getElementById("scrollProgress");
+window.addEventListener("scroll", () => {
+  if (window.pageYOffset > 400) scrollBtn.classList.add("show");
+  else scrollBtn.classList.remove("show");
+  
+  // Scroll progress bar
+  const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrolled = (winScroll / height) * 100;
+  if(scrollProgress) scrollProgress.style.width = scrolled + "%";
+});
+scrollBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 // Click outside to close overlays
 $$(".overlay").forEach(o => o.addEventListener("click", e => {
