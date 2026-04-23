@@ -1,6 +1,6 @@
 const cacheName = 'sabuj-comp-v3';
 const assets = [
-  '/home.html',
+  '/index.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
@@ -27,7 +27,7 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     e.respondWith(
-      fetch(req).catch(() => caches.match(req).then(r => r || caches.match('/home.html')))
+      fetch(req).catch(() => caches.match(req).then(r => r || caches.match('/index.html')))
     );
     return;
   }
