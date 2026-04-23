@@ -3,7 +3,7 @@
   ╔══════════════════════════════════════════════════════════════╗
   ║  সবুজ কম্পিউটার ট্রেনিং সেন্টার — Resource Hub             ║
   ║  Version: 2.0 (Secured)                                      ║
-  ║  GitHub: https://github.com/YOUR_USERNAME/resource-hub       ║
+  ║  GitHub: https://github.com/sabujcomputers/resource-hub      ║
   ╠══════════════════════════════════════════════════════════════╣
   ║  🔐 SECURITY NOTES (GitHub-এ push করার আগে পড়ুন):          ║
   ║                                                              ║
@@ -36,6 +36,8 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sabujcomputers.pro.bd/resource-hub.html">
 <meta property="og:image" content="https://sabujcomputers.pro.bd/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
 <title>রিসোর্স হাব — সবুজ কম্পিউটার ট্রেনিং সেন্টার | চাকরি, ভর্তি ও নোটিশ</title>
 <link rel="icon" type="image/png" href="https://sabujcomputers.pro.bd/icon-192.png">
 <link rel="apple-touch-icon" href="https://sabujcomputers.pro.bd/icon-192.png">
@@ -44,6 +46,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<!-- Security Fix: DOMPurify Add kora holo -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <style>
 /* ====== DESIGN TOKENS (matched with main site) ====== */
 :root{
@@ -1047,7 +1051,7 @@ function openPreview(id){
       </div>
       <h3>${escapeHtml(p.title)}</h3>
       ${p.deadline ? `<div style="margin-bottom:10px">${getDeadlineHtml(p.deadline)}</div>` : ""}
-      <div class="rich-content">${p.description||""}</div>
+      <div class="rich-content">${DOMPurify.sanitize(p.description||"")}</div>
       ${filesHtml ? `<div class="modal-files">${filesHtml}</div>` : ""}
       ${p.url ? `<div style="margin-top:16px"><a class="btn-primary" href="${escapeHtml(p.url)}" target="_blank" rel="noopener" style="width:auto;display:inline-flex">🔗 Visit External Link</a></div>` : ""}
     </div>
@@ -1167,8 +1171,8 @@ document.getElementById("secretTrigger")?.addEventListener("click", handleAdminT
 
 // ====== LOGIN RATE LIMITING ======
 const LOGIN_STATE = {
-  attempts: parseInt(sessionStorage.getItem("rh_login_attempts") || "0"),
-  lockedUntil: parseInt(sessionStorage.getItem("rh_login_locked") || "0")
+  attempts: parseInt(localStorage.getItem("rh_login_attempts") || "0"),
+  lockedUntil: parseInt(localStorage.getItem("rh_login_locked") || "0")
 };
 function isLoginLocked(){
   if(LOGIN_STATE.lockedUntil > Date.now()){
