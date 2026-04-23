@@ -576,14 +576,15 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
         <a href="/" style="color:#9bbfa6;text-decoration:none;opacity:.8">🏠 Main Website</a>
         <button onclick="quickFilter('job')" style="background:none;border:none;color:#9bbfa6;text-align:left;cursor:pointer;padding:0;font-size:12.5px;font-family:'Hind Siliguri';opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">💼 Job Circulars</button>
         <button onclick="quickFilter('admission')" style="background:none;border:none;color:#9bbfa6;text-align:left;cursor:pointer;padding:0;font-size:12.5px;font-family:'Hind Siliguri';opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">🎓 Admission</button>
+        <button onclick="openContactModal()" style="background:none;border:none;color:#9bbfa6;text-align:left;cursor:pointer;padding:0;font-size:12.5px;font-family:'Hind Siliguri';opacity:.8;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.8">✉️ Contact Us</button>
       </div>
     </div>
     <div>
       <h4 style="color:var(--gold2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter'">যোগাযোগ</h4>
       <div style="font-size:12.5px;line-height:1.9;opacity:.75">
-        <p id="footerPhone">📞 01XXXXXXXXX</p>
-        <p id="footerEmail">📧 info@sabujcomputers.pro.bd</p>
-        <p>🌐 <a href="https://sabujcomputers.pro.bd" style="color:var(--gold2)">sabujcomputers.pro.bd</a></p>
+        <p id="footerPhone"><a href="tel:01XXXXXXXXX" style="color:inherit;text-decoration:none">📞 01XXXXXXXXX</a></p>
+        <p id="footerEmail"><a href="mailto:info@sabujcomputers.pro.bd" style="color:inherit;text-decoration:none">📧 info@sabujcomputers.pro.bd</a></p>
+        <p id="footerWebsite">🌐 <a href="https://sabujcomputers.pro.bd" target="_blank" style="color:inherit;text-decoration:none">sabujcomputers.pro.bd</a></p>
       </div>
     </div>
   </div>
@@ -601,6 +602,29 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
 
 <!-- Hidden 5-click trigger -->
 <div id="secretTrigger" title=""></div>
+
+<!-- Contact modal -->
+<div class="overlay" id="contactOverlay">
+  <div class="modal-card" style="max-width: 400px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <h3 style="margin:0;font-family:'Noto Serif Bengali';color:var(--text-dark)">✉️ যোগাযোগ করুন</h3>
+      <button class="btn-close" onclick="closeOverlay('contactOverlay')">✕</button>
+    </div>
+    <div class="fg">
+      <label>আপনার নাম</label>
+      <input type="text" id="contactName" placeholder="আপনার নাম লিখুন" maxlength="60">
+    </div>
+    <div class="fg">
+      <label>ইমেইল বা ফোন নম্বর <span style="color:red">*</span></label>
+      <input type="text" id="contactEmail" placeholder="e.g. 01XXXXXXXXX" maxlength="80">
+    </div>
+    <div class="fg">
+      <label>মেসেজ <span style="color:red">*</span></label>
+      <textarea id="contactMsg" rows="4" placeholder="আপনার মেসেজ বিস্তারিত লিখুন..." maxlength="1000"></textarea>
+    </div>
+    <button class="btn-primary" id="btnSubmitContact" onclick="submitContactForm()" style="width:100%;margin-top:10px">📤 মেসেজ পাঠান</button>
+  </div>
+</div>
 
 <!-- Login overlay -->
 <div class="overlay" id="loginOverlay">
@@ -848,7 +872,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import {
-  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc,
   query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -1135,8 +1159,8 @@ window.toggleLike = async function(id) {
   }
 
   try {
-     await setDoc(doc(db, "posts", id), { likes: increment(1) }, { merge: true });
-  } catch(e) { console.warn("Like sync failed (auth maybe missing):", e); }
+     await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+  } catch(e) { console.warn("Like sync failed:", e); }
 };
 
 function renderPosts(append=false){
@@ -1264,8 +1288,7 @@ function openPreview(id){
   if(!sessionStorage.getItem('viewed_' + p.id)) {
       sessionStorage.setItem('viewed_' + p.id, '1');
       p.views = (p.views || 0) + 1;
-      // Fail silently if guest lacks db write rule. UI still reacts immediately.
-      setDoc(doc(db, "posts", p.id), { views: increment(1) }, { merge: true }).catch(()=>{});
+      updateDoc(doc(db, "posts", p.id), { views: increment(1) }).catch(e => console.warn("View sync failed:", e));
   }
   
   let gCalUrl = null;
@@ -1814,6 +1837,53 @@ async function deletePost(id){
 window.toggleAllPosts = function(chk) {
   document.querySelectorAll(".post-chk").forEach(c => c.checked = chk.checked);
 };
+
+// ====== CONTACT FORM LOGIC ======
+window.openContactModal = function() {
+  document.getElementById('contactOverlay').classList.add('show');
+};
+
+window.submitContactForm = async function() {
+  let name = document.getElementById("contactName").value.trim();
+  let email = document.getElementById("contactEmail").value.trim();
+  let message = document.getElementById("contactMsg").value.trim();
+  
+  if(!email || !message) {
+    return toast("অনুগ্রহ করে ইমেইল/ফোন এবং মেসেজ পূরণ করুন!", "error");
+  }
+  if(message.length < 5) return toast("মেসেজ খুব ছোট!", "error");
+  
+  let lastSent = localStorage.getItem("lastContactSent");
+  if(lastSent && (Date.now() - parseInt(lastSent) < 5 * 60 * 1000)){
+     return toast("দয়া করে ৫ মিনিট পর আবার চেষ্টা করুন। (Anti-spam)", "error");
+  }
+
+  let btn = document.getElementById("btnSubmitContact");
+  btn.disabled = true;
+  btn.innerText = "⏳ পাঠানো হচ্ছে...";
+  
+  try {
+    await addDoc(collection(db, "messages"), {
+      name: name || "Anonymous",
+      email: email,
+      message: message,
+      createdAt: serverTimestamp()
+    });
+    localStorage.setItem("lastContactSent", Date.now().toString());
+    toast("আপনার মেসেজ সফলভাবে পাঠানো হয়েছে! 💚");
+    closeOverlay("contactOverlay");
+    document.getElementById("contactName").value = '';
+    document.getElementById("contactEmail").value = '';
+    document.getElementById("contactMsg").value = '';
+  } catch(e) {
+    console.error(e);
+    toast("কোথাও ভুল হচ্ছে: " + e.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "📤 মেসেজ পাঠান";
+  }
+};
+
 window.selectExpiredPosts = function() {
   let count = 0;
   document.querySelectorAll(".post-chk").forEach(c => {
@@ -1916,8 +1986,8 @@ async function loadSettings(){
     const phoneEl = document.getElementById("footerPhone");
     const emailEl = document.getElementById("footerEmail");
     const addrEl  = document.getElementById("footerAddress");
-    if(phoneEl) phoneEl.textContent = "📞 " + s.phone;
-    if(emailEl) emailEl.textContent = "📧 " + s.email;
+    if(phoneEl) phoneEl.innerHTML = `<a href="tel:${escapeHtml(s.phone)}" style="color:inherit;text-decoration:none">📞 ${escapeHtml(s.phone)}</a>`;
+    if(emailEl) emailEl.innerHTML = `<a href="mailto:${escapeHtml(s.email)}" style="color:inherit;text-decoration:none">📧 ${escapeHtml(s.email)}</a>`;
     if(addrEl)  addrEl.textContent  = s.address;
     const footerCopy = document.getElementById("footerCopy");
     if(footerCopy) footerCopy.textContent = s.footer;
