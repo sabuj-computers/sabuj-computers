@@ -852,22 +852,19 @@ import {
   query, orderBy, limit, startAfter, where, deleteDoc, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-// ====== CONFIG (obfuscated — do NOT expose raw keys in public repos) ======
-// NOTE: For a static web app, client-side keys are always readable by the browser.
-// True security comes from Firebase Security Rules (already set) + Cloudinary restrictions.
-// This obfuscation prevents casual copy-paste scraping from GitHub/view-source.
-const _c = (s) => atob(s);
+// ====== CONFIG ======
 const firebaseConfig = {
-  apiKey:            _c("QUl6YVN5QnMwbVBXTnNPMTVqQ2tPcVZIS2FRVGp3SDdCN1MyUUFB"),
-  authDomain:        _c("c2FidWotcmVzb3VyY2UtaHViLmZpcmViYXNlYXBwLmNvbQ=="),
-  projectId:         _c("c2FidWotcmVzb3VyY2UtaHVi"),
-  storageBucket:     _c("c2FidWotcmVzb3VyY2UtaHViLmZpcmViYXNlc3RvcmFnZS5hcHA="),
-  messagingSenderId: _c("MTcwOTMxOTkxODE1"),
-  appId:             _c("MToxNzA5MzE5OTE4MTU6d2ViOjZlOTM3ZGJhYzM4ZDRkZjlmMTgxYTI=")
+  apiKey: "AIzaSyBs0mPWNsO15jCkOqVHKaQTjwH7B7S2QAA",
+  authDomain: "sabuj-resource-hub.firebaseapp.com",
+  projectId: "sabuj-resource-hub",
+  storageBucket: "sabuj-resource-hub.firebasestorage.app",
+  messagingSenderId: "170931991815",
+  appId: "1:170931991815:web:6e937dbac38d4df9f181a2"
 };
+
 const CLOUDINARY = {
-  cloudName:    _c("ZGZ3am9hendx"),
-  uploadPreset: _c("cmVzb3VyY2VfaHViX3Vuc2lnbmVk")
+  cloudName: "dfwjoazwq",
+  uploadPreset: "resource_hub_unsigned"
 };
 
 // ====== CLOUDINARY SECURITY CONFIG ======
@@ -2063,7 +2060,6 @@ $("#yr").textContent = new Date().getFullYear();
 window.__rh = { sharePost, closeOverlay: window.closeOverlay };
 window.sharePost = sharePost;
 window.openPreview = openPreview;
-window.downloadPDF = downloadPDF;
 window.toggleLike = toggleLike;
 window.toggleSave = toggleSave;
 
