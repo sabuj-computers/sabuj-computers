@@ -49,7 +49,7 @@
 <!-- Security Fix: DOMPurify Add kora holo -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <!-- Export to PDF dependency -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Removed html2pdf.js as per user feedback -->
 <!-- Confetti Effect -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <!-- Chart.js for Analytics -->
@@ -1232,25 +1232,6 @@ async function loadPosts(append=false){
 function resetAndLoad(){ loadPosts(false); }
 
 // ====== PREVIEW MODAL ======
-window.downloadPDF = function(title) {
-  const ele = document.getElementById("pdfTarget");
-  const related = document.getElementById("relatedSection");
-  if(related) related.style.display = "none"; // Hide related posts from PDF
-  
-  const opt = {
-    margin:       0.5,
-    filename:     title.replace(/[^a-zA-Z0-9]/g, '_') + '_Notice.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-  };
-  toast("PDF তৈরি হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...");
-  html2pdf().set(opt).from(ele).save().then(() => {
-    if(related) related.style.display = "block";
-    toast("✅ PDF ডাউনলোড সম্পন্ন হয়েছে!");
-  });
-};
-
 function openPreview(id){
   const p = postsCache.find(x => x.id === id);
   if(!p) return;
@@ -1323,7 +1304,6 @@ function openPreview(id){
       <button class="btn-secondary action-like ${isLiked ? 'liked' : ''}" id="modalLikeBtn" onclick="toggleLike('${p.id}')">
         👍 Helpful (${p.likes || 0})
       </button>
-      <button class="btn-secondary" onclick="downloadPDF('${escapeHtml(p.title)}')">📄 PDF</button>
       <button class="btn-secondary" onclick="window.__rh.sharePost('${p.id}')">📤 Share</button>
       <button class="btn-primary" style="width:auto" onclick="window.__rh.closeOverlay('previewOverlay')">Close</button>
     </div>`;
@@ -1658,7 +1638,7 @@ function renderPendingFiles(){
   $("#fileList").innerHTML = pendingFiles.map((f,i) => `
     <div class="file-item">
       <span>📎 ${escapeHtml(f.name)} <small style="opacity:.6">(${(f.size/1024).toFixed(0)} KB)</small></span>
-      <button data-seerm="${i}" title="Remove">✕</button>
+      <button data-rm="${i}" title="Remove">✕</button>
     </div>`).join("");
   $$("[data-rm]").forEach(b => b.addEventListener("click", () => {
     pendingFiles.splice(parseInt(b.dataset.rm), 1);
