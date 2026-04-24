@@ -828,7 +828,7 @@ body.dark-mode .fg input[type="date"]{color-scheme:dark}
         <div class="fg">
           <label>Status / Publish Control</label>
           <div style="display:flex;gap:14px;padding:12px 0; background:var(--bg); border-radius:8px; border:1px solid var(--border); padding:10px;">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500flex:1">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;flex:1">
               <input type="radio" name="postStatus" value="published" checked style="width:16px;height:16px"> 🟢 Publish Now
             </label>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:500;flex:1">
@@ -1000,8 +1000,7 @@ const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
 // ====== STATE ======
 let activeCategory = "all";
 let searchTerm = "";
-let lastDoc = null;
-let allLoaded = false;
+let visibleCount = POSTS_PER_PAGE;
 let postsCache = [];
 let pendingFiles = [];      // {name, url, type}
 let pendingCover = null;    // {name, url, type}
@@ -1028,6 +1027,39 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 const escapeHtml = (s) => String(s||"").replace(/[&<>"']/g, ch =>
   ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[ch]));
+
+window.forceDownload = async function(url, filename, event) {
+  if (event) event.preventDefault();
+  toast("⏳ ডাউনলোড শুরু হচ্ছে...", "success");
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network error");
+    
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = blobUrl;
+    a.download = filename || 'download';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(blobUrl);
+    a.remove();
+  } catch (e) {
+    console.error("Download failed:", e);
+    toast("ডাউনলোডে সমস্যা। নতুন ট্যাবে খোলা হচ্ছে...", "warn");
+    // Fallback: Use Cloudinary's fl_attachment flag if possible
+    if(url.includes("res.cloudinary.com")) {
+      const parts = url.split("/upload/");
+      if(parts.length === 2) {
+        window.open(parts[0] + "/upload/fl_attachment/" + parts[1], "_blank");
+        return;
+      }
+    }
+    window.open(url, "_blank");
+  }
+};
 
 function toast(msg, type="success"){
   const t = document.createElement("div");
@@ -1129,8 +1161,18 @@ function renderFilters(){
 }
 function updateCounts(){
   const counts = {};
-  postsCache.forEach(p => { counts[p.category] = (counts[p.category]||0) + 1; });
-  counts.all = postsCache.length;
+  const activePosts = postsCache.filter(p => (p.status === 'published' || !p.status) && !isPostExpired(p));
+  activePosts.forEach(p => { counts[p.category] = (counts[p.category]||0) + 1; });
+  counts.all = activePosts.length;
+  counts.saved = savedPosts.length;
+  
+  const today = new Date().setHours(0,0,0,0);
+  counts.ending_soon = activePosts.filter(p => {
+    if(!p.deadline) return false;
+    const diff = Math.ceil((new Date(p.deadline) - today) / (1000 * 60 * 60 * 24));
+    return diff >= 0 && diff <= 4;
+  }).length;
+
   $$("[data-cnt]").forEach(el => { el.textContent = counts[el.dataset.cnt] || 0; });
 }
 
@@ -1192,7 +1234,7 @@ function postCardHtml(p, idx){
       </div>
       <div class="post-actions">
         <button class="btn-action btn-view" data-view="${p.id}">👁️ View</button>
-        ${downloadable ? `<a class="btn-action btn-download" href="${escapeHtml(downloadable.url)}" download="${escapeHtml(downloadable.name)}" target="_blank" rel="noopener">⬇️ Download</a>` : ""}
+        ${downloadable ? `<a class="btn-action btn-download" href="${escapeHtml(downloadable.url)}" onclick="window.forceDownload('${escapeHtml(downloadable.url)}', '${escapeHtml(downloadable.name).replace(/'/g, "\\'")}', event)">⬇️ Download</a>` : ""}
         ${p.url ? `<a class="btn-action btn-link" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">🔗 Link</a>` : ""}
         <button class="btn-action btn-share" data-share="${p.id}">📤</button>
       </div>
@@ -1258,7 +1300,7 @@ window.toggleLike = async function(id) {
   }
 };
 
-function renderPosts(append=false){
+function renderPosts(){
   const grid = $("#postsGrid");
   const now = Date.now();
   const filtered = postsCache.filter(p => {
@@ -1288,19 +1330,33 @@ function renderPosts(append=false){
     const tb = b.createdAt?.toMillis?.() || (typeof b.createdAt === 'number' ? b.createdAt : 0);
     return tb - ta;
   });
-  if(filtered.length === 0){
+  
+  const paginated = filtered.slice(0, visibleCount);
+  
+  if(paginated.length === 0){
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
       <div class="empty-icon">🔍</div>
       <h3>কোনো পোস্ট পাওয়া যায়নি</h3>
       <p>অন্য ক্যাটাগরি বা search term try করুন</p></div>`;
   } else {
-    grid.innerHTML = filtered.map((p,i) => postCardHtml(p,i)).join("");
+    grid.innerHTML = paginated.map((p,i) => postCardHtml(p,i)).join("");
     grid.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => openPreview(b.dataset.view)));
     grid.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => sharePost(b.dataset.share)));
   }
-  $("#statTotal").textContent = postsCache.length;
+  
+  if(filtered.length > visibleCount) {
+     document.getElementById("infiniteLoader").style.display = "block";
+     document.getElementById("infiniteLoader").innerHTML = "👇 আরও পোস্ট দেখার জন্য নিচে স্ক্রল করুন...";
+     window._hasMorePostsToLoad = true;
+  } else {
+     document.getElementById("infiniteLoader").style.display = "none";
+     window._hasMorePostsToLoad = false;
+  }
+  
+  const allActive = postsCache.filter(p => (p.status === 'published' || !p.status) && !isPostExpired(p));
+  $("#statTotal").textContent = allActive.length;
   const wkAgo = Date.now() - 7*86400000;
-  $("#statWeek").textContent = postsCache.filter(p => (p.createdAt?.toMillis?.()||0) > wkAgo).length;
+  $("#statWeek").textContent = allActive.filter(p => (p.createdAt?.toMillis?.()||0) > wkAgo).length;
   updateCounts();
   renderQbPanel();
 }
@@ -1316,28 +1372,30 @@ function showSkeletons(){
 }
 
 // ====== LOAD POSTS ======
-async function loadPosts(append=false){
+async function loadPosts(forceServer = false){
   try {
-    if(!append){ showSkeletons(); lastDoc = null; allLoaded = false; postsCache = []; }
-    const constraints = [orderBy("createdAt", "desc")];
-    if(append && lastDoc) constraints.push(startAfter(lastDoc));
-    constraints.push(limit(POSTS_PER_PAGE));
-    const q = query(collection(db, "posts"), ...constraints);
-    const snap = await getDocs(q);
-    if(snap.empty && !append){
-      postsCache = [];
-      renderPosts();
-      return;
-    }
-    snap.docs.forEach(d => {
-      if(!postsCache.find(x => x.id === d.id)){
-        postsCache.push({ id: d.id, ...d.data() });
+    if (postsCache.length === 0 || forceServer) {
+      let cacheLoaded = false;
+      const cached = localStorage.getItem("rh_cache");
+      if (cached && !forceServer) {
+        try {
+          postsCache = JSON.parse(cached);
+          renderPosts();
+          cacheLoaded = true;
+        } catch(e) { postsCache = []; }
       }
-    });
-    lastDoc = snap.docs[snap.docs.length - 1];
-    allLoaded = snap.size < POSTS_PER_PAGE;
+      
+      if (!cacheLoaded) showSkeletons();
+      
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      postsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      try {
+        localStorage.setItem("rh_cache", JSON.stringify(postsCache.slice(0,50).map(p=>({...p,createdAt:p.createdAt?.toMillis?.()||Date.now()}))));
+      } catch(e) {}
+    }
     renderPosts();
-    localStorage.setItem("rh_cache", JSON.stringify(postsCache.slice(0,30).map(p=>({...p,createdAt:p.createdAt?.toMillis?.()||Date.now()}))));
   } catch(e){
     console.error(e);
     toast("Posts load করতে সমস্যা: " + e.message, "error");
@@ -1345,7 +1403,10 @@ async function loadPosts(append=false){
       <div class="empty-icon">⚠️</div><h3>Connection error</h3><p>${escapeHtml(e.message)}</p></div>`;
   }
 }
-function resetAndLoad(){ loadPosts(false); }
+function resetAndLoad(){ 
+  visibleCount = POSTS_PER_PAGE; 
+  renderPosts(); 
+}
 
 // ====== PREVIEW MODAL ======
 async function openPreview(id){
@@ -1369,7 +1430,10 @@ async function openPreview(id){
   const filesHtml = (p.files||[]).map(f => `
     <div class="modal-file">
       <span class="fname">📎 ${escapeHtml(f.name||"file")}</span>
-      <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener" download="${escapeHtml(f.name||'')}">View / Download</a>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener" style="background:var(--bg);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">👁️ View</a>
+        <a href="${escapeHtml(f.url)}" onclick="window.forceDownload('${escapeHtml(f.url)}', '${escapeHtml(f.name||'file').replace(/'/g, "\\'")}', event)" style="background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;">⬇️ Download</a>
+      </div>
     </div>`).join("");
     
   const tagsHtml = p.tags && p.tags.length > 0 ? `<div style="margin-top:10px">${p.tags.map(t=>`<span class="tag-badge">#${escapeHtml(t)}</span>`).join('')}</div>` : '';
@@ -1866,7 +1930,7 @@ window.savePost = async function(){
       logActivity(`➕ Created (${postStatus}): ${title}`);
     }
     resetPostForm();
-    await loadPosts(false);
+    await loadPosts(true);
     renderDashboard();
     renderManagePosts();
     switchTab("manage");
@@ -2262,18 +2326,14 @@ function initQuill(){
 // ====== INFINITE SCROLL ======
 const sentinel = document.getElementById("scrollSentinel");
 const infiniteLoader = document.getElementById("infiniteLoader");
-let isLoadingMore = false;
 
-const scrollObserver = new IntersectionObserver(async (entries) => {
-  if(entries[0].isIntersecting && !allLoaded && !isLoadingMore && postsCache.length > 0){
-    isLoadingMore = true;
-    infiniteLoader.style.display = "block";
-    await loadPosts(true);
-    infiniteLoader.style.display = "none";
-    isLoadingMore = false;
+const scrollObserver = new IntersectionObserver((entries) => {
+  if(entries[0].isIntersecting && window._hasMorePostsToLoad){
+    visibleCount += POSTS_PER_PAGE;
+    renderPosts();
   }
-}, { rootMargin: "200px" });
-scrollObserver.observe(sentinel);
+}, { rootMargin: "0px" });
+setTimeout(() => scrollObserver.observe(sentinel), 2000);
 
 // ====== QUICK BROWSE PANEL ======
 let qbActiveTab = "job";
@@ -2326,9 +2386,9 @@ window.toggleLike = toggleLike;
 window.toggleSave = toggleSave;
 
 renderFilters();
+loadPosts();
 loadSettings();
 loadTicker();
-loadPosts();
 
 // Deep link: ?post=ID
 const urlParams = new URLSearchParams(location.search);
