@@ -73,6 +73,13 @@
             "name": "অ্যাটেনডেন্স",
             "description": "শিক্ষার্থী ও কর্মচারীদের উপস্থিতি ব্যবস্থাপনা",
             "url": "https://sabujcomputers.pro.bd/attendance.html"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 5,
+            "name": "রিসোর্স হাব",
+            "description": "দরকারী কোর্স ম্যাটেরিয়াল ও সহায়ক সফটওয়্যার ডাউনলোড",
+            "url": "https://sabujcomputers.pro.bd/resource-hub.html"
           }
         ]
       },

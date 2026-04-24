@@ -8,6 +8,7 @@ Allow: /admission-form.html
 Allow: /portal.html
 Allow: /verify.html
 Allow: /attendance.html
+Allow: /resource-hub.html
 
 # Block private/admin pages from indexing
 Disallow: /admin-dashboard.html
